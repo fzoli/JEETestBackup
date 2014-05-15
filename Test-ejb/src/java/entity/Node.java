@@ -17,19 +17,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="`nodes`")
-@DiscriminatorValue("`node`")
-@DiscriminatorColumn(name = "`type`")
+@Table(name="nodes")
+@DiscriminatorValue("node")
+@DiscriminatorColumn(name = "type")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Node<NodeType extends Node> implements NodeObject<NodeType> {
     
     @Id
-    @Column(name = "`id`", nullable = false)
+    @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name="`parent-id`", nullable = true)
+    @JoinColumn(name="parent-id", nullable = true)
     private Node parent;
     
     @OneToMany(mappedBy = "parent")

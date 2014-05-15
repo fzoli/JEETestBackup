@@ -16,19 +16,19 @@ import javax.persistence.Table;
  * @author zoli
  */
 @Entity
-@Table(name="`pages`")
+@Table(name="pages")
 @DiscriminatorValue("page")
 public class PageNode extends Node<PageNode> {
     
-    @Column(name = "`name`", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @ElementCollection
-    @Column(name="`param-name`")
-    @OrderColumn(name="`index`")
+    @Column(name="name")
+    @OrderColumn(name="index")
     @CollectionTable(
-        name="`page-parameters`",
-        joinColumns=@JoinColumn(name="`page-id`")
+        name="page-params",
+        joinColumns=@JoinColumn(name="page-id")
     )
     private List<String> parameters = new ArrayList();
     
