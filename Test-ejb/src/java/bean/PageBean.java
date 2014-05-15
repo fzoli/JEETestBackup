@@ -3,6 +3,7 @@ package bean;
 import entity.Node_;
 import entity.PageNode;
 import entity.PageNode_;
+import java.text.Normalizer;
 import java.util.Collections;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -20,7 +21,7 @@ import javax.persistence.criteria.Root;
  */
 @Stateless
 public class PageBean implements PageBeanLocal {
-
+    
     @PersistenceContext(unitName = "Test-ejbPU")
     private EntityManager manager;
     
@@ -46,6 +47,18 @@ public class PageBean implements PageBeanLocal {
         if (!listAll) query.where(builder.isNull(root.get(Node_.parent)));
         query.orderBy(builder.asc(root.get(PageNode_.name)));
         return manager.createQuery(query).getResultList();
+    }
+    
+    public static String toPrettyURL(String string) {
+        return Normalizer.normalize(string.toLowerCase(), Normalizer.Form.NFD)
+            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "") // normalize all characters and get rid of all diacritical marks (so that e.g. é, ö, à becomes e, o, a)
+            .replaceAll("[^\\p{Alnum}]+", "-") // replace all remaining non-alphanumeric characters by - and collapse when necessary
+            .replaceAll("[^a-z0-9]+$", "") // remove trailing punctuation
+            .replaceAll("^[^a-z0-9]+", ""); // remove leading punctuation
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(toPrettyURL("/öt szép szűzlány 1 őrült írót nyúz! <"));
     }
     
 }
