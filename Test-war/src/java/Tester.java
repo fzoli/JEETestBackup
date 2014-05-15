@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 import bean.PageBeanLocal;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,13 +35,13 @@ public class Tester extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet Tester</title>");            
+            out.println("<title>Tester</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet Tester at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Tester at " + request.getContextPath() + "</h1>");
+            pages.testPageNode();
             out.println("</body>");
             out.println("</html>");
-            pages.test();
         }
     }
 

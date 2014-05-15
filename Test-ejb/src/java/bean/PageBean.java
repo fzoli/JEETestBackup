@@ -1,11 +1,18 @@
 package bean;
 
+import entity.Node_;
 import entity.PageNode;
+import entity.PageNode_;
+import java.util.Collections;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -19,10 +26,26 @@ public class PageBean implements PageBeanLocal {
     
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void test() {
-        PageNode node = new PageNode("test");
-        node.getParameters().add("alma");
+    public void testPageNode() {
+        List<PageNode> nodes = getPageNodes(true);
+        PageNode node = nodes.isEmpty() ? new PageNode("test") : nodes.get(0);
+        List<String> params = node.getParameters();
+        if (params.size() >= 2) {
+            Collections.swap(params, 0, 1);
+        }
+        else {
+            params.add("alma" + (params.size() + 1));
+        }
         manager.persist(node);
     }
 
+    private List<PageNode> getPageNodes(boolean listAll) {
+        CriteriaBuilder builder = manager.getCriteriaBuilder();
+        CriteriaQuery<PageNode> query = builder.createQuery(PageNode.class);
+        Root<PageNode> root = query.from(PageNode.class);
+        if (!listAll) query.where(builder.isNull(root.get(Node_.parent)));
+        query.orderBy(builder.asc(root.get(PageNode_.name)));
+        return manager.createQuery(query).getResultList();
+    }
+    
 }
