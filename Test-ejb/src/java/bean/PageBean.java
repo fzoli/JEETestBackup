@@ -3,7 +3,6 @@ package bean;
 import entity.Node_;
 import entity.PageNode;
 import entity.PageNode_;
-import java.text.Normalizer;
 import java.util.Collections;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -47,10 +46,6 @@ public class PageBean implements PageBeanLocal {
         if (!listAll) query.where(builder.isNull(root.get(Node_.parent)));
         query.orderBy(builder.asc(root.get(PageNode_.name)));
         return manager.createQuery(query).getResultList();
-    }
-    
-    public static void main(String[] args) {
-        System.out.println(PageNode.toPrettyURLString("/öt szép szűzlány #1 őrült {írót} nyúz!"));
     }
     
 }

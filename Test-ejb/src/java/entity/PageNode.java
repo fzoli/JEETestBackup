@@ -24,6 +24,9 @@ public class PageNode extends Node<PageNode> {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "pretty-name")
+    private String prettyName;
+    
     @ElementCollection
     @Column(name="name")
     @OrderColumn(name="index")
@@ -60,13 +63,25 @@ public class PageNode extends Node<PageNode> {
     public List<String> getParameters() {
         return parameters;
     }
+
+    public String getPrettyName() {
+        return toPrettyString(prettyName == null ? name : prettyName);
+    }
+
+    public void setPrettyName(String prettyName) {
+        this.prettyName = prettyName;
+    }
     
-    public static String toPrettyURLString(String string) {
-        return Normalizer.normalize(string.toLowerCase(), Normalizer.Form.NFD)
+    public static String toPrettyString(String string) {
+        return Normalizer.normalize(string == null ? "" : string.toLowerCase(), Normalizer.Form.NFD)
             .replaceAll("\\p{InCombiningDiacriticalMarks}+", "") // normalize all characters and get rid of all diacritical marks (so that e.g. é, ö, à becomes e, o, a)
             .replaceAll("[^\\p{Alnum}]+", "-") // replace all remaining non-alphanumeric characters by - and collapse when necessary
             .replaceAll("[^a-z0-9]+$", "") // remove trailing punctuation
             .replaceAll("^[^a-z0-9]+", ""); // remove leading punctuation
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(PageNode.toPrettyString("/öt szép szűzlány #1 őrült {írót} nyúz!"));
     }
     
 }
