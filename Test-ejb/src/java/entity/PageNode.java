@@ -1,7 +1,7 @@
 package entity;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
+import util.Strings;
 
 /**
  *
@@ -34,7 +35,7 @@ public class PageNode extends Node<PageNode> {
         name="page-params",
         joinColumns=@JoinColumn(name="page-id")
     )
-    private List<String> parameters = new ArrayList();
+    private List<String> parameters = new ArrayList<>();
     
     protected PageNode() {
     }
@@ -65,23 +66,35 @@ public class PageNode extends Node<PageNode> {
     }
 
     public String getPrettyName() {
-        return toPrettyString(prettyName == null ? name : prettyName);
+        return Strings.toPrettyString(prettyName == null ? name : prettyName);
     }
 
     public void setPrettyName(String prettyName) {
         this.prettyName = prettyName;
     }
     
-    public static String toPrettyString(String string) {
-        return Normalizer.normalize(string == null ? "" : string.toLowerCase(), Normalizer.Form.NFD)
-            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "") // normalize all characters and get rid of all diacritical marks (so that e.g. é, ö, à becomes e, o, a)
-            .replaceAll("[^\\p{Alnum}]+", "-") // replace all remaining non-alphanumeric characters by - and collapse when necessary
-            .replaceAll("[^a-z0-9]+$", "") // remove trailing punctuation
-            .replaceAll("^[^a-z0-9]+", ""); // remove leading punctuation
+    public String getPermalink() {
+        String link = Strings.join(getWay(), "/", new Strings.Formatter<PageNode>() {
+
+            @Override
+            public String toString(PageNode node) {
+                return node.getPrettyName();
+            }
+            
+        });
+        return link.startsWith("/") ? link : "/" + link;
     }
     
-    public static void main(String[] args) {
-        System.out.println(PageNode.toPrettyString("/öt szép szűzlány #1 őrült {írót} nyúz!"));
+    public List<PageNode> getWay() {
+        PageNode node = this;
+        List<PageNode> way = new ArrayList<>();
+        while (!node.isRoot()) {
+            way.add(node);
+            node = node.getParent();
+        }
+        way.add(node);
+        Collections.reverse(way);
+        return way;
     }
     
 }
