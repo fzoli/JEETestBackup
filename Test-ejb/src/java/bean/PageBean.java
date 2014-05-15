@@ -49,16 +49,8 @@ public class PageBean implements PageBeanLocal {
         return manager.createQuery(query).getResultList();
     }
     
-    public static String toPrettyURL(String string) {
-        return Normalizer.normalize(string.toLowerCase(), Normalizer.Form.NFD)
-            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "") // normalize all characters and get rid of all diacritical marks (so that e.g. é, ö, à becomes e, o, a)
-            .replaceAll("[^\\p{Alnum}]+", "-") // replace all remaining non-alphanumeric characters by - and collapse when necessary
-            .replaceAll("[^a-z0-9]+$", "") // remove trailing punctuation
-            .replaceAll("^[^a-z0-9]+", ""); // remove leading punctuation
-    }
-    
     public static void main(String[] args) {
-        System.out.println(toPrettyURL("/öt szép szűzlány #1 őrült {írót} nyúz!"));
+        System.out.println(PageNode.toPrettyURLString("/öt szép szűzlány #1 őrült {írót} nyúz!"));
     }
     
 }
