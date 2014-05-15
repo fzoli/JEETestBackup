@@ -58,7 +58,7 @@ public class PageBean implements PageBeanLocal {
     }
     
     public static void main(String[] args) {
-        System.out.println(toPrettyURL("/öt szép szűzlány 1 őrült írót nyúz! <"));
+        System.out.println(toPrettyURL("/öt szép szűzlány #1 őrült {írót} nyúz!"));
     }
     
 }
