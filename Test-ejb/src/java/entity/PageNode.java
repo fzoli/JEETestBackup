@@ -59,9 +59,5 @@ public class PageNode extends Node<PageNode> {
     public List<String> getParameters() {
         return parameters;
     }
-
-    public void setParameters(List<String> parameters) {
-        this.parameters = parameters;
-    }
     
 }

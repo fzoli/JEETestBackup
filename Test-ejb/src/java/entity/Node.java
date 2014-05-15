@@ -35,7 +35,7 @@ public class Node<NodeType extends Node> implements NodeObject<NodeType> {
     @OneToMany(mappedBy = "parent")
     private List<Node> children;
 
-    public Node() {
+    protected Node() {
         this((NodeType) null);
     }
 
@@ -84,27 +84,24 @@ public class Node<NodeType extends Node> implements NodeObject<NodeType> {
     }
     
     public String getInfo() {
-        return "Node(id=" + id + ", parent=" + (parent == null ? "null" : parent.getId()) + ")";
+        return "Node(id=" + getId() + ", parent=" + (parent == null ? "null" : parent.getId()) + ")";
     }
     
-//    @Override
-//    public int hashCode() {
-//        int hash = 0;
-//        hash += (id != null ? id.hashCode() : 0);
-//        return hash;
-//    }
-//
-//    @Override
-//    public boolean equals(Object object) {
-//        // TODO: Warning - this method won't work in the case the id fields are not set
-//        if (!(object instanceof Node)) {
-//            return false;
-//        }
-//        Node other = (Node) object;
-//        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-//            return false;
-//        }
-//        return true;
-//    }
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    /**
+     * Warning - this method won't work in the case the id fields are not set.
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof Node)) return false;
+        Node other = (Node) object;
+        return (id == null && other.id == null) || (id != null && id.equals(other.id));
+    }
     
 }
