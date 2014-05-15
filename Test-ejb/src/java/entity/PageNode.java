@@ -74,14 +74,7 @@ public class PageNode extends Node<PageNode> {
     }
     
     public String getPermalink() {
-        String link = Strings.join(getWay(), "/", new Strings.Formatter<PageNode>() {
-
-            @Override
-            public String toString(PageNode node) {
-                return node.getPrettyName();
-            }
-            
-        });
+        String link = Strings.join(getWay(), "/", (PageNode node) -> node.getPrettyName());
         return link.startsWith("/") ? link : "/" + link;
     }
     
