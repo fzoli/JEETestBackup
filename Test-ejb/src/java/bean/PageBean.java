@@ -1,5 +1,7 @@
 package bean;
 
+import entity.Language;
+import entity.Language_;
 import entity.Node_;
 import entity.PageMapping;
 import entity.PageNode;
@@ -27,6 +29,17 @@ public class PageBean implements PageBeanLocal {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void testPageNode() {
+        
+        List<Language> langs = getLanguages();
+        Language lang;
+        if (langs.isEmpty()) {
+            lang = new Language("hu", "Magyar");
+            manager.persist(lang);
+        }
+        else {
+            lang = langs.get(0);
+        }
+        
         List<PageNode> nodes = getPageNodes(true);
         PageNode node = nodes.isEmpty() ? new PageNode("/faces/home.xhtml") : nodes.get(0);
         List<String> params = node.getParameters();
@@ -37,10 +50,12 @@ public class PageBean implements PageBeanLocal {
             params.add("value" + (params.size() + 1));
         }
         manager.persist(node);
+        
         if (node.getMappings() == null || node.getMappings().isEmpty()) {
-            PageMapping mapping = new PageMapping(node, "hu", "alma");
+            PageMapping mapping = new PageMapping(node, lang, "alma");
             manager.persist(mapping);
         }
+        
     }
 
     @Override
@@ -53,6 +68,14 @@ public class PageBean implements PageBeanLocal {
             }
             
         };
+    }
+    
+    private List<Language> getLanguages() {
+        CriteriaBuilder builder = manager.getCriteriaBuilder();
+        CriteriaQuery<Language> query = builder.createQuery(Language.class);
+        Root<Language> root = query.from(Language.class);
+        query.orderBy(builder.asc(root.get(Language_.code)));
+        return manager.createQuery(query).getResultList();
     }
     
     private List<PageNode> getPageNodes(boolean listAll) {

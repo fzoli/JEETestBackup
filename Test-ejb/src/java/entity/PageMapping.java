@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import util.Strings;
 
@@ -26,8 +27,9 @@ public class PageMapping implements Serializable {
     private PageNode page;
     
     @Id
-    @Column(name="language-code")
-    private String languageCode;
+    @OneToOne
+    @JoinColumn(name="language-code")
+    private Language language;
     
     @Column(name = "name", nullable = false)
     private String name;
@@ -39,7 +41,7 @@ public class PageMapping implements Serializable {
         
         private Long page;
         
-        private String languageCode;
+        private String language;
 
         public Key() {
         }
@@ -48,13 +50,13 @@ public class PageMapping implements Serializable {
         public boolean equals(Object object) {
             if (!(object instanceof Key)) return false;
             Key other = (Key) object;
-            return Node.equals(page, other.page) && Node.equals(languageCode, other.languageCode);
+            return Node.equals(page, other.page) && Node.equals(language, other.language);
         }
         
         @Override
         public int hashCode() {
-            if (page == null || languageCode == null) return 0;
-            return 31 * (31 + page.hashCode()) + languageCode.hashCode();
+            if (page == null || language == null) return 0;
+            return 31 * (31 + page.hashCode()) + language.hashCode();
         }
         
     }
@@ -62,13 +64,13 @@ public class PageMapping implements Serializable {
     protected PageMapping() {
     }
 
-    public PageMapping(PageNode page, String languageCode, String name) {
-        this(page, languageCode, name, null);
+    public PageMapping(PageNode page, Language language, String name) {
+        this(page, language, name, null);
     }
     
-    public PageMapping(PageNode page, String languageCode, String name, String prettyName) {
+    public PageMapping(PageNode page, Language language, String name, String prettyName) {
         this.page = page;
-        this.languageCode = languageCode;
+        this.language = language;
         this.name = name;
         this.prettyName = prettyName;
     }
@@ -77,8 +79,8 @@ public class PageMapping implements Serializable {
         return page;
     }
     
-    public String getLanguageCode() {
-        return languageCode;
+    public Language getLanguage() {
+        return language;
     }
     
     public String getName() {
@@ -102,13 +104,13 @@ public class PageMapping implements Serializable {
 
             @Override
             public String toString(PageNode node) {
-                if (getLanguageCode() == null) return null;
+                if (getLanguage() == null || getLanguage().getCode() == null) return null;
                 List<PageMapping> mappings = node.getMappings();
                 if (mappings == null) return null;
                 PageMapping pm = null;
                 for (PageMapping mapping : mappings) {
                     if (mapping == null) continue;
-                    if (getLanguageCode().equals(mapping.getLanguageCode())) {
+                    if (getLanguage().equals(mapping.getLanguage())) {
                         pm = mapping;
                         break;
                     }
