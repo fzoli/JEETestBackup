@@ -74,11 +74,18 @@ public class PageNode extends Node<PageNode> {
     }
     
     public String getPermalink() {
-        String link = Strings.join(getWay(), "/", (PageNode node) -> node.getPrettyName());
+        String link = Strings.join(getWay(true), "/", new Strings.Formatter<PageNode>() {
+
+            @Override
+            public String toString(PageNode node) {
+                return node.getPrettyName();
+            }
+            
+        });
         return link.startsWith("/") ? link : "/" + link;
     }
     
-    public List<PageNode> getWay() {
+    public List<PageNode> getWay(boolean fromRoot) {
         PageNode node = this;
         List<PageNode> way = new ArrayList<>();
         while (!node.isRoot()) {
@@ -86,7 +93,7 @@ public class PageNode extends Node<PageNode> {
             node = node.getParent();
         }
         way.add(node);
-        Collections.reverse(way);
+        if (fromRoot) Collections.reverse(way);
         return way;
     }
     

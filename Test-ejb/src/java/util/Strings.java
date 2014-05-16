@@ -36,7 +36,7 @@ public class Strings {
     }
     
     public static void main(String[] args) {
-        System.out.println(toPrettyString("/öt szép szűzlány #1 őrült {írót} nyúz!"));
+        System.out.println(toPrettyString("/öt szép szűzlány #1 őrült {ír/ót} nyúz!"));
     }
     
 }

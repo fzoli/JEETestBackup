@@ -2,7 +2,6 @@ package bean;
 
 import entity.Node_;
 import entity.PageNode;
-import entity.PageNode_;
 import java.util.Collections;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -34,17 +33,29 @@ public class PageBean implements PageBeanLocal {
             Collections.swap(params, 0, 1);
         }
         else {
-            params.add("alma" + (params.size() + 1));
+            params.add("value" + (params.size() + 1));
         }
         manager.persist(node);
     }
 
+    @Override
+    public PageNode getPageTree() {
+        return new PageNode(getPageNodes(false)) {
+
+            @Override
+            public String getInfo() {
+                return "Root";
+            }
+            
+        };
+    }
+    
     private List<PageNode> getPageNodes(boolean listAll) {
         CriteriaBuilder builder = manager.getCriteriaBuilder();
         CriteriaQuery<PageNode> query = builder.createQuery(PageNode.class);
         Root<PageNode> root = query.from(PageNode.class);
         if (!listAll) query.where(builder.isNull(root.get(Node_.parent)));
-        query.orderBy(builder.asc(root.get(PageNode_.name)));
+        query.orderBy(builder.asc(root.get(Node_.id)));
         return manager.createQuery(query).getResultList();
     }
     

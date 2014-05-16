@@ -1,5 +1,6 @@
 package bean;
 
+import entity.PageNode;
 import javax.ejb.Local;
 
 /**
@@ -9,6 +10,8 @@ import javax.ejb.Local;
 @Local
 public interface PageBeanLocal {
 
-    void testPageNode();
+    public void testPageNode();
+    
+    public PageNode getPageTree();
     
 }
