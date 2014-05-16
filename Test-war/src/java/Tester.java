@@ -1,4 +1,5 @@
 import bean.PageBeanLocal;
+import com.ocpsoft.pretty.faces.config.reload.PrettyConfigReloader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.ejb.EJB;
@@ -40,6 +41,7 @@ public class Tester extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Tester at " + request.getContextPath() + "</h1>");
             pages.testPageNode();
+            new PrettyConfigReloader().reloadIfNecessary(request.getServletContext());
             out.println("</body>");
             out.println("</html>");
         }
