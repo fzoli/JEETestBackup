@@ -9,9 +9,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
-import util.Strings;
 
 /**
  *
@@ -22,12 +22,6 @@ import util.Strings;
 @DiscriminatorValue("page")
 public class PageNode extends Node<PageNode> {
     
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "pretty-name")
-    private String prettyName;
-    
     @ElementCollection
     @Column(name="name")
     @OrderColumn(name="index")
@@ -37,52 +31,42 @@ public class PageNode extends Node<PageNode> {
     )
     private List<String> parameters = new ArrayList<>();
     
+    @OneToMany(mappedBy = "page")
+    private List<PageMapping> mappings;
+    
+    @Column(name="view-path", nullable=false)
+    private String viewPath;
+    
     protected PageNode() {
     }
-
-    public PageNode(String name) {
-        this(null, name);
+    
+    public PageNode(String viewPath) {
+        this((PageNode) null, viewPath);
     }
     
-    public PageNode(PageNode parent, String name) {
+    public PageNode(PageNode parent, String viewPath) {
         super(parent);
-        this.name = name;
+        this.viewPath = viewPath;
     }
     
     protected PageNode(List<PageNode> children) {
         super(children);
-    }
-    
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public List<String> getParameters() {
         return parameters;
     }
 
-    public String getPrettyName() {
-        return Strings.toPrettyString(prettyName == null ? name : prettyName);
+    public List<PageMapping> getMappings() {
+        return mappings;
     }
 
-    public void setPrettyName(String prettyName) {
-        this.prettyName = prettyName;
+    public String getViewPath() {
+        return viewPath;
     }
-    
-    public String getPermalink() {
-        String link = Strings.join(getWay(true), "/", new Strings.Formatter<PageNode>() {
 
-            @Override
-            public String toString(PageNode node) {
-                return node.getPrettyName();
-            }
-            
-        });
-        return link.startsWith("/") ? link : "/" + link;
+    public void setViewPath(String viewPath) {
+        this.viewPath = viewPath;
     }
     
     public List<PageNode> getWay(boolean fromRoot) {

@@ -96,12 +96,16 @@ public class Node<NodeType extends Node> implements NodeObject<NodeType> {
 
     /**
      * Warning - this method won't work in the case the id fields are not set.
+     * @param object
      */
     @Override
     public boolean equals(Object object) {
         if (!(object instanceof Node)) return false;
-        Node other = (Node) object;
-        return (id == null && other.id == null) || (id != null && id.equals(other.id));
+        return equals(id, ((Node) object).id);
+    }
+    
+    protected static boolean equals(Object o1, Object o2) {
+        return (o1 == null && o2 == null) || (o1 != null && o1.equals(o2));
     }
     
 }

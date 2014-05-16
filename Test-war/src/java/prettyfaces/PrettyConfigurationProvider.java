@@ -4,6 +4,7 @@ import bean.PageBeanLocal;
 import com.ocpsoft.pretty.faces.config.PrettyConfig;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
+import entity.PageMapping;
 import entity.PageNode;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,30 +40,44 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
 
     private void fillList(List<PageNode> nodes, List<UrlMapping> ls) {
         for (PageNode node : nodes) {
-            for (UrlMapping mapping : createMapping(node)) {
-                ls.add(mapping);
-            }
+            ls.addAll(createMapping(node));
             if (node.isChildAvailable()) {
                 fillList(node.getChildren(), ls);
             }
         }
     }
     
-    private UrlMapping[] createMapping(PageNode node) {
+    private List<UrlMapping> createMapping(PageNode node) {
         UrlMapping map = new UrlMapping();
-        String view = "/faces/home.xhtml";
-        String link = node.getPermalink();
+        String view = node.getViewPath();
+        
+        List<UrlMapping> ls = new ArrayList<>();
+        if (view == null) return ls;
+        
+        List<PageMapping> mappings = node.getMappings();
+        if (mappings == null || mappings.isEmpty()) return ls;
+        
+        String paramString = "";
         for (String param : node.getParameters()) {
             if (param == null || param.trim().isEmpty()) continue;
-            link += "/#{" + param.trim() + "}";
+            paramString += "/#{" + param.trim() + "}";
         }
-        System.out.println("Mapping: " + link + " -> " + view);
-        map.setPattern(link);
-        map.setViewId(view);
-        UrlMapping map2 = new UrlMapping();
-        map2.setPattern(link + "/");
-        map2.setViewId(view);
-        return new UrlMapping[] {map, map2};
+        
+        for (PageMapping mapping : mappings) {
+            String link = mapping.getPermalink();
+            if (link == null) continue;
+            link += paramString;
+            System.out.println("Mapping: " + link + " -> " + view);
+            map.setPattern(link);
+            map.setViewId(view);
+            ls.add(map);
+            UrlMapping map2 = new UrlMapping();
+            map2.setPattern(link + "/");
+            map2.setViewId(view);
+            ls.add(map2);
+        }
+
+        return ls;
     }
     
     private PageBeanLocal lookupPageBeanLocal() {

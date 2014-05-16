@@ -1,6 +1,7 @@
 package bean;
 
 import entity.Node_;
+import entity.PageMapping;
 import entity.PageNode;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,7 @@ public class PageBean implements PageBeanLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void testPageNode() {
         List<PageNode> nodes = getPageNodes(true);
-        PageNode node = nodes.isEmpty() ? new PageNode("test") : nodes.get(0);
+        PageNode node = nodes.isEmpty() ? new PageNode("/faces/home.xhtml") : nodes.get(0);
         List<String> params = node.getParameters();
         if (params.size() >= 2) {
             Collections.swap(params, 0, 1);
@@ -36,6 +37,10 @@ public class PageBean implements PageBeanLocal {
             params.add("value" + (params.size() + 1));
         }
         manager.persist(node);
+        if (node.getMappings() == null || node.getMappings().isEmpty()) {
+            PageMapping mapping = new PageMapping(node, "hu", "alma");
+            manager.persist(mapping);
+        }
     }
 
     @Override

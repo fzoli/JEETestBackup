@@ -16,10 +16,13 @@ public class Strings {
     public static <T> String join(List<T> list, String delim, Formatter<T> getter) {
         int len = list.size();
         if (len == 0) return "";
-        StringBuilder sb = new StringBuilder(getter.toString(list.get(0)));
+        String str = getter.toString(list.get(0));
+        if (str == null) return null;
+        StringBuilder sb = new StringBuilder(str);
         for (int i = 1; i < len; i++) {
-            String str = getter.toString(list.get(i));
-            if (str != null && !str.isEmpty()) {
+            str = getter.toString(list.get(i));
+            if (str == null) return null;
+            if (!str.isEmpty()) {
                 sb.append(delim);
                 sb.append(str);
             }

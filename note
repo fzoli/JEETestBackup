@@ -1,0 +1,8 @@
+drop tables
+------------
+
+drop table `page-params`;
+drop table `page-mappings`;
+drop table `pages`;
+drop table `nodes`;
+
