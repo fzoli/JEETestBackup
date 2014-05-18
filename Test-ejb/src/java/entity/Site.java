@@ -1,11 +1,13 @@
 package entity;
 
-import entity.spec.PrimaryObject;
+import entity.key.PrimaryIntObject;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -14,7 +16,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="sites")
-public class Site extends PrimaryObject {
+public class Site extends PrimaryIntObject {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -24,10 +26,18 @@ public class Site extends PrimaryObject {
     @Column(name = "title", nullable = false)
     private String title;
     
-    public Site() {
+    @OneToMany(mappedBy = "site")
+    private List<Domain> domains;
+    
+    protected Site() {
         super(Site.class);
     }
 
+    public Site(String title) {
+        this();
+        this.title = title;
+    }
+    
     @Override
     public Long getId() {
         return id;
@@ -39,6 +49,10 @@ public class Site extends PrimaryObject {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public List<Domain> getDomains() {
+        return domains;
     }
     
 }

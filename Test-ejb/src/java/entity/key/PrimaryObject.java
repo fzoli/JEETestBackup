@@ -1,4 +1,4 @@
-package entity.spec;
+package entity.key;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -7,12 +7,13 @@ import java.util.Objects;
  *
  * @author zoli
  * @param <T>
+ * @param <K>
  */
-public abstract class PrimaryObject<T extends PrimaryObject> implements Serializable {
+abstract class PrimaryObject<T extends PrimaryObject, K extends Serializable> implements Serializable {
     
     private final transient Class<T> clazz;
     
-    public abstract Long getId();
+    public abstract K getId();
 
     @Deprecated
     protected PrimaryObject() {

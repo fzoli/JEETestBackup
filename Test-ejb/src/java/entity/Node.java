@@ -1,7 +1,7 @@
 package entity;
 
 import entity.spec.NodeObject;
-import entity.spec.PrimaryObject;
+import entity.key.PrimaryIntObject;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @DiscriminatorValue("node")
 @DiscriminatorColumn(name = "type")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Node<NodeType extends Node> extends PrimaryObject<Node> implements NodeObject<NodeType> {
+public class Node<NodeType extends Node> extends PrimaryIntObject<Node> implements NodeObject<NodeType> {
     
     @Id
     @Column(name = "id", nullable = false)
