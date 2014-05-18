@@ -28,7 +28,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         return cfg;
     }
     
-    private List<UrlMapping> loadMappings() {
+    private static List<UrlMapping> loadMappings() {
         PageBeanLocal pageBean = lookupPageBeanLocal();
         List<UrlMapping> mappings = new ArrayList<>();
         if (pageBean != null) {
@@ -38,17 +38,16 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         return mappings;
     }
 
-    private void fillList(List<PageNode> nodes, List<UrlMapping> ls) {
+    private static void fillList(List<PageNode> nodes, List<UrlMapping> ls) {
         for (PageNode node : nodes) {
-            ls.addAll(createMapping(node));
+            ls.addAll(createMappings(node));
             if (node.isChildAvailable()) {
                 fillList(node.getChildren(), ls);
             }
         }
     }
     
-    private List<UrlMapping> createMapping(PageNode node) {
-        UrlMapping map = new UrlMapping();
+    private static List<UrlMapping> createMappings(PageNode node) {
         String view = node.getViewPath();
         
         List<UrlMapping> ls = new ArrayList<>();
@@ -68,25 +67,27 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (link == null) continue;
             link += paramString;
             System.out.println("Mapping: " + link + " -> " + view);
-            map.setPattern(link);
-            map.setViewId(view);
-            ls.add(map);
-            UrlMapping map2 = new UrlMapping();
-            map2.setPattern(link + "/");
-            map2.setViewId(view);
-            ls.add(map2);
+            createMapping(ls, link, view);
+            createMapping(ls, link + '/', view);
         }
 
         return ls;
     }
     
-    private PageBeanLocal lookupPageBeanLocal() {
+    private static void createMapping(List<UrlMapping> ls, String link, String view) {
+        UrlMapping map = new UrlMapping();
+        map.setPattern(link);
+        map.setViewId(view);
+        ls.add(map);
+    }
+    
+    private static PageBeanLocal lookupPageBeanLocal() {
         try {
             Context c = new InitialContext();
             return (PageBeanLocal) c.lookup("java:global/Test/Test-ejb/PageBean!bean.PageBeanLocal");
         }
         catch (NamingException ne) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "exception caught", ne);
+            Logger.getLogger(PrettyConfigurationProvider.class.getName()).log(Level.SEVERE, "exception caught", ne);
             return null;
         }
     }
