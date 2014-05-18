@@ -2,6 +2,7 @@ package entity;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -50,7 +51,7 @@ public class PageMapping implements Serializable {
         public boolean equals(Object object) {
             if (!(object instanceof Key)) return false;
             Key other = (Key) object;
-            return Node.equals(page, other.page) && Node.equals(language, other.language);
+            return Objects.equals(page, other.page) && Objects.equals(language, other.language);
         }
         
         @Override

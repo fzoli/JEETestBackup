@@ -45,7 +45,7 @@ public class Language implements Serializable {
     @Override
     public boolean equals(Object object) {
         if (!(object instanceof Language)) return false;
-        return Node.equals(code, ((Language) object).code);
+        return java.util.Objects.equals(code, ((Language) object).code);
     }
     
 }
