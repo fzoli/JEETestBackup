@@ -1,5 +1,5 @@
 import bean.PageBeanLocal;
-import com.ocpsoft.pretty.faces.config.reload.PrettyConfigReloader;
+import com.ocpsoft.pretty.faces.config.PrettyConfigurator;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.ejb.EJB;
@@ -30,7 +30,7 @@ public class Tester extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pages.testPageNode();
-        new PrettyConfigReloader().reloadIfNecessary(request.getServletContext());
+        new PrettyConfigurator(request.getServletContext()).configure();
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
