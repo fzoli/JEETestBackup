@@ -9,6 +9,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
@@ -30,6 +32,13 @@ public class PageNode extends Node<PageNode> {
         joinColumns=@JoinColumn(name="page-id")
     )
     private List<String> parameters = new ArrayList<>();
+    
+    @ManyToMany
+    @JoinTable(
+        name="site-pages",
+        joinColumns={@JoinColumn(name="page-id", referencedColumnName="id")},
+        inverseJoinColumns={@JoinColumn(name="site-id", referencedColumnName="id")})
+    private List<Site> sites = new ArrayList<>();
     
     @OneToMany(mappedBy = "page")
     private List<PageMapping> mappings;
@@ -59,6 +68,10 @@ public class PageNode extends Node<PageNode> {
 
     public List<PageMapping> getMappings() {
         return mappings;
+    }
+
+    public List<Site> getSites() {
+        return sites;
     }
 
     public String getViewPath() {
