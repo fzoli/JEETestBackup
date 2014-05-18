@@ -34,8 +34,8 @@ public class Domain extends PrimaryStrObject<Domain> {
     }
     
     @Override
-    public String getId() {
-        return domain;
+    protected String getId() {
+        return getDomain();
     }
 
     public String getDomain() {

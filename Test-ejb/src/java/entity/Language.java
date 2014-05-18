@@ -1,6 +1,6 @@
 package entity;
 
-import java.io.Serializable;
+import entity.key.PrimaryStrObject;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,7 +12,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="languages")
-public class Language implements Serializable {
+public class Language extends PrimaryStrObject<Language> {
     
     @Id
     @Column(name = "code", nullable = false)
@@ -22,11 +22,18 @@ public class Language implements Serializable {
     private String name;
 
     protected Language() {
+        super(Language.class);
     }
 
     public Language(String code, String name) {
+        this();
         this.code = code;
         this.name = name;
+    }
+
+    @Override
+    public String getId() {
+        return getCode();
     }
 
     public String getCode() {
@@ -35,17 +42,6 @@ public class Language implements Serializable {
 
     public String getName() {
         return name;
-    }
-
-    @Override
-    public int hashCode() {
-        return code == null ? 0 : code.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof Language)) return false;
-        return java.util.Objects.equals(code, ((Language) object).code);
     }
     
 }

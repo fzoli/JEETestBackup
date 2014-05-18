@@ -13,7 +13,7 @@ abstract class PrimaryObject<T extends PrimaryObject, K extends Serializable> im
     
     private final transient Class<T> clazz;
     
-    public abstract K getId();
+    protected abstract K getId();
 
     @Deprecated
     protected PrimaryObject() {
