@@ -1,9 +1,8 @@
 package entity.spec;
 
-import java.io.Serializable;
 import java.util.List;
 
-public interface NodeObject<NodeType extends NodeObject> extends Serializable {
+public interface NodeObject<NodeType extends NodeObject> {
     Long getId();
     boolean isRoot();
     boolean isChildAvailable();

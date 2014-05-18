@@ -1,8 +1,8 @@
 package entity;
 
 import entity.spec.NodeObject;
+import entity.spec.PrimaryObject;
 import java.util.List;
-import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorValue;
@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @DiscriminatorValue("node")
 @DiscriminatorColumn(name = "type")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Node<NodeType extends Node> implements NodeObject<NodeType> {
+public class Node<NodeType extends Node> extends PrimaryObject<Node> implements NodeObject<NodeType> {
     
     @Id
     @Column(name = "id", nullable = false)
@@ -49,6 +49,7 @@ public class Node<NodeType extends Node> implements NodeObject<NodeType> {
     }
     
     private Node(NodeType parent, List<NodeType> children) {
+        super(Node.class);
         this.parent = parent;
         this.children = (List<Node>) children;
     }
@@ -86,23 +87,6 @@ public class Node<NodeType extends Node> implements NodeObject<NodeType> {
     
     public String getInfo() {
         return "Node(id=" + getId() + ", parent=" + (parent == null ? "null" : parent.getId()) + ")";
-    }
-    
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    /**
-     * Warning - this method won't work in the case the id fields are not set.
-     * @param object
-     */
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof Node)) return false;
-        return Objects.equals(id, ((Node) object).id);
     }
     
 }
