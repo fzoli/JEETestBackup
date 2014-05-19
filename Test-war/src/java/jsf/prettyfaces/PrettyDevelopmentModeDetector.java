@@ -1,4 +1,4 @@
-package prettyfaces;
+package jsf.prettyfaces;
 
 import com.ocpsoft.pretty.faces.spi.DevelopmentModeDetector;
 import javax.servlet.ServletContext;

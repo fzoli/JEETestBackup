@@ -1,4 +1,4 @@
-package prettyfaces;
+package jsf.prettyfaces;
 
 import bean.PageBeanLocal;
 import com.ocpsoft.pretty.faces.config.PrettyConfig;
@@ -48,10 +48,11 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     }
     
     private static List<UrlMapping> createMappings(PageNode node) {
-        String view = node.getViewPath();
-        
         List<UrlMapping> ls = new ArrayList<>();
-        if (view == null) return ls;
+        
+        String view = node.getViewPath();
+        if (view == null || view.trim().isEmpty()) return ls;
+        if (!view.startsWith("/")) view = "/faces/" + view.trim();
         
         List<PageMapping> mappings = node.getMappings();
         if (mappings == null || mappings.isEmpty()) return ls;
