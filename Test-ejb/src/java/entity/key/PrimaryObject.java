@@ -9,7 +9,7 @@ import java.util.Objects;
  * @param <T>
  * @param <K>
  */
-abstract class PrimaryObject<T extends PrimaryObject, K extends Serializable> implements Serializable {
+public abstract class PrimaryObject<T extends PrimaryObject, K extends Serializable> implements Serializable {
     
     private final transient Class<T> clazz;
     

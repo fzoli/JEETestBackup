@@ -1,6 +1,10 @@
 drop tables
 ------------
 
+drop table `shops`;
+drop table `site-pages`;
+drop table `domains`;
+drop table `sites`;
 drop table `page-params`;
 drop table `page-mappings`;
 drop table `pages`;
