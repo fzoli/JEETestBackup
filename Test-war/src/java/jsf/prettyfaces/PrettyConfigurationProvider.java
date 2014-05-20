@@ -1,18 +1,17 @@
 package jsf.prettyfaces;
 
 import bean.PageBeanLocal;
+import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.PrettyConfig;
+import com.ocpsoft.pretty.faces.config.mapping.PathValidator;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
 import entity.PageMapping;
 import entity.PageNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import java.util.WeakHashMap;
+import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 
 /**
@@ -20,6 +19,16 @@ import javax.servlet.ServletContext;
  * @author zoli
  */
 public class PrettyConfigurationProvider implements ConfigurationProvider {
+    
+    private static final WeakHashMap<UrlMapping, PageNode> NODES = new WeakHashMap<>();
+    
+    static PageNode getPage(UrlMapping mapping) {
+        return NODES.get(mapping);
+    }
+    
+    static PageNode getPage(FacesContext context) {
+        return getPage(PrettyContext.getCurrentInstance(context).getCurrentMapping());
+    }
     
     @Override
     public PrettyConfig loadConfiguration(ServletContext sc) {
@@ -29,7 +38,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     }
     
     private static List<UrlMapping> loadMappings() {
-        PageBeanLocal pageBean = lookupPageBeanLocal();
+        PageBeanLocal pageBean = Beans.lookupPageBeanLocal();
         List<UrlMapping> mappings = new ArrayList<>();
         if (pageBean != null) {
             PageNode root = pageBean.getPageTree();
@@ -51,8 +60,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         List<UrlMapping> ls = new ArrayList<>();
         
         String view = node.getViewPath();
-        if (view == null || view.trim().isEmpty()) return ls;
-        if (!view.startsWith("/")) view = "/faces/" + view.trim();
+        if (view == null) return ls;
         
         List<PageMapping> mappings = node.getMappings();
         if (mappings == null || mappings.isEmpty()) return ls;
@@ -68,29 +76,22 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (link == null) continue;
             link += paramString;
             System.out.println("Mapping: " + link + " -> " + view);
-            createMapping(ls, link, view);
-            createMapping(ls, link + '/', view);
+            createMapping(ls, node, link, view);
+            createMapping(ls, node, link + '/', view);
         }
 
         return ls;
     }
     
-    private static void createMapping(List<UrlMapping> ls, String link, String view) {
+    private static void createMapping(List<UrlMapping> ls, PageNode node, String link, String view) {
         UrlMapping map = new UrlMapping();
         map.setPattern(link);
         map.setViewId(view);
+        PathValidator lngValidator = new PathValidator();
+        lngValidator.setValidatorIds(PathFilterValidator.NAME);
+        map.addPathValidator(lngValidator);
         ls.add(map);
-    }
-    
-    private static PageBeanLocal lookupPageBeanLocal() {
-        try {
-            Context c = new InitialContext();
-            return (PageBeanLocal) c.lookup("java:global/Test/Test-ejb/PageBean!bean.PageBeanLocal");
-        }
-        catch (NamingException ne) {
-            Logger.getLogger(PrettyConfigurationProvider.class.getName()).log(Level.SEVERE, "exception caught", ne);
-            return null;
-        }
+        NODES.put(map, node);
     }
 
 }
