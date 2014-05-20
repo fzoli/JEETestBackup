@@ -22,16 +22,16 @@ import javax.servlet.ServletContext;
  */
 public class PrettyConfigurationProvider implements ConfigurationProvider {
     
-    private static final WeakHashMap<UrlMapping, PageNode> NODES = new WeakHashMap<>();
+    private static final WeakHashMap<UrlMapping, PageMapping> NODES = new WeakHashMap<>();
     
     private static PathValidator filterValidator;
     
-    static PageNode getPage(UrlMapping mapping) {
+    static PageMapping getPageMapping(UrlMapping mapping) {
         return NODES.get(mapping);
     }
     
-    static PageNode getPage(FacesContext context) {
-        return getPage(PrettyContext.getCurrentInstance(context).getCurrentMapping());
+    static PageMapping getPageMapping(FacesContext context) {
+        return getPageMapping(PrettyContext.getCurrentInstance(context).getCurrentMapping());
     }
     
     private static PathValidator getFilterValidator() {
@@ -94,21 +94,21 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             link += paramString;
             String id = mapping.getLanguage().getCode() + node.getId();
             System.out.println("Mapping[" + id + "]: " + link + " -> " + view);
-            createMapping(ls, node, id, link, view);
-            createMapping(ls, node, id, link + '/', view);
+            createMapping(ls, mapping, id, link, view);
+            createMapping(ls, mapping, id, link + '/', view);
         }
 
         return ls;
     }
     
-    private static void createMapping(List<UrlMapping> ls, PageNode node, String id, String link, String view) {
+    private static void createMapping(List<UrlMapping> ls, PageMapping mapping, String id, String link, String view) {
         UrlMapping map = new UrlMapping();
         map.setId(id);
         map.setPattern(link);
         map.setViewId(view);
         map.addPathValidator(getFilterValidator());
         ls.add(map);
-        NODES.put(map, node);
+        NODES.put(map, mapping);
     }
     
 }

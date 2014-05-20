@@ -1,6 +1,8 @@
 package jsf.prettyfaces;
 
+import entity.PageMapping;
 import entity.PageNode;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
@@ -22,9 +24,17 @@ public class PathFilterValidator implements Validator {
         try {
             String originalURI = ((String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI)).substring(context.getExternalContext().getApplicationContextPath().length());
             System.out.println(originalURI);
-            PageNode page = PrettyConfigurationProvider.getPage(context);
-            String domain = context.getExternalContext().getRequestServerName();
-            System.out.println(domain + " - " + page);
+            PageMapping pageMapping = PrettyConfigurationProvider.getPageMapping(context);
+            PageNode page = pageMapping.getPage();
+            if (!page.getSites().isEmpty()) {
+                String domain = context.getExternalContext().getRequestServerName();
+                System.out.print(domain + " - ");
+                if (page.findSite(domain) == null) {
+//                    context.validationFailed();
+                    throw new ValidatorException(new FacesMessage("Filtered page", String.format("Domain '%s' is not joined to page '%s'", domain, pageMapping.getPermalink())));
+                }
+            }
+            System.out.println(page + ": " + pageMapping.getPermalink());
         }
         catch (Exception ex) {
             ex.printStackTrace();

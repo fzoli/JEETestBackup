@@ -101,4 +101,19 @@ public class PageNode extends Node<PageNode> {
         return way;
     }
     
+    public Site findSite(String domain) {
+        Site found = null;
+        if (sites != null && !sites.isEmpty()) {
+            for (Site site : sites) {
+                for (Domain d : site.getDomains()) {
+                    if (d.getDomain().equalsIgnoreCase(domain)) {
+                        found = site;
+                        break;
+                    }
+                }
+            }
+        }
+        return found;
+    }
+    
 }
