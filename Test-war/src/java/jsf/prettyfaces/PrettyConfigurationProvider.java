@@ -10,6 +10,7 @@ import entity.Language;
 import entity.PageMapping;
 import entity.PageNode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.WeakHashMap;
 import javax.faces.context.FacesContext;
@@ -56,6 +57,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             PageNode root = pageBean.getPageTree();
             fillList(root.getChildren(), mappings);
         }
+        Collections.reverse(mappings); // solves parameter "bug"
         return mappings;
     }
 
