@@ -1,6 +1,7 @@
 package entity;
 
 import entity.key.PrimaryStrObject;
+import java.util.Locale;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -42,6 +43,10 @@ public class Language extends PrimaryStrObject<Language> {
 
     public String getName() {
         return name;
+    }
+    
+    public Locale getLocale(Locale defLocale) {
+        return new Locale(getCode(), defLocale.getCountry());
     }
     
 }
