@@ -6,6 +6,7 @@ import com.ocpsoft.pretty.faces.config.PrettyConfig;
 import com.ocpsoft.pretty.faces.config.mapping.PathValidator;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
+import entity.Language;
 import entity.PageMapping;
 import entity.PageNode;
 import java.util.ArrayList;
@@ -22,12 +23,22 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     private static final WeakHashMap<UrlMapping, PageNode> NODES = new WeakHashMap<>();
     
+    private static PathValidator filterValidator;
+    
     static PageNode getPage(UrlMapping mapping) {
         return NODES.get(mapping);
     }
     
     static PageNode getPage(FacesContext context) {
         return getPage(PrettyContext.getCurrentInstance(context).getCurrentMapping());
+    }
+    
+    private static PathValidator getFilterValidator() {
+        if (filterValidator == null) {
+            filterValidator = new PathValidator();
+            filterValidator.setValidatorIds(PathFilterValidator.NAME);
+        }
+        return filterValidator;
     }
     
     @Override
@@ -38,6 +49,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     }
     
     private static List<UrlMapping> loadMappings() {
+        NODES.clear();
         PageBeanLocal pageBean = Beans.lookupPageBeanLocal();
         List<UrlMapping> mappings = new ArrayList<>();
         if (pageBean != null) {
@@ -59,6 +71,8 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     private static List<UrlMapping> createMappings(PageNode node) {
         List<UrlMapping> ls = new ArrayList<>();
         
+        if (node.getId() == null) return ls;
+        
         String view = node.getViewPath();
         if (view == null) return ls;
         
@@ -73,25 +87,26 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         
         for (PageMapping mapping : mappings) {
             String link = mapping.getPermalink();
-            if (link == null) continue;
+            Language lng = mapping.getLanguage();
+            if (link == null || lng == null || lng.getCode() == null) continue;
             link += paramString;
-            System.out.println("Mapping: " + link + " -> " + view);
-            createMapping(ls, node, link, view);
-            createMapping(ls, node, link + '/', view);
+            String id = mapping.getLanguage().getCode() + node.getId();
+            System.out.println("Mapping[" + id + "]: " + link + " -> " + view);
+            createMapping(ls, node, id, link, view);
+            createMapping(ls, node, id, link + '/', view);
         }
 
         return ls;
     }
     
-    private static void createMapping(List<UrlMapping> ls, PageNode node, String link, String view) {
+    private static void createMapping(List<UrlMapping> ls, PageNode node, String id, String link, String view) {
         UrlMapping map = new UrlMapping();
+        map.setId(id);
         map.setPattern(link);
         map.setViewId(view);
-        PathValidator lngValidator = new PathValidator();
-        lngValidator.setValidatorIds(PathFilterValidator.NAME);
-        map.addPathValidator(lngValidator);
+        map.addPathValidator(getFilterValidator());
         ls.add(map);
         NODES.put(map, node);
     }
-
+    
 }

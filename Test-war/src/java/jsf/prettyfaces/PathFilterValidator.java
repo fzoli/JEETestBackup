@@ -6,6 +6,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
+import javax.servlet.RequestDispatcher;
 
 /**
  *
@@ -18,9 +19,16 @@ public class PathFilterValidator implements Validator {
     
     @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
-        PageNode page = PrettyConfigurationProvider.getPage(context);
-        String domain = context.getExternalContext().getRequestServerName();
-//        String originalURI = ((String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI)).substring(context.getExternalContext().getApplicationContextPath().length());
+        try {
+            String originalURI = ((String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI)).substring(context.getExternalContext().getApplicationContextPath().length());
+            System.out.println(originalURI);
+            PageNode page = PrettyConfigurationProvider.getPage(context);
+            String domain = context.getExternalContext().getRequestServerName();
+            System.out.println(domain + " - " + page);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
     
 }
