@@ -3,7 +3,6 @@ package jsf.prettyfaces;
 import bean.PageBeanLocal;
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.PrettyConfig;
-import com.ocpsoft.pretty.faces.config.mapping.PathValidator;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
 import entity.Language;
@@ -24,22 +23,12 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     private static final WeakHashMap<UrlMapping, PageMapping> NODES = new WeakHashMap<>();
     
-    private static PathValidator filterValidator;
-    
     static PageMapping getPageMapping(UrlMapping mapping) {
         return NODES.get(mapping);
     }
     
     static PageMapping getPageMapping(FacesContext context) {
         return getPageMapping(PrettyContext.getCurrentInstance(context).getCurrentMapping());
-    }
-    
-    private static PathValidator getFilterValidator() {
-        if (filterValidator == null) {
-            filterValidator = new PathValidator();
-            filterValidator.setValidatorIds(PathFilterValidator.NAME);
-        }
-        return filterValidator;
     }
     
     @Override
@@ -106,7 +95,6 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         map.setId(id);
         map.setPattern(link);
         map.setViewId(view);
-        map.addPathValidator(getFilterValidator());
         ls.add(map);
         NODES.put(map, mapping);
     }

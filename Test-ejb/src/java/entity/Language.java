@@ -45,8 +45,12 @@ public class Language extends PrimaryStrObject<Language> {
         return name;
     }
     
+    public Locale getLocale() {
+        return getLocale(null);
+    }
+    
     public Locale getLocale(Locale defLocale) {
-        return new Locale(getCode(), defLocale.getCountry());
+        return defLocale == null ? new Locale(getCode()) : new Locale(getCode(), defLocale.getCountry());
     }
     
 }
