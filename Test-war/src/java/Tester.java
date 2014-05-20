@@ -19,6 +19,11 @@ public class Tester extends HttpServlet {
     @EJB
     private PageBeanLocal pages;
     
+    private void reloadPrettyUrls() {
+        pages.refreshPageNodes();
+        new PrettyConfigurator(getServletContext()).configure();
+    }
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -30,7 +35,7 @@ public class Tester extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pages.testPageNode();
-        new PrettyConfigurator(request.getServletContext()).configure();
+        reloadPrettyUrls();
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");

@@ -8,7 +8,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
-import javax.servlet.RequestDispatcher;
 
 /**
  *
@@ -22,19 +21,25 @@ public class PathFilterValidator implements Validator {
     @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
         try {
-            String originalURI = ((String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI)).substring(context.getExternalContext().getApplicationContextPath().length());
-            System.out.println(originalURI);
             PageMapping pageMapping = PrettyConfigurationProvider.getPageMapping(context);
             PageNode page = pageMapping.getPage();
             if (!page.getSites().isEmpty()) {
                 String domain = context.getExternalContext().getRequestServerName();
-                System.out.print(domain + " - ");
                 if (page.findSite(domain) == null) {
-//                    context.validationFailed();
+//                    ((HttpServletResponse) context.getExternalContext().getResponse()).sendError(HttpServletResponse.SC_NOT_FOUND);
+//                    context.getExternalContext().setResponseStatus(404);
+//                    context.responseComplete();
+//                    return;
                     throw new ValidatorException(new FacesMessage("Filtered page", String.format("Domain '%s' is not joined to page '%s'", domain, pageMapping.getPermalink())));
                 }
+//                System.out.print(domain + " - ");
             }
-            System.out.println(page + ": " + pageMapping.getPermalink());
+//            System.out.println(page + ": " + pageMapping.getPermalink());
+//            String originalURI = ((String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI)).substring(context.getExternalContext().getApplicationContextPath().length());
+//            System.out.println(originalURI);
+        }
+        catch (ValidatorException ex) {
+            throw ex;
         }
         catch (Exception ex) {
             ex.printStackTrace();

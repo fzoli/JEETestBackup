@@ -87,4 +87,9 @@ public class PageBean implements PageBeanLocal {
         return manager.createQuery(query).getResultList();
     }
     
+    @Override
+    public void refreshPageNodes() {
+        manager.getEntityManagerFactory().getCache().evict(PageNode.class);
+    }
+    
 }
