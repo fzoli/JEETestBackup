@@ -12,6 +12,8 @@ fejlesztés:
   (ne kelljen default properties fájlt létrehozni)
 
 továbbfejlesztés:
+- http://en.wikibooks.org/wiki/Java_Persistence/ManyToMany alapján a site-pages tábla kiegészítése egy extra bool mezővel,
+  ami megadja, hogy az adott bejegyzés szűrő feltétel-e és a PrettyViewHandler szűrőjének frissítése ez alapján
 - jsf oldalon nyelvválasztó, mely az adott oldal címére mutat az adott nyelvhez
   (csak az adott oldalhoz tartozó nyelvek megjelenítése)
 
