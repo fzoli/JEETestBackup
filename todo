@@ -1,8 +1,14 @@
 bug:
 - a pretty faces újratöltése után a view-id útvonal nem változik meg
-- a beállított locale az xhtml fájlokban nem hat
 
 sebezhetőség:
 - az eredeti jsf oldalak ne legyenek előrhetőek
 - a nem pretty url-ek se legyenek elérhetőek + a generált kimenetben a nem pretty url-ek cserélődjenek le pretty url-re
+
+utánajárni:
+- a jsf xhtml fájlokban hogyan kérhető le a PrettyViewHandlerben kalkulált locale
+
+fejlesztés:
+- default locale a létező properties fájlok alapján, ha a kért locale nem létezik
+  (ne kelljen default properties fájlt létrehozni)
 
