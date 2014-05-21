@@ -20,7 +20,6 @@ public class Tester extends HttpServlet {
     private PageBeanLocal pages;
     
     private void reloadPrettyUrls() {
-        pages.clearCache();
         new PrettyConfigurator(getServletContext()).configure();
     }
     

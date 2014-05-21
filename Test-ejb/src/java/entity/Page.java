@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="pages")
 @DiscriminatorValue("page")
-public class PageNode extends Node<PageNode> {
+public class Page extends Node<Page> {
     
     @ElementCollection
     @Column(name="name")
@@ -46,19 +46,19 @@ public class PageNode extends Node<PageNode> {
     @Column(name="view-path", nullable=false)
     private String viewPath;
     
-    protected PageNode() {
+    protected Page() {
     }
     
-    public PageNode(String viewPath) {
-        this((PageNode) null, viewPath);
+    public Page(String viewPath) {
+        this((Page) null, viewPath);
     }
     
-    public PageNode(PageNode parent, String viewPath) {
+    public Page(Page parent, String viewPath) {
         super(parent);
         this.viewPath = viewPath;
     }
     
-    protected PageNode(List<PageNode> children) {
+    protected Page(List<Page> children) {
         super(children);
     }
 
@@ -90,9 +90,9 @@ public class PageNode extends Node<PageNode> {
         this.viewPath = viewPath;
     }
     
-    public List<PageNode> getWay(boolean fromRoot) {
-        PageNode node = this;
-        List<PageNode> way = new ArrayList<>();
+    public List<Page> getWay(boolean fromRoot) {
+        Page node = this;
+        List<Page> way = new ArrayList<>();
         while (!node.isRoot()) {
             way.add(node);
             node = node.getParent();

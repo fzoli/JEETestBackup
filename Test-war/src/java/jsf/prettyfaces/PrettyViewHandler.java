@@ -1,8 +1,9 @@
 package jsf.prettyfaces;
 
 import com.sun.faces.application.view.MultiViewHandler;
+import entity.Page;
 import entity.PageMapping;
-import entity.PageNode;
+import entity.Site;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -34,12 +35,18 @@ public class PrettyViewHandler extends MultiViewHandler {
     private void filterPages(FacesContext context) {
         PageMapping pageMapping = PrettyConfigurationProvider.getPageMapping(context);
         if (pageMapping != null) {
-            PageNode page = pageMapping.getPage();
-            if (!page.getSites().isEmpty()) {
+            Page page = pageMapping.getPage();
+            if (page.isDisabled()) {
+                onPageDisabled(context);
+            }
+            else if (!page.getSites().isEmpty()) {
                 String domain = context.getExternalContext().getRequestServerName();
-                if (page.findSite(domain) == null) {
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("Page '%s' is filtered by site '%s'", getRealRequestURL(context), domain));
-                    send404Error(context);
+                Site site = page.findSite(domain);
+                if (site == null) {
+                    onSiteFiltered(context, domain);
+                }
+                else if (site.isDisabled()) {
+                    onSiteDisabled(context);
                 }
             }
         }
@@ -59,6 +66,19 @@ public class PrettyViewHandler extends MultiViewHandler {
         }
         context.getExternalContext().setResponseStatus(404);
         context.responseComplete();
+    }
+    
+    private void onSiteFiltered(FacesContext context, String domain) {
+        Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("Page '%s' is filtered by site '%s'", getRealRequestURL(context), domain));
+        send404Error(context);
+    }
+    
+    private void onSiteDisabled(FacesContext context) {
+        send404Error(context);
+    }
+    
+    private void onPageDisabled(FacesContext context) {
+        send404Error(context);
     }
     
 }

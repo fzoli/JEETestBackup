@@ -4,7 +4,7 @@ import entity.Language;
 import entity.Language_;
 import entity.Node_;
 import entity.PageMapping;
-import entity.PageNode;
+import entity.Page;
 import java.util.Collections;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -40,8 +40,10 @@ public class PageBean implements PageBeanLocal {
             lang = langs.get(0);
         }
         
-        List<PageNode> nodes = getPageNodes(true);
-        PageNode node = nodes.isEmpty() ? new PageNode("home.xhtml") : nodes.get(0);
+        clearPagesFromCache();
+        
+        List<Page> nodes = getPageNodes(true);
+        Page node = nodes.isEmpty() ? new Page("home.xhtml") : nodes.get(0);
         List<String> params = node.getParameters();
         if (params.size() >= 2) {
             Collections.swap(params, 0, 1);
@@ -59,8 +61,8 @@ public class PageBean implements PageBeanLocal {
     }
 
     @Override
-    public PageNode getPageTree() {
-        return new PageNode(getPageNodes(false)) {
+    public Page getPageTree() {
+        return new Page(getPageNodes(false)) {
 
             @Override
             public String getInfo() {
@@ -78,18 +80,18 @@ public class PageBean implements PageBeanLocal {
         return manager.createQuery(query).getResultList();
     }
     
-    private List<PageNode> getPageNodes(boolean listAll) {
+    private List<Page> getPageNodes(boolean listAll) {
         CriteriaBuilder builder = manager.getCriteriaBuilder();
-        CriteriaQuery<PageNode> query = builder.createQuery(PageNode.class);
-        Root<PageNode> root = query.from(PageNode.class);
+        CriteriaQuery<Page> query = builder.createQuery(Page.class);
+        Root<Page> root = query.from(Page.class);
         if (!listAll) query.where(builder.isNull(root.get(Node_.parent)));
         query.orderBy(builder.asc(root.get(Node_.id)));
         return manager.createQuery(query).getResultList();
     }
     
     @Override
-    public void clearCache() {
-        manager.getEntityManagerFactory().getCache().evict(PageNode.class);
+    public void clearPagesFromCache() {
+        manager.getEntityManagerFactory().getCache().evict(Page.class);
     }
     
 }

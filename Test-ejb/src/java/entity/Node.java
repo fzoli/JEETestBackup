@@ -35,7 +35,10 @@ public class Node<NodeType extends Node> extends PrimaryLongObject<Node> impleme
     
     @OneToMany(mappedBy = "parent")
     private List<Node> children;
-
+    
+    @Column(name = "disabled", nullable = false)
+    private boolean disabled;
+    
     protected Node() {
         this((NodeType) null);
     }
@@ -78,6 +81,14 @@ public class Node<NodeType extends Node> extends PrimaryLongObject<Node> impleme
     @Override
     public List<NodeType> getChildren() {
         return (List<NodeType>) children;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
     
     @Override

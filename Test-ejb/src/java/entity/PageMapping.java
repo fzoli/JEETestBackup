@@ -25,7 +25,7 @@ public class PageMapping implements Serializable {
     @Id
     @ManyToOne
     @JoinColumn(name="page-id")
-    private PageNode page;
+    private Page page;
     
     @Id
     @OneToOne
@@ -66,18 +66,18 @@ public class PageMapping implements Serializable {
     protected PageMapping() {
     }
 
-    public PageMapping(PageNode page, Language language, String name) {
+    public PageMapping(Page page, Language language, String name) {
         this(page, language, name, null);
     }
     
-    public PageMapping(PageNode page, Language language, String name, String prettyName) {
+    public PageMapping(Page page, Language language, String name, String prettyName) {
         this.page = page;
         this.language = language;
         this.name = name;
         this.prettyName = prettyName;
     }
 
-    public PageNode getPage() {
+    public Page getPage() {
         return page;
     }
     
@@ -102,10 +102,10 @@ public class PageMapping implements Serializable {
     }
     
     public String getPermalink() {
-        String link = Strings.join(getPage().getWay(true), "/", new Strings.Formatter<PageNode>() {
+        String link = Strings.join(getPage().getWay(true), "/", new Strings.Formatter<Page>() {
 
             @Override
-            public String toString(PageNode node) {
+            public String toString(Page node) {
                 if (getLanguage() == null || getLanguage().getCode() == null) return null;
                 List<PageMapping> mappings = node.getMappings();
                 if (mappings == null) return null;

@@ -7,7 +7,7 @@ import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
 import entity.Language;
 import entity.PageMapping;
-import entity.PageNode;
+import entity.Page;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,15 +47,16 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         PageBeanLocal pageBean = Beans.lookupPageBeanLocal();
         List<UrlMapping> mappings = new ArrayList<>();
         if (pageBean != null) {
-            PageNode root = pageBean.getPageTree();
+            pageBean.clearPagesFromCache();
+            Page root = pageBean.getPageTree();
             fillList(root.getChildren(), mappings);
         }
         Collections.reverse(mappings); // solves parameter "bug"
         return mappings;
     }
 
-    private static void fillList(List<PageNode> nodes, List<UrlMapping> ls) {
-        for (PageNode node : nodes) {
+    private static void fillList(List<Page> nodes, List<UrlMapping> ls) {
+        for (Page node : nodes) {
             ls.addAll(createMappings(node));
             if (node.isChildAvailable()) {
                 fillList(node.getChildren(), ls);
@@ -63,7 +64,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         }
     }
     
-    private static List<UrlMapping> createMappings(PageNode node) {
+    private static List<UrlMapping> createMappings(Page node) {
         List<UrlMapping> ls = new ArrayList<>();
         
         if (node.getId() == null) return ls;
