@@ -41,7 +41,7 @@ public class PageBean implements PageBeanLocal {
         }
         
         List<PageNode> nodes = getPageNodes(true);
-        PageNode node = nodes.isEmpty() ? new PageNode("/faces/home.xhtml") : nodes.get(0);
+        PageNode node = nodes.isEmpty() ? new PageNode("home.xhtml") : nodes.get(0);
         List<String> params = node.getParameters();
         if (params.size() >= 2) {
             Collections.swap(params, 0, 1);
