@@ -18,7 +18,7 @@ public class Shop extends PrimaryObject<Shop, Site> {
     
     @Id
     @OneToOne
-    @JoinColumn(name="site")
+    @JoinColumn(name="site-id")
     private Site site;
 
     @Column(name="name", nullable=false)

@@ -21,7 +21,7 @@ public class Domain extends PrimaryStringObject<Domain> {
     private String domain;
     
     @ManyToOne
-    @JoinColumn(name = "site", nullable = false)
+    @JoinColumn(name = "site-id", nullable = false)
     private Site site;
     
     protected Domain() {
