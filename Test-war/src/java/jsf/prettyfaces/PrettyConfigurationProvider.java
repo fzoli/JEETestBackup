@@ -3,6 +3,7 @@ package jsf.prettyfaces;
 import bean.PageBeanLocal;
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.PrettyConfig;
+import com.ocpsoft.pretty.faces.config.PrettyConfigurator;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
 import entity.Language;
@@ -24,6 +25,8 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     private static String pageRoot;
     
+    private static PageBeanLocal pageBean;
+    
     private static final WeakHashMap<UrlMapping, PageMapping> NODES = new WeakHashMap<>();
     
     static PageMapping getPageMapping(UrlMapping mapping) {
@@ -36,15 +39,19 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     @Override
     public PrettyConfig loadConfiguration(ServletContext sc) {
-        pageRoot = Servlets.getMappingDir(sc, FacesServlet.class);
+        if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
+        if (pageRoot == null) pageRoot = Servlets.getMappingDir(sc, FacesServlet.class);
         PrettyConfig cfg = new PrettyConfig();
         cfg.setMappings(loadMappings());
         return cfg;
     }
     
+    public static void reloadConfiguration(ServletContext sc) {
+        new PrettyConfigurator(sc).configure();
+    }
+    
     private static List<UrlMapping> loadMappings() {
         NODES.clear();
-        PageBeanLocal pageBean = Beans.lookupPageBeanLocal();
         List<UrlMapping> mappings = new ArrayList<>();
         if (pageBean != null) {
             pageBean.clearPagesFromCache();

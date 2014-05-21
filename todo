@@ -1,17 +1,17 @@
 bug:
-- a pretty faces újratöltése után a view-id útvonal nem változik meg
-  (úgy néz ki, csak a paraméterek frissülnek; se a view-id, se a nyelv nem frissül)
+- nincs észlelt bug
 
 sebezhetőség:
 - az eredeti jsf oldalak ne legyenek előrhetőek
 - a nem pretty url-ek se legyenek elérhetőek + a generált kimenetben a nem pretty url-ek cserélődjenek le pretty url-re
 
 fejlesztés:
-- locale display language szövegei mind nagy betűvel kezdődjenek
+- locale display language helyett adatbázisban használt érték (nagy betűvel kezdve)
 - default locale a létező properties fájlok alapján, ha a kért locale nem létezik
   (ne kelljen default properties fájlt létrehozni)
 
 továbbfejlesztés:
+- a PageMapping osztálynak legyen egy őse - NodeMapping -, amiből öröklődik a PageMapping
 - http://en.wikibooks.org/wiki/Java_Persistence/ManyToMany alapján a site-pages tábla kiegészítése egy extra bool mezővel,
   ami megadja, hogy az adott bejegyzés szűrő feltétel-e és a PrettyViewHandler szűrőjének frissítése ez alapján
 - jsf oldalon nyelvválasztó, mely az adott oldal címére mutat az adott nyelvhez

@@ -1,5 +1,4 @@
 import bean.PageBeanLocal;
-import com.ocpsoft.pretty.faces.config.PrettyConfigurator;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.ejb.EJB;
@@ -8,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import jsf.prettyfaces.PrettyConfigurationProvider;
 
 /**
  *
@@ -18,10 +18,6 @@ public class Tester extends HttpServlet {
 
     @EJB
     private PageBeanLocal pages;
-    
-    private void reloadPrettyUrls() {
-        new PrettyConfigurator(getServletContext()).configure();
-    }
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -34,7 +30,7 @@ public class Tester extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         pages.testPageNode();
-        reloadPrettyUrls();
+        PrettyConfigurationProvider.reloadConfiguration(getServletContext());
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
