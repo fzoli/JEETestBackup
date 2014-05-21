@@ -1,6 +1,6 @@
 package entity;
 
-import entity.key.PrimaryStrObject;
+import entity.key.PrimaryStringObject;
 import java.util.Locale;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +13,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="languages")
-public class Language extends PrimaryStrObject<Language> {
+public class Language extends PrimaryStringObject<Language> {
     
     @Id
     @Column(name = "code", nullable = false)

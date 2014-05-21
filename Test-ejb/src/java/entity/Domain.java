@@ -1,6 +1,6 @@
 package entity;
 
-import entity.key.PrimaryStrObject;
+import entity.key.PrimaryStringObject;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -14,7 +14,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="domains")
-public class Domain extends PrimaryStrObject<Domain> {
+public class Domain extends PrimaryStringObject<Domain> {
     
     @Id
     @Column(name = "domain", nullable = false)

@@ -1,6 +1,6 @@
 package entity;
 
-import entity.key.PrimaryIntObject;
+import entity.key.PrimaryLongObject;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +16,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="sites")
-public class Site extends PrimaryIntObject {
+public class Site extends PrimaryLongObject {
 
     @Id
     @Column(name = "id", nullable = false)
