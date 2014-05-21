@@ -88,7 +88,7 @@ public class PageBean implements PageBeanLocal {
     }
     
     @Override
-    public void refreshPageNodes() {
+    public void clearCache() {
         manager.getEntityManagerFactory().getCache().evict(PageNode.class);
     }
     

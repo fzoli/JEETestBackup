@@ -14,6 +14,6 @@ public interface PageBeanLocal {
     
     public PageNode getPageTree();
     
-    public void refreshPageNodes();
+    public void clearCache();
     
 }

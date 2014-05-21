@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.WeakHashMap;
 import javax.faces.context.FacesContext;
+import javax.faces.webapp.FacesServlet;
 import javax.servlet.ServletContext;
 
 /**
@@ -20,6 +21,8 @@ import javax.servlet.ServletContext;
  * @author zoli
  */
 public class PrettyConfigurationProvider implements ConfigurationProvider {
+    
+    private static String pageRoot;
     
     private static final WeakHashMap<UrlMapping, PageMapping> NODES = new WeakHashMap<>();
     
@@ -33,6 +36,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     @Override
     public PrettyConfig loadConfiguration(ServletContext sc) {
+        pageRoot = Servlets.getMappingDir(sc, FacesServlet.class);
         PrettyConfig cfg = new PrettyConfig();
         cfg.setMappings(loadMappings());
         return cfg;
@@ -64,7 +68,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         
         if (node.getId() == null) return ls;
         
-        String view = node.getViewPath();
+        String view = node.getViewPath(pageRoot);
         if (view == null) return ls;
         
         List<PageMapping> mappings = node.getMappings();

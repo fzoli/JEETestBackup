@@ -24,9 +24,6 @@ import javax.persistence.Table;
 @DiscriminatorValue("page")
 public class PageNode extends Node<PageNode> {
     
-    private static transient final String DEF_PATH = "/faces/";
-    public static transient final String DEF_PATTERN = DEF_PATH + "*";
-    
     @ElementCollection
     @Column(name="name")
     @OrderColumn(name="index")
@@ -78,10 +75,14 @@ public class PageNode extends Node<PageNode> {
     }
     
     public String getViewPath() {
+        return getViewPath(null);
+    }
+    
+    public String getViewPath(String root) {
         if (viewPath == null) return null;
         String view = viewPath.trim();
         if (view.isEmpty()) return null;
-        if (!view.startsWith("/")) return DEF_PATH + view;
+        if (root != null && !view.startsWith("/")) return root + (root.endsWith("/") ? "" : "/") + view;
         return view;
     }
 
