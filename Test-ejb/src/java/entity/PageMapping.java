@@ -44,11 +44,12 @@ public class PageMapping implements Serializable {
         
         private String language;
 
-        public Key() {
+        protected Key() {
         }
 
         @Override
         public boolean equals(Object object) {
+            if (this == object) return true;
             if (!(object instanceof Key)) return false;
             Key other = (Key) object;
             return Objects.equals(page, other.page) && Objects.equals(language, other.language);

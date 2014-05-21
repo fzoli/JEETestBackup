@@ -39,6 +39,7 @@ public abstract class PrimaryObject<T extends PrimaryObject, K extends Serializa
      */
     @Override
     public boolean equals(Object object) {
+        if (this == object) return true;
         if (!(object instanceof PrimaryObject)) return false;
         if (clazz != null && !clazz.isInstance(object)) return false;
         return Objects.equals(getId(), ((PrimaryObject) object).getId());
