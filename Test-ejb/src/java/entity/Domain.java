@@ -1,6 +1,7 @@
 package entity;
 
 import entity.key.PrimaryStringObject;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -52,6 +53,18 @@ public class Domain extends PrimaryStringObject<Domain> {
 
     public void setSite(Site site) {
         this.site = site;
+    }
+    
+    public static Domain findDomain(List<Domain> domains, String domain) {
+        if (domains != null && domain != null) {
+            for (Domain d : domains) {
+                if (d == null || d.getDomain() == null) continue;
+                if (d.getDomain().equalsIgnoreCase(domain)) {
+                    return d;
+                }
+            }
+        }
+        return null;
     }
     
 }

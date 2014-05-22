@@ -2,9 +2,13 @@ package bean;
 
 import entity.Language;
 import entity.Language_;
+import entity.Node;
 import entity.Node_;
-import entity.PageMapping;
 import entity.Page;
+import entity.PageFilter;
+import entity.PageFilter_;
+import entity.PageMapping;
+import entity.Site;
 import java.util.Collections;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -28,7 +32,7 @@ public class PageBean implements PageBeanLocal {
     
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void testPageNode() {
+    public void testPages() {
         
         List<Language> langs = getLanguages();
         Language lang;
@@ -42,7 +46,7 @@ public class PageBean implements PageBeanLocal {
         
         clearPagesFromCache();
         
-        List<Page> nodes = getPageNodes(true);
+        List<Page> nodes = getPages(true);
         Page node = nodes.isEmpty() ? new Page("home.xhtml") : nodes.get(0);
         List<String> params = node.getParameters();
         if (params.size() >= 2) {
@@ -62,7 +66,7 @@ public class PageBean implements PageBeanLocal {
 
     @Override
     public Page getPageTree() {
-        return new Page(getPageNodes(false)) {
+        return new Page(getPages(false)) {
 
             @Override
             public String getInfo() {
@@ -72,7 +76,8 @@ public class PageBean implements PageBeanLocal {
         };
     }
     
-    private List<Language> getLanguages() {
+    @Override
+    public List<Language> getLanguages() {
         CriteriaBuilder builder = manager.getCriteriaBuilder();
         CriteriaQuery<Language> query = builder.createQuery(Language.class);
         Root<Language> root = query.from(Language.class);
@@ -80,10 +85,27 @@ public class PageBean implements PageBeanLocal {
         return manager.createQuery(query).getResultList();
     }
     
-    private List<Page> getPageNodes(boolean listAll) {
+    public List<PageFilter> getPageFilters() {
         CriteriaBuilder builder = manager.getCriteriaBuilder();
-        CriteriaQuery<Page> query = builder.createQuery(Page.class);
-        Root<Page> root = query.from(Page.class);
+        CriteriaQuery<PageFilter> query = builder.createQuery(PageFilter.class);
+        Root<PageFilter> root = query.from(PageFilter.class);
+        query.orderBy(builder.asc(root.get(PageFilter_.page)), builder.asc(root.get(PageFilter_.site)));
+        return manager.createQuery(query).getResultList();
+    }
+    
+    @Override
+    public List<Site> getSites() {
+        return getNodes(Site.class, true);
+    }
+    
+    private List<Page> getPages(boolean listAll) {
+        return getNodes(Page.class, listAll);
+    }
+    
+    private <T extends Node> List<T> getNodes(Class<T> nodeClass, boolean listAll) {
+        CriteriaBuilder builder = manager.getCriteriaBuilder();
+        CriteriaQuery<T> query = builder.createQuery(nodeClass);
+        Root<T> root = query.from(nodeClass);
         if (!listAll) query.where(builder.isNull(root.get(Node_.parent)));
         query.orderBy(builder.asc(root.get(Node_.id)));
         return manager.createQuery(query).getResultList();
@@ -91,7 +113,11 @@ public class PageBean implements PageBeanLocal {
     
     @Override
     public void clearPagesFromCache() {
-        manager.getEntityManagerFactory().getCache().evict(Page.class);
+        clearFromCache(Page.class);
+    }
+    
+    private void clearFromCache(Class<?> clazz) {
+        manager.getEntityManagerFactory().getCache().evict(clazz);
     }
     
 }

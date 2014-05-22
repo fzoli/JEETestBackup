@@ -9,8 +9,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
@@ -32,15 +31,14 @@ public class Page extends Node<Page, PageMapping> {
     )
     private List<String> parameters = new ArrayList<>();
     
-    @ManyToMany
-    @JoinTable(
-        name="site-pages",
-        joinColumns={@JoinColumn(name="page-id", referencedColumnName="id")},
-        inverseJoinColumns={@JoinColumn(name="site-id", referencedColumnName="id")})
-    private List<Site> sites = new ArrayList<>();
+    @OneToMany(mappedBy = "page")
+    private List<PageFilter> pageFilters = new ArrayList<>();
     
     @Column(name="view-path", nullable=false)
     private String viewPath;
+    
+    @Column(name="site-dependent", nullable=false)
+    private boolean siteDependent;
     
     protected Page() {
     }
@@ -50,8 +48,13 @@ public class Page extends Node<Page, PageMapping> {
     }
     
     public Page(Page parent, String viewPath) {
+        this(parent, viewPath, false);
+    }
+    
+    public Page(Page parent, String viewPath, boolean siteDependent) {
         super(parent);
         this.viewPath = viewPath;
+        this.siteDependent = siteDependent;
     }
     
     protected Page(List<Page> children) {
@@ -62,8 +65,16 @@ public class Page extends Node<Page, PageMapping> {
         return parameters;
     }
 
-    public List<Site> getSites() {
-        return sites;
+    public List<PageFilter> getPageFilters() {
+        return pageFilters;
+    }
+
+    public boolean isSiteDependent() {
+        return siteDependent;
+    }
+
+    public void setSiteDependent(boolean siteDependent) {
+        this.siteDependent = siteDependent;
     }
     
     public String getViewPath() {
@@ -94,19 +105,15 @@ public class Page extends Node<Page, PageMapping> {
         return way;
     }
     
-    public Site findSite(String domain) {
-        Site found = null;
-        if (sites != null && !sites.isEmpty()) {
-            for (Site site : sites) {
-                for (Domain d : site.getDomains()) {
-                    if (d.getDomain().equalsIgnoreCase(domain)) {
-                        found = site;
-                        break;
-                    }
-                }
-            }
-        }
-        return found;
-    }
+//    public PageFilter findPageFilterByDomain(String domain) {
+//        if (domain != null && pageFilters != null && !pageFilters.isEmpty()) {
+//            for (PageFilter filter : pageFilters) {
+//                if (filter == null || filter.getSite() == null || filter.getSite().getDomains() == null) continue;
+//                Domain d = Domain.findDomain(filter.getSite().getDomains(), domain);
+//                if (d != null) return filter;
+//            }
+//        }
+//        return null;
+//    }
     
 }

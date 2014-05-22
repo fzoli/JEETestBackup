@@ -1,10 +1,13 @@
 package jsf.prettyfaces;
 
+import bean.PageBeanLocal;
 import com.sun.faces.application.view.MultiViewHandler;
 import entity.Page;
+import entity.PageFilter;
 import entity.PageMapping;
 import entity.Site;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PrettyViewHandler extends MultiViewHandler {
 
+    private PageBeanLocal pageBean;
+    
     @Override
     public UIViewRoot createView(FacesContext context, String viewId) {
         filterPages(context);
@@ -39,16 +44,26 @@ public class PrettyViewHandler extends MultiViewHandler {
             if (page.isDisabled()) {
                 onPageDisabled(context);
             }
-            else if (!page.getSites().isEmpty()) {
+            else {
                 String domain = context.getExternalContext().getRequestServerName();
-                Site site = page.findSite(domain);
+                if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
+                List<Site> sites = pageBean.getSites();
+                Site site = Site.findSiteByDomain(sites, domain);
                 if (site == null) {
-                    onSiteFiltered(context, domain);
+                    if (page.isSiteDependent()) onSiteUnknown(context);
                 }
-                else if (site.isDisabled()) {
-                    onSiteDisabled(context);
+                else {
+                    if (site.isDisabled()) {
+                        onSiteDisabled(context);
+                    }
+                    else if (PageFilter.isPageFiltered(pageBean.getPageFilters(), site)) {
+                        onSiteFiltered(context, domain);
+                    }
                 }
             }
+        }
+        else {
+            Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("URL '%s' is not a pretty URL", getRealRequestURL(context)));
         }
     }
     
@@ -58,13 +73,13 @@ public class PrettyViewHandler extends MultiViewHandler {
     
     @Override
     protected void send404Error(FacesContext context) {
+        context.getExternalContext().setResponseStatus(404);
         try {
             ((HttpServletResponse) context.getExternalContext().getResponse()).sendError(HttpServletResponse.SC_NOT_FOUND);
         }
         catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "404 error failed", ex);
         }
-        context.getExternalContext().setResponseStatus(404);
         context.responseComplete();
     }
     
@@ -74,6 +89,10 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     private void onSiteDisabled(FacesContext context) {
+        send404Error(context);
+    }
+    
+    private void onSiteUnknown(FacesContext context) {
         send404Error(context);
     }
     
