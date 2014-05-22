@@ -15,4 +15,5 @@ továbbfejlesztés:
   ami megadja, hogy az adott bejegyzés szűrő feltétel-e és a PrettyViewHandler szűrőjének frissítése ez alapján
 - jsf oldalon nyelvválasztó, mely az adott oldal címére mutat az adott nyelvhez
   (csak az adott oldalhoz tartozó nyelvek megjelenítése)
-
+- a shops tábla address és name oszlopa legyen nyelvfüggő
+  (a Shop származzon le a Site-ból és tartozzon hozzá a ShopMapping)
