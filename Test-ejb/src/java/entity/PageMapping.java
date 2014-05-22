@@ -1,15 +1,8 @@
 package entity;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import util.Strings;
 
@@ -19,49 +12,13 @@ import util.Strings;
  */
 @Entity
 @Table(name="page-mappings")
-@IdClass(PageMapping.Key.class)
-public class PageMapping implements Serializable {
-    
-    @Id
-    @ManyToOne
-    @JoinColumn(name="page-id")
-    private Page page;
-    
-    @Id
-    @OneToOne
-    @JoinColumn(name="language-code")
-    private Language language;
+public class PageMapping extends NodeMapping<Page> {
     
     @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "pretty-name")
     private String prettyName;
-
-    public static class Key implements Serializable {
-        
-        private Long page;
-        
-        private String language;
-
-        protected Key() {
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) return true;
-            if (!(object instanceof Key)) return false;
-            Key other = (Key) object;
-            return Objects.equals(page, other.page) && Objects.equals(language, other.language);
-        }
-        
-        @Override
-        public int hashCode() {
-            if (page == null || language == null) return 0;
-            return 31 * (31 + page.hashCode()) + language.hashCode();
-        }
-        
-    }
     
     protected PageMapping() {
     }
@@ -71,18 +28,13 @@ public class PageMapping implements Serializable {
     }
     
     public PageMapping(Page page, Language language, String name, String prettyName) {
-        this.page = page;
-        this.language = language;
+        super(page, language);
         this.name = name;
         this.prettyName = prettyName;
     }
 
     public Page getPage() {
-        return page;
-    }
-    
-    public Language getLanguage() {
-        return language;
+        return getNode();
     }
     
     public String getName() {

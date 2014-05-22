@@ -1,5 +1,5 @@
 bug:
-- nincs észlelt bug
+- a PrettyFaces újratöltése után nem frissül jól a konfiguráció 
 
 sebezhetőség:
 - az eredeti jsf oldalak ne legyenek előrhetőek
@@ -11,7 +11,6 @@ fejlesztés:
   (ne kelljen default properties fájlt létrehozni)
 
 továbbfejlesztés:
-- a PageMapping osztálynak legyen egy őse - NodeMapping -, amiből öröklődik a PageMapping
 - http://en.wikibooks.org/wiki/Java_Persistence/ManyToMany alapján a site-pages tábla kiegészítése egy extra bool mezővel,
   ami megadja, hogy az adott bejegyzés szűrő feltétel-e és a PrettyViewHandler szűrőjének frissítése ez alapján
 - jsf oldalon nyelvválasztó, mely az adott oldal címére mutat az adott nyelvhez

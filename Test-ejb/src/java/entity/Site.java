@@ -13,7 +13,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="sites")
 @DiscriminatorValue("site")
-public class Site extends Node<Site> {
+public class Site extends Node<Site, SiteMapping> {
     
     @OneToMany(mappedBy = "site")
     private List<Domain> domains;

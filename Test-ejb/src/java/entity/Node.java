@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @DiscriminatorValue("node")
 @DiscriminatorColumn(name = "type")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Node<NodeType extends Node> extends PrimaryLongObject<Node> implements NodeObject<NodeType> {
+public class Node<NodeType extends Node, MappingType extends NodeMapping> extends PrimaryLongObject<Node> implements NodeObject<NodeType> {
     
     @Id
     @Column(name = "id", nullable = false)
@@ -35,6 +35,9 @@ public class Node<NodeType extends Node> extends PrimaryLongObject<Node> impleme
     
     @OneToMany(mappedBy = "parent")
     private List<Node> children;
+    
+    @OneToMany(mappedBy = "node")
+    private List<NodeMapping> mappings;
     
     @Column(name = "disabled", nullable = false)
     private boolean disabled;
@@ -83,6 +86,10 @@ public class Node<NodeType extends Node> extends PrimaryLongObject<Node> impleme
         return (List<NodeType>) children;
     }
 
+    public List<MappingType> getMappings() {
+        return (List<MappingType>) mappings;
+    }
+    
     public boolean isDisabled() {
         return disabled;
     }
