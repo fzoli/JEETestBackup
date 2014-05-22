@@ -2,7 +2,7 @@ bug:
 - a PrettyFaces újratöltése után nem frissül jól a konfiguráció 
 
 sebezhetőség:
-- az eredeti jsf oldalak ne legyenek előrhetőek
+- az eredeti jsf oldalak ne legyenek elérhetőek
 - a nem pretty url-ek se legyenek elérhetőek + a generált kimenetben a nem pretty url-ek cserélődjenek le pretty url-re
 
 fejlesztés:
@@ -11,8 +11,6 @@ fejlesztés:
   (ne kelljen default properties fájlt létrehozni)
 
 továbbfejlesztés:
-- http://en.wikibooks.org/wiki/Java_Persistence/ManyToMany alapján a site-pages tábla kiegészítése egy extra bool mezővel,
-  ami megadja, hogy az adott bejegyzés szűrő feltétel-e és a PrettyViewHandler szűrőjének frissítése ez alapján
 - jsf oldalon nyelvválasztó, mely az adott oldal címére mutat az adott nyelvhez
   (csak az adott oldalhoz tartozó nyelvek megjelenítése)
 - a shops tábla address és name oszlopa legyen nyelvfüggő
