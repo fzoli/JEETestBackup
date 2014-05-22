@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Hoszt: localhost
--- Létrehozás ideje: 2014. máj. 22. 02:56
+-- Létrehozás ideje: 2014. máj. 22. 08:43
 -- Szerver verzió: 5.5.37
 -- PHP verzió: 5.4.4-14+deb7u9
 
@@ -275,6 +275,12 @@ ALTER TABLE `page-mappings`
 --
 ALTER TABLE `page-params`
   ADD CONSTRAINT `page-params_ibfk_1` FOREIGN KEY (`page-id`) REFERENCES `pages` (`id`);
+
+--
+-- Megkötések a táblához `pages`
+--
+ALTER TABLE `pages`
+  ADD CONSTRAINT `pages_ibfk_1` FOREIGN KEY (`id`) REFERENCES `nodes` (`id`);
 
 --
 -- Megkötések a táblához `shops`
