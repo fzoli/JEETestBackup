@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Hoszt: localhost
--- Létrehozás ideje: 2014. máj. 22. 08:43
+-- Létrehozás ideje: 2014. máj. 23. 01:43
 -- Szerver verzió: 5.5.37
 -- PHP verzió: 5.4.4-14+deb7u9
 
@@ -104,6 +104,28 @@ INSERT INTO `nodes` (`id`, `type`, `disabled`, `parent-id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Tábla szerkezet: `page-filters`
+--
+
+CREATE TABLE IF NOT EXISTS `page-filters` (
+  `single` tinyint(1) NOT NULL DEFAULT '0',
+  `page-id` bigint(20) NOT NULL,
+  `site-id` bigint(20) NOT NULL,
+  PRIMARY KEY (`page-id`,`site-id`),
+  KEY `FK_page-filters_site-id` (`site-id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- A tábla adatainak kiíratása `page-filters`
+--
+
+INSERT INTO `page-filters` (`single`, `page-id`, `site-id`) VALUES
+(1, 1, 4),
+(0, 2, 3);
+
+-- --------------------------------------------------------
+
+--
 -- Tábla szerkezet: `page-mappings`
 --
 
@@ -132,9 +154,9 @@ INSERT INTO `page-mappings` (`name`, `pretty-name`, `node-id`, `language-code`) 
 --
 
 CREATE TABLE IF NOT EXISTS `page-params` (
-  `page-id` bigint(20) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `index` int(11) DEFAULT NULL,
+  `page-id` bigint(20) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `index` int(11) NOT NULL,
   KEY `page-id` (`page-id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -155,6 +177,7 @@ INSERT INTO `page-params` (`page-id`, `name`, `index`) VALUES
 CREATE TABLE IF NOT EXISTS `pages` (
   `id` bigint(20) NOT NULL,
   `view-path` varchar(255) NOT NULL,
+  `site-dependent` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -162,9 +185,9 @@ CREATE TABLE IF NOT EXISTS `pages` (
 -- A tábla adatainak kiíratása `pages`
 --
 
-INSERT INTO `pages` (`id`, `view-path`) VALUES
-(1, 'home.xhtml'),
-(2, 'index.html');
+INSERT INTO `pages` (`id`, `view-path`, `site-dependent`) VALUES
+(1, 'home.xhtml', 0),
+(2, 'index.html', 0);
 
 -- --------------------------------------------------------
 
@@ -198,28 +221,8 @@ CREATE TABLE IF NOT EXISTS `site-mappings` (
 --
 
 INSERT INTO `site-mappings` (`title`, `node-id`, `language-code`) VALUES
-('Test title', 3, 'en'),
-('Teszt cím', 3, 'hu');
-
--- --------------------------------------------------------
-
---
--- Tábla szerkezet: `site-pages`
---
-
-CREATE TABLE IF NOT EXISTS `site-pages` (
-  `page-id` bigint(20) NOT NULL,
-  `site-id` bigint(20) NOT NULL,
-  PRIMARY KEY (`page-id`,`site-id`),
-  KEY `FK_site-pages_site-id` (`site-id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- A tábla adatainak kiíratása `site-pages`
---
-
-INSERT INTO `site-pages` (`page-id`, `site-id`) VALUES
-(2, 3);
+('Test title', 4, 'en'),
+('Teszt cím', 4, 'hu');
 
 -- --------------------------------------------------------
 
@@ -264,6 +267,13 @@ ALTER TABLE `nodes`
   ADD CONSTRAINT `FK_nodes_parent-id` FOREIGN KEY (`parent-id`) REFERENCES `nodes` (`id`);
 
 --
+-- Megkötések a táblához `page-filters`
+--
+ALTER TABLE `page-filters`
+  ADD CONSTRAINT `FK_page-filters_site-id` FOREIGN KEY (`site-id`) REFERENCES `sites` (`id`),
+  ADD CONSTRAINT `FK_page-filters_page-id` FOREIGN KEY (`page-id`) REFERENCES `pages` (`id`);
+
+--
 -- Megkötések a táblához `page-mappings`
 --
 ALTER TABLE `page-mappings`
@@ -294,13 +304,6 @@ ALTER TABLE `shops`
 ALTER TABLE `site-mappings`
   ADD CONSTRAINT `FK_site-mappings_language-code` FOREIGN KEY (`language-code`) REFERENCES `languages` (`code`),
   ADD CONSTRAINT `site-mappings_ibfk_1` FOREIGN KEY (`node-id`) REFERENCES `sites` (`id`);
-
---
--- Megkötések a táblához `site-pages`
---
-ALTER TABLE `site-pages`
-  ADD CONSTRAINT `FK_site-pages_site-id` FOREIGN KEY (`site-id`) REFERENCES `nodes` (`id`),
-  ADD CONSTRAINT `FK_site-pages_page-id` FOREIGN KEY (`page-id`) REFERENCES `nodes` (`id`);
 
 --
 -- Megkötések a táblához `sites`
