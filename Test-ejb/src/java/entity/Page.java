@@ -24,11 +24,11 @@ import javax.persistence.Table;
 public class Page extends Node<Page, PageMapping> {
     
     @ElementCollection
-    @Column(name="name")
-    @OrderColumn(name="index")
+    @Column(name="name", nullable = false)
+    @OrderColumn(name="index", nullable = false)
     @CollectionTable(
         name="page-params",
-        joinColumns=@JoinColumn(name="page-id")
+        joinColumns=@JoinColumn(name="page-id", nullable = false)
     )
     private List<String> parameters = new ArrayList<>();
     
