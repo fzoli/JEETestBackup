@@ -7,8 +7,8 @@ import com.ocpsoft.pretty.faces.config.PrettyConfigurator;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
 import entity.Language;
-import entity.PageMapping;
 import entity.Page;
+import entity.PageMapping;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +16,7 @@ import java.util.WeakHashMap;
 import javax.faces.context.FacesContext;
 import javax.faces.webapp.FacesServlet;
 import javax.servlet.ServletContext;
+import logging.Log;
 
 /**
  *
@@ -28,6 +29,8 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     private static PageBeanLocal pageBean;
     
     private static final WeakHashMap<UrlMapping, PageMapping> NODES = new WeakHashMap<>();
+    
+    private static final Log LOGGER = Log.getLogger(PrettyConfigurationProvider.class);
     
     static PageMapping getPageMapping(UrlMapping mapping) {
         return NODES.get(mapping);
@@ -94,7 +97,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (link == null || lng == null || lng.getCode() == null) continue;
             link += paramString;
             String id = mapping.getLanguage().getCode() + node.getId();
-            System.out.println("Mapping[" + id + "]: " + link + " -> " + view);
+            LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
             createMapping(ls, mapping, id, link, view);
             createMapping(ls, mapping, id, link + '/', view);
         }

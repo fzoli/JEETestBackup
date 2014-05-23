@@ -85,6 +85,7 @@ public class PageBean implements PageBeanLocal {
         return manager.createQuery(query).getResultList();
     }
     
+    @Override
     public List<PageFilter> getPageFilters() {
         CriteriaBuilder builder = manager.getCriteriaBuilder();
         CriteriaQuery<PageFilter> query = builder.createQuery(PageFilter.class);

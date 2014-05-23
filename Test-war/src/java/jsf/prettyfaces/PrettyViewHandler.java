@@ -9,20 +9,27 @@ import entity.Site;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import logging.Log;
 
 /**
- *
+ * TODO: replace "default" URLs to pretty URL in the output
  * @author zoli
  */
 public class PrettyViewHandler extends MultiViewHandler {
 
+    private static final Log LOGGER = Log.getLogger(PrettyViewHandler.class);
+    
     private PageBeanLocal pageBean;
+
+    protected PageBeanLocal getPageBean() {
+        if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
+        return pageBean;
+    }
     
     @Override
     public UIViewRoot createView(FacesContext context, String viewId) {
@@ -46,29 +53,41 @@ public class PrettyViewHandler extends MultiViewHandler {
             }
             else {
                 String domain = context.getExternalContext().getRequestServerName();
-                if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
-                List<Site> sites = pageBean.getSites();
+                List<Site> sites = getPageBean().getSites();
                 Site site = Site.findSiteByDomain(sites, domain);
                 if (site == null) {
-                    if (page.isSiteDependent()) onSiteUnknown(context);
+                    if (page.isSiteDependent()) onSiteUnknown(context, domain);
                 }
                 else {
                     if (site.isDisabled()) {
-                        onSiteDisabled(context);
+                        onSiteDisabled(context, domain);
                     }
-                    else if (PageFilter.isPageFiltered(pageBean.getPageFilters(), site)) {
+                    else if (PageFilter.isPageFiltered(getPageBean().getPageFilters(), site)) {
                         onSiteFiltered(context, domain);
                     }
                 }
             }
         }
         else {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("URL '%s' is not a pretty URL", getRealRequestURL(context)));
+            onPageUnknown(context);
         }
     }
     
     protected String getRealRequestURL(FacesContext context) {
-        return ((String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI)).substring(context.getExternalContext().getApplicationContextPath().length());
+        try {
+            return trimRequestURI(context, (String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI));
+        }
+        catch (Exception ex) {
+            return getRequestURL(context);
+        }
+    }
+    
+    protected String getRequestURL(FacesContext context) {
+        return trimRequestURI(context, ((HttpServletRequest) context.getExternalContext().getRequest()).getRequestURI());
+    }
+    
+    private String trimRequestURI(FacesContext context, String requestURI) {
+        return requestURI.substring(context.getExternalContext().getApplicationContextPath().length());
     }
     
     @Override
@@ -78,25 +97,33 @@ public class PrettyViewHandler extends MultiViewHandler {
             ((HttpServletResponse) context.getExternalContext().getResponse()).sendError(HttpServletResponse.SC_NOT_FOUND);
         }
         catch (IOException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "404 error failed", ex);
+            LOGGER.e("404 error failed", ex);
         }
         context.responseComplete();
     }
     
-    private void onSiteFiltered(FacesContext context, String domain) {
-        Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("Page '%s' is filtered by site '%s'", getRealRequestURL(context), domain));
+    protected void onSiteFiltered(FacesContext context, String domain) {
+        LOGGER.i(String.format("Page '%s' is filtered by site '%s'", getRealRequestURL(context), domain));
         send404Error(context);
     }
     
-    private void onSiteDisabled(FacesContext context) {
+    protected void onSiteDisabled(FacesContext context, String domain) {
+        LOGGER.i(String.format("Site '%s' is disabled", domain));
         send404Error(context);
     }
     
-    private void onSiteUnknown(FacesContext context) {
+    protected void onSiteUnknown(FacesContext context, String domain) {
+        LOGGER.i(String.format("Unknown site '%s'", domain));
         send404Error(context);
     }
     
-    private void onPageDisabled(FacesContext context) {
+    protected void onPageDisabled(FacesContext context) {
+        LOGGER.i(String.format("Page '%s' is disabled", getRealRequestURL(context)));
+        send404Error(context);
+    }
+    
+    protected void onPageUnknown(FacesContext context) {
+        LOGGER.i(String.format("URL '%s' is not a pretty URL", getRealRequestURL(context)));
         send404Error(context);
     }
     
