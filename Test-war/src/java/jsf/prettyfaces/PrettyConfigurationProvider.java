@@ -49,7 +49,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
      */
     static String findPrettyURL(String viewId, Locale locale, List<String> paramValues) {
         if (pageRoot == null || locale == null || viewId == null) return null;
-        viewId = stripPath(viewId);
+        viewId = stripPageRoot(viewId);
         String language = locale.getLanguage();
         Iterator<Map.Entry<UrlMapping, PageMapping>> it = NODES.entrySet().iterator();
         while (it.hasNext()) {
@@ -60,7 +60,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (language.equalsIgnoreCase(mapping.getLanguage().getCode()) && page.isParametersValid(paramValues, true)) {
                 String path = page.getViewPath();
                 if (!isPathJSF(path)) continue;
-                path = stripPath(path);
+                path = stripPageRoot(path);
                 if (viewId.equals(path)) {
                     StringBuilder prettyURL = new StringBuilder(pageRoot + mapping.getPermalink());
                     if (paramValues != null) {
@@ -76,7 +76,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         return null;
     }
     
-    private static String stripPath(String path) {
+    private static String stripPageRoot(String path) {
         if (path == null) return null;
         if (path.startsWith(pageRoot)) path = path.substring(pageRoot.length());
         if (path.startsWith("/")) path = path.substring(1);

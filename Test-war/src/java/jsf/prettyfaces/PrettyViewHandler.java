@@ -82,22 +82,22 @@ public class PrettyViewHandler extends MultiViewHandler {
         }
     }
     
-    protected String getRealRequestURI(FacesContext context, boolean trimAppContext) {
+    protected String getRealRequestURI(FacesContext context, boolean stripAppContext) {
         try {
             String uri = (String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI);
-            return trimAppContext ? trimRequestURI(context, uri) : uri;
+            return stripAppContext ? stripContextPath(context, uri) : uri;
         }
         catch (Exception ex) {
-            return getRequestURI(context, trimAppContext);
+            return getRequestURI(context, stripAppContext);
         }
     }
     
-    protected String getRequestURI(FacesContext context, boolean trimAppContext) {
+    protected String getRequestURI(FacesContext context, boolean stripAppContext) {
         String uri = ((HttpServletRequest) context.getExternalContext().getRequest()).getRequestURI();
-        return trimAppContext ? trimRequestURI(context, uri) : uri;
+        return stripAppContext ? stripContextPath(context, uri) : uri;
     }
     
-    private String trimRequestURI(FacesContext context, String requestURI) {
+    private String stripContextPath(FacesContext context, String requestURI) {
         return requestURI.substring(context.getExternalContext().getApplicationContextPath().length());
     }
     
