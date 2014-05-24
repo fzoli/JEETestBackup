@@ -105,15 +105,10 @@ public class Page extends Node<Page, PageMapping> {
         return way;
     }
     
-//    public PageFilter findPageFilterByDomain(String domain) {
-//        if (domain != null && pageFilters != null && !pageFilters.isEmpty()) {
-//            for (PageFilter filter : pageFilters) {
-//                if (filter == null || filter.getSite() == null || filter.getSite().getDomains() == null) continue;
-//                Domain d = Domain.findDomain(filter.getSite().getDomains(), domain);
-//                if (d != null) return filter;
-//            }
-//        }
-//        return null;
-//    }
+    public boolean isParametersValid(List<String> paramValues, boolean strict) {
+        List<String> paramNames = getParameters();
+        boolean params = paramNames != null && !paramNames.isEmpty();
+        return (!params && !strict) || (!params && (paramValues == null || paramValues.isEmpty())) || (params && paramValues != null && paramValues.size() == paramNames.size());
+    }
     
 }

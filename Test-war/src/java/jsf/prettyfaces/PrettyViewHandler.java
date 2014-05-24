@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import logging.Log;
 
 /**
- * TODO: replace "default" URLs to pretty URL in the output
  * @author zoli
  */
 public class PrettyViewHandler extends MultiViewHandler {
@@ -35,6 +34,16 @@ public class PrettyViewHandler extends MultiViewHandler {
     public UIViewRoot createView(FacesContext context, String viewId) {
         filterPages(context);
         return super.createView(context, viewId);
+    }
+
+    @Override
+    public String getActionURL(FacesContext context, String viewId) {
+        if (context.getViewRoot().getViewId().equals(viewId)) {
+            return getRealRequestURI(context, false);
+        }
+        String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), null);
+        if (prettyURL != null) return prettyURL;
+        return super.getActionURL(context, viewId);
     }
     
     @Override
@@ -73,17 +82,19 @@ public class PrettyViewHandler extends MultiViewHandler {
         }
     }
     
-    protected String getRealRequestURL(FacesContext context) {
+    protected String getRealRequestURI(FacesContext context, boolean trimAppContext) {
         try {
-            return trimRequestURI(context, (String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI));
+            String uri = (String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI);
+            return trimAppContext ? trimRequestURI(context, uri) : uri;
         }
         catch (Exception ex) {
-            return getRequestURL(context);
+            return getRequestURI(context, trimAppContext);
         }
     }
     
-    protected String getRequestURL(FacesContext context) {
-        return trimRequestURI(context, ((HttpServletRequest) context.getExternalContext().getRequest()).getRequestURI());
+    protected String getRequestURI(FacesContext context, boolean trimAppContext) {
+        String uri = ((HttpServletRequest) context.getExternalContext().getRequest()).getRequestURI();
+        return trimAppContext ? trimRequestURI(context, uri) : uri;
     }
     
     private String trimRequestURI(FacesContext context, String requestURI) {
@@ -103,7 +114,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onSiteFiltered(FacesContext context, String domain) {
-        LOGGER.i(String.format("Page '%s' is filtered by site '%s'", getRealRequestURL(context), domain));
+        LOGGER.i(String.format("Page '%s' is filtered by site '%s'", getRealRequestURI(context, true), domain));
         send404Error(context);
     }
     
@@ -118,12 +129,12 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onPageDisabled(FacesContext context) {
-        LOGGER.i(String.format("Page '%s' is disabled", getRealRequestURL(context)));
+        LOGGER.i(String.format("Page '%s' is disabled", getRealRequestURI(context, true)));
         send404Error(context);
     }
     
     protected void onPageUnknown(FacesContext context) {
-        LOGGER.i(String.format("URL '%s' is not a pretty URL", getRealRequestURL(context)));
+        LOGGER.i(String.format("URL '%s' is not a pretty URL", getRealRequestURI(context, true)));
         send404Error(context);
     }
     

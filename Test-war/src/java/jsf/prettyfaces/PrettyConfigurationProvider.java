@@ -11,7 +11,10 @@ import entity.Page;
 import entity.PageMapping;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.WeakHashMap;
 import javax.faces.context.FacesContext;
 import javax.faces.webapp.FacesServlet;
@@ -38,6 +41,51 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     static PageMapping getPageMapping(FacesContext context) {
         return getPageMapping(PrettyContext.getCurrentInstance(context).getCurrentMapping());
+    }
+    
+    /**
+     * Returns the pretty URL.
+     * WARNING: This method returns the first match!
+     */
+    static String findPrettyURL(String viewId, Locale locale, List<String> paramValues) {
+        if (pageRoot == null || locale == null || viewId == null) return null;
+        viewId = stripPath(viewId);
+        String language = locale.getLanguage();
+        Iterator<Map.Entry<UrlMapping, PageMapping>> it = NODES.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<UrlMapping, PageMapping> e = it.next();
+            PageMapping mapping = e.getValue();
+            if (mapping.getLanguage() == null || mapping.getPage() == null) continue;
+            Page page = mapping.getPage();
+            if (language.equalsIgnoreCase(mapping.getLanguage().getCode()) && page.isParametersValid(paramValues, true)) {
+                String path = page.getViewPath();
+                if (!isPathJSF(path)) continue;
+                path = stripPath(path);
+                if (viewId.equals(path)) {
+                    StringBuilder prettyURL = new StringBuilder(pageRoot + mapping.getPermalink());
+                    if (paramValues != null) {
+                        for (String paramValue : paramValues) {
+                            if (paramValue == null || paramValue.trim().isEmpty()) continue;
+                            prettyURL.append('/').append(paramValue);
+                        }
+                    }
+                    return prettyURL.toString();
+                }
+            }
+        }
+        return null;
+    }
+    
+    private static String stripPath(String path) {
+        if (path == null) return null;
+        if (path.startsWith(pageRoot)) path = path.substring(pageRoot.length());
+        if (path.startsWith("/")) path = path.substring(1);
+        return path;
+    }
+    
+    private static boolean isPathJSF(String path) {
+        if (path == null) return false;
+        return !path.startsWith("/") || (path.startsWith("/") && path.startsWith(pageRoot));
     }
     
     @Override
