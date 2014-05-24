@@ -40,7 +40,11 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     }
     
     static PageMapping getPageMapping(FacesContext context) {
-        return getPageMapping(PrettyContext.getCurrentInstance(context).getCurrentMapping());
+        return getPageMapping(getCurrentMapping(context));
+    }
+    
+    static UrlMapping getCurrentMapping(FacesContext context) {
+        return PrettyContext.getCurrentInstance(context).getCurrentMapping();
     }
     
     /**

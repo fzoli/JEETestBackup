@@ -32,9 +32,9 @@
    
    -->
 
-      <url-mapping id="homee"> 
-          <pattern value="/homee/#{value}" /> 
-          <view-id value="/faces/home.xhtml" />
+      <url-mapping id="cms"> 
+          <pattern value="/cms" /> 
+          <view-id value="/faces/sample.xhtml" />
       </url-mapping>
 
 </pretty-config>

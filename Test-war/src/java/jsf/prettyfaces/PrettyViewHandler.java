@@ -134,8 +134,13 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onPageUnknown(FacesContext context) {
-        LOGGER.i(String.format("URL '%s' is not a pretty URL", getRealRequestURI(context, true)));
-        send404Error(context);
+        if (PrettyConfigurationProvider.getCurrentMapping(context) == null) {
+            LOGGER.i(String.format("URL '%s' is not a pretty URL", getRealRequestURI(context, true)));
+            send404Error(context);
+        }
+        else {
+            LOGGER.i(String.format("URL '%s' is not from the database", getRealRequestURI(context, true)));
+        }
     }
     
 }
