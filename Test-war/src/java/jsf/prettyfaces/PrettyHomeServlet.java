@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author zoli
  */
+//@WebServlet(name = "PrettyHomeServlet", urlPatterns = "")
 @WebServlet(name = "PrettyHomeServlet", urlPatterns = {"/"})
 public class PrettyHomeServlet extends HttpServlet {
     
