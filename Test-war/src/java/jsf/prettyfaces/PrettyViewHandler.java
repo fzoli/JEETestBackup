@@ -2,18 +2,16 @@ package jsf.prettyfaces;
 
 import bean.PageBeanLocal;
 import com.sun.faces.application.view.MultiViewHandler;
-import entity.Page;
-import entity.PageFilter;
 import entity.PageMapping;
 import entity.Site;
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import jsf.prettyfaces.PrettyConfigurationProvider.FilterType;
 import logging.Log;
 
 /**
@@ -54,31 +52,28 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     private void filterPages(FacesContext context) {
-        PageMapping pageMapping = PrettyConfigurationProvider.getPageMapping(context);
-        if (pageMapping != null) {
-            Page page = pageMapping.getPage();
-            if (page.isDisabled()) {
-                onPageDisabled(context);
+        String domain = context.getExternalContext().getRequestServerName();
+        Site site = Site.findSiteByDomain(getPageBean().getSites(), domain);
+        PageMapping mapping = PrettyConfigurationProvider.getPageMapping(context);
+        FilterType filterType = PrettyConfigurationProvider.getFilterType(site, mapping, getPageBean().getPageFilters());
+        if (filterType != null) {
+            switch (filterType) {
+                case PAGE_DISABLED:
+                    onPageDisabled(context);
+                    break;
+                case PAGE_UNKNOWN:
+                    onPageUnknown(context);
+                    break;
+                case SITE_DISABLED:
+                    onSiteDisabled(context, domain);
+                    break;
+                case SITE_FILTERED:
+                    onSiteFiltered(context, domain);
+                    break;
+                case SITE_UNKNOWN:
+                    onSiteUnknown(context, domain);
+                    break;
             }
-            else {
-                String domain = context.getExternalContext().getRequestServerName();
-                List<Site> sites = getPageBean().getSites();
-                Site site = Site.findSiteByDomain(sites, domain);
-                if (site == null) {
-                    if (page.isSiteDependent()) onSiteUnknown(context, domain);
-                }
-                else {
-                    if (site.isDisabled()) {
-                        onSiteDisabled(context, domain);
-                    }
-                    else if (PageFilter.isPageFiltered(getPageBean().getPageFilters(), site)) {
-                        onSiteFiltered(context, domain);
-                    }
-                }
-            }
-        }
-        else {
-            onPageUnknown(context);
         }
     }
     

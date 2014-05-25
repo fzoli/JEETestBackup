@@ -8,7 +8,9 @@ import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
 import entity.Language;
 import entity.Page;
+import entity.PageFilter;
 import entity.PageMapping;
+import entity.Site;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ import java.util.WeakHashMap;
 import javax.faces.context.FacesContext;
 import javax.faces.webapp.FacesServlet;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import logging.Log;
 
 /**
@@ -45,6 +48,68 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     static UrlMapping getCurrentMapping(FacesContext context) {
         return PrettyContext.getCurrentInstance(context).getCurrentMapping();
+    }
+    
+    enum FilterType {
+        PAGE_DISABLED, SITE_UNKNOWN, SITE_DISABLED, SITE_FILTERED, PAGE_UNKNOWN
+    }
+    
+    static FilterType getFilterType(Site site, PageMapping pageMapping, List<PageFilter> pageFilters) {
+        if (pageMapping != null) {
+            Page page = pageMapping.getPage();
+            if (page == null) {
+                return FilterType.PAGE_UNKNOWN;
+            }
+            else {
+                if (page.isDisabled()) {
+                    return FilterType.PAGE_DISABLED;
+                }
+                else {
+                    if (site == null) {
+                        if (page.isSiteDependent()) return FilterType.SITE_UNKNOWN;
+                    }
+                    else {
+                        if (site.isDisabled()) {
+                            return FilterType.SITE_DISABLED;
+                        }
+                        else if (PageFilter.isPageFiltered(pageFilters, site)) {
+                            return FilterType.SITE_FILTERED;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            return FilterType.PAGE_UNKNOWN;
+        }
+        return null;
+    }
+    
+    static PageMapping getFirstPage(HttpServletRequest request) {
+        String language = request.getLocale().getLanguage();
+        Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
+        List<Page> mainPages = pageBean.getPageTree().getOrderedChildren();
+        List<PageFilter> pageFilters = pageBean.getPageFilters();
+        for (Page page : mainPages) {
+            if (page == null || !page.getParameters().isEmpty()) continue;
+            List<PageMapping> mappings = page.getMappings();
+            if (mappings == null || mappings.isEmpty()) continue;
+            PageMapping pm = mappings.get(0);
+            for (PageMapping mapping : mappings) {
+                if (mapping == null || mapping.getLanguage() == null) continue;
+                if ("en".equalsIgnoreCase(mapping.getLanguage().getCode())) {
+                    pm = mapping;
+                }
+                if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {
+                    pm = mapping;
+                    break;
+                }
+            }
+            if (pm != null && PrettyConfigurationProvider.getFilterType(site, pm, pageFilters) == null) {
+                return pm;
+            }
+        }
+        return null;
     }
     
     /**
@@ -80,7 +145,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         return null;
     }
     
-    private static String stripPageRoot(String path) {
+    static String stripPageRoot(String path) {
         if (path == null) return null;
         if (path.startsWith(pageRoot)) path = path.substring(pageRoot.length());
         if (path.startsWith("/")) path = path.substring(1);

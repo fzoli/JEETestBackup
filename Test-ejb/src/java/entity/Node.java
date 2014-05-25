@@ -1,7 +1,10 @@
 package entity;
 
-import entity.spec.NodeObject;
 import entity.key.PrimaryLongObject;
+import entity.spec.NodeObject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -38,6 +41,9 @@ public class Node<NodeType extends Node, MappingType extends NodeMapping> extend
     
     @OneToMany(mappedBy = "node")
     private List<NodeMapping> mappings;
+    
+    @Column(name = "priority", nullable = false)
+    private int priority = 0;
     
     @Column(name = "disabled", nullable = false)
     private boolean disabled;
@@ -85,11 +91,31 @@ public class Node<NodeType extends Node, MappingType extends NodeMapping> extend
     public List<NodeType> getChildren() {
         return (List<NodeType>) children;
     }
-
+    
+    @Override
+    public List<NodeType> getOrderedChildren() {
+        List<NodeType> l = getChildren();
+        if (l != null) {
+            l = new ArrayList<>(l);
+            Collections.sort(l, COMPARATOR);
+        }
+        return l;
+    }
+    
     public List<MappingType> getMappings() {
         return (List<MappingType>) mappings;
     }
+
+    @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
     
+    @Override
     public boolean isDisabled() {
         return disabled;
     }
@@ -106,5 +132,17 @@ public class Node<NodeType extends Node, MappingType extends NodeMapping> extend
     public String getInfo() {
         return "Node(id=" + getId() + ", parent=" + (parent == null ? "null" : parent.getId()) + ")";
     }
+    
+    private final transient Comparator<NodeType> COMPARATOR = new Comparator<NodeType>() {
+
+        @Override
+        public int compare(NodeType o1, NodeType o2) {
+            if (o1 == null && o2 == null) return 0;
+            if (o1 == null && o2 != null) return -1;
+            if (o1 != null && o2 == null) return 1;
+            return Integer.compare(o1.getPriority(), o2.getPriority());
+        }
+
+    };
     
 }
