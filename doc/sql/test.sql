@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Hoszt: localhost
--- Létrehozás ideje: 2014. máj. 23. 01:43
+-- Létrehozás ideje: 2014. máj. 25. 21:41
 -- Szerver verzió: 5.5.37
 -- PHP verzió: 5.4.4-14+deb7u9
 
@@ -86,20 +86,22 @@ CREATE TABLE IF NOT EXISTS `nodes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `type` varchar(31) DEFAULT NULL,
   `disabled` tinyint(1) NOT NULL DEFAULT '0',
+  `priority` int(11) NOT NULL DEFAULT '0',
   `parent-id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_nodes_parent-id` (`parent-id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
 
 --
 -- A tábla adatainak kiíratása `nodes`
 --
 
-INSERT INTO `nodes` (`id`, `type`, `disabled`, `parent-id`) VALUES
-(1, 'page', 0, NULL),
-(2, 'page', 0, 1),
-(3, 'site', 0, NULL),
-(4, 'site', 0, NULL);
+INSERT INTO `nodes` (`id`, `type`, `disabled`, `priority`, `parent-id`) VALUES
+(1, 'page', 0, 0, NULL),
+(2, 'page', 0, 0, 1),
+(3, 'site', 0, 0, NULL),
+(4, 'site', 0, 0, NULL),
+(5, 'page', 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -145,7 +147,9 @@ CREATE TABLE IF NOT EXISTS `page-mappings` (
 INSERT INTO `page-mappings` (`name`, `pretty-name`, `node-id`, `language-code`) VALUES
 ('apple', NULL, 1, 'en'),
 ('alma', NULL, 1, 'hu'),
-('körte', NULL, 2, 'hu');
+('körte', NULL, 2, 'hu'),
+('nothing', NULL, 5, 'en'),
+('semmi', NULL, 5, 'hu');
 
 -- --------------------------------------------------------
 
@@ -165,8 +169,8 @@ CREATE TABLE IF NOT EXISTS `page-params` (
 --
 
 INSERT INTO `page-params` (`page-id`, `name`, `index`) VALUES
-(1, 'value1', 0),
-(1, 'value2', 1);
+(1, 'value1', 1),
+(1, 'value2', 0);
 
 -- --------------------------------------------------------
 
@@ -186,8 +190,9 @@ CREATE TABLE IF NOT EXISTS `pages` (
 --
 
 INSERT INTO `pages` (`id`, `view-path`, `site-dependent`) VALUES
-(1, 'home.xhtml', 0),
-(2, 'index.html', 0);
+(1, '/faces/home.xhtml', 0),
+(2, 'sample.xhtml', 0),
+(5, '/no-faces/sample.xhtml', 0);
 
 -- --------------------------------------------------------
 
@@ -232,16 +237,18 @@ INSERT INTO `site-mappings` (`title`, `node-id`, `language-code`) VALUES
 
 CREATE TABLE IF NOT EXISTS `sites` (
   `id` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`)
+  `home-page` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `home-page` (`home-page`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- A tábla adatainak kiíratása `sites`
 --
 
-INSERT INTO `sites` (`id`) VALUES
-(3),
-(4);
+INSERT INTO `sites` (`id`, `home-page`) VALUES
+(3, NULL),
+(4, 2);
 
 --
 -- Megkötések a kiírt táblákhoz
@@ -309,6 +316,7 @@ ALTER TABLE `site-mappings`
 -- Megkötések a táblához `sites`
 --
 ALTER TABLE `sites`
+  ADD CONSTRAINT `sites_ibfk_1` FOREIGN KEY (`home-page`) REFERENCES `pages` (`id`),
   ADD CONSTRAINT `FK_sites_id` FOREIGN KEY (`id`) REFERENCES `nodes` (`id`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

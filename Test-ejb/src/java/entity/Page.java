@@ -111,4 +111,22 @@ public class Page extends Node<Page, PageMapping> {
         return (!params && !strict) || (!params && (paramValues == null || paramValues.isEmpty())) || (params && paramValues != null && paramValues.size() == paramNames.size());
     }
     
+    public static PageMapping findPageMapping(Page page, String language, boolean skipParam) {
+        if (page == null || (skipParam && !page.getParameters().isEmpty()) || language == null) return null;
+        List<PageMapping> mappings = page.getMappings();
+        if (mappings == null || mappings.isEmpty()) return null;
+        PageMapping pm = mappings.get(0);
+        for (PageMapping mapping : mappings) {
+            if (mapping == null || mapping.getLanguage() == null) continue;
+            if ("en".equalsIgnoreCase(mapping.getLanguage().getCode())) {
+                pm = mapping;
+            }
+            if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {
+                pm = mapping;
+                break;
+            }
+        }
+        return pm;
+    }
+    
 }

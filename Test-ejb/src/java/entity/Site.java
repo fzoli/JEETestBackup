@@ -3,6 +3,7 @@ package entity;
 import java.util.List;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -21,12 +22,23 @@ public class Site extends Node<Site, SiteMapping> {
     @OneToMany(mappedBy = "site")
     private List<PageFilter> pageFilters;
     
+    @JoinColumn(name="home-page", nullable = true)
+    private Page homePage;
+    
     protected Site() {
         super();
     }
 
     protected Site(Site parent) {
         super(parent);
+    }
+
+    public Page getHomePage() {
+        return homePage;
+    }
+
+    public void setHomePage(Page homePage) {
+        this.homePage = homePage;
     }
 
     public List<Domain> getDomains() {

@@ -88,23 +88,15 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     static PageMapping getFirstPage(HttpServletRequest request) {
         String language = request.getLocale().getLanguage();
         Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
+        if (site == null) return null;
+        if (site.getHomePage() != null) {
+            PageMapping pm = Page.findPageMapping(site.getHomePage(), language, true);
+            if (pm != null) return pm;
+        }
         List<Page> mainPages = pageBean.getPageTree().getOrderedChildren();
         List<PageFilter> pageFilters = pageBean.getPageFilters();
         for (Page page : mainPages) {
-            if (page == null || !page.getParameters().isEmpty()) continue;
-            List<PageMapping> mappings = page.getMappings();
-            if (mappings == null || mappings.isEmpty()) continue;
-            PageMapping pm = mappings.get(0);
-            for (PageMapping mapping : mappings) {
-                if (mapping == null || mapping.getLanguage() == null) continue;
-                if ("en".equalsIgnoreCase(mapping.getLanguage().getCode())) {
-                    pm = mapping;
-                }
-                if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {
-                    pm = mapping;
-                    break;
-                }
-            }
+            PageMapping pm = Page.findPageMapping(page, language, true);
             if (pm != null && PrettyConfigurationProvider.getFilterType(site, pm, pageFilters) == null) {
                 return pm;
             }
