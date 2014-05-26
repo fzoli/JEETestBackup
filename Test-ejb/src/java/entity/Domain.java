@@ -62,6 +62,12 @@ public class Domain extends PrimaryStringObject<Domain> {
                 if (d.getDomain().equalsIgnoreCase(domain)) {
                     return d;
                 }
+                else if (d.getDomain().startsWith("*.")) {
+                    String s = d.getDomain().substring(2).toLowerCase();
+                    if (domain.toLowerCase().endsWith(s)) {
+                        return d;
+                    }
+                }
             }
         }
         return null;
