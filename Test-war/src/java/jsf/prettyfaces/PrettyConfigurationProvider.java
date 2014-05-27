@@ -195,7 +195,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         if (mappings == null || mappings.isEmpty()) return ls;
         
         String paramString = "";
-        for (String param : node.getParameters()) {
+        for (String param : node.getParameterNames()) {
             if (param == null || param.trim().isEmpty()) continue;
             paramString += "/#{" + param.trim() + "}";
         }

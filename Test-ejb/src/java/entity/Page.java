@@ -1,5 +1,6 @@
 package entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +8,8 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -22,14 +25,14 @@ import javax.persistence.Table;
 @DiscriminatorValue("page")
 public class Page extends Node<Page, PageMapping> {
     
+    @Embedded
     @ElementCollection
-    @Column(name="name", nullable = false)
     @OrderColumn(name="index", nullable = false)
     @CollectionTable(
         name="page-params",
         joinColumns=@JoinColumn(name="page-id", nullable = false)
     )
-    private List<String> parameters = new ArrayList<>();
+    private List<Parameter> parameters = new ArrayList<>();
     
     @OneToMany(mappedBy = "page")
     private List<PageFilter> pageFilters = new ArrayList<>();
@@ -39,6 +42,62 @@ public class Page extends Node<Page, PageMapping> {
     
     @Column(name="site-dependent", nullable=false)
     private boolean siteDependent;
+    
+    @Embeddable
+    public static class Parameter implements Serializable {
+        
+        @Column(name="name", nullable = false)
+        private String name;
+
+        @Column(name="action")
+        private String action;
+        
+        @Column(name="validator")
+        private String validator;
+
+        protected Parameter() {
+            this(null);
+        }
+        
+        public Parameter(String name) {
+            this(name, null);
+        }
+        
+        public Parameter(String name, String defaultValue) {
+            this(name, null, defaultValue, null);
+        }
+        
+        public Parameter(String name, String action, String defaultValue, String validator) {
+            this.name = name;
+            this.action = action;
+            this.validator = validator;
+        }
+        
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getAction() {
+            return action;
+        }
+
+        public void setAction(String action) {
+            this.action = action;
+        }
+
+        public String getValidator() {
+            return validator;
+        }
+
+        public void setValidator(String validator) {
+            this.validator = validator;
+        }
+        
+    }
     
     protected Page() {
     }
@@ -61,10 +120,21 @@ public class Page extends Node<Page, PageMapping> {
         super(children);
     }
 
-    public List<String> getParameters() {
+    public List<Parameter> getParameters() {
         return parameters;
     }
 
+    public List<String> getParameterNames() {
+        if (parameters != null) {
+            List<String> params = new ArrayList<>();
+            for (Parameter param : parameters) {
+                params.add(param == null ? null : param.getName());
+            }
+            return params;
+        }
+        return null;
+    }
+    
     public List<PageFilter> getPageFilters() {
         return pageFilters;
     }
@@ -72,7 +142,7 @@ public class Page extends Node<Page, PageMapping> {
     public boolean isSiteDependent() {
         return siteDependent;
     }
-
+    
     public void setSiteDependent(boolean siteDependent) {
         this.siteDependent = siteDependent;
     }
@@ -106,13 +176,17 @@ public class Page extends Node<Page, PageMapping> {
     }
     
     public boolean isParametersValid(List<String> paramValues, boolean strict) {
-        List<String> paramNames = getParameters();
+        List<String> paramNames = getParameterNames();
         boolean params = paramNames != null && !paramNames.isEmpty();
         return (!params && !strict) || (!params && (paramValues == null || paramValues.isEmpty())) || (params && paramValues != null && paramValues.size() == paramNames.size());
     }
     
+    public boolean isParametersEmpty() {
+        return parameters == null || parameters.isEmpty();
+    }
+    
     public static PageMapping findPageMapping(Page page, String language, boolean skipParam) {
-        if (page == null || (skipParam && !page.getParameters().isEmpty()) || language == null) return null;
+        if (page == null || (skipParam && !page.isParametersEmpty()) || language == null) return null;
         List<PageMapping> mappings = page.getMappings();
         if (mappings == null || mappings.isEmpty()) return null;
         PageMapping pm = mappings.get(0);

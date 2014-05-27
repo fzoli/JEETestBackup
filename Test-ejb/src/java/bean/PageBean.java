@@ -48,12 +48,12 @@ public class PageBean implements PageBeanLocal {
         
         List<Page> nodes = getPages(true);
         Page node = nodes.isEmpty() ? new Page("home.xhtml") : nodes.get(0);
-        List<String> params = node.getParameters();
+        List<Page.Parameter> params = node.getParameters();
         if (params.size() >= 2) {
             Collections.swap(params, 0, 1);
         }
         else {
-            params.add("value" + (params.size() + 1));
+            params.add(new Page.Parameter("value" + (params.size() + 1)));
         }
         manager.persist(node);
         
