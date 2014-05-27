@@ -4,6 +4,8 @@ import bean.PageBeanLocal;
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.PrettyConfig;
 import com.ocpsoft.pretty.faces.config.PrettyConfigurator;
+import com.ocpsoft.pretty.faces.config.mapping.PathValidator;
+import com.ocpsoft.pretty.faces.config.mapping.UrlAction;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
 import entity.Language;
@@ -194,31 +196,46 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         List<PageMapping> mappings = node.getMappings();
         if (mappings == null || mappings.isEmpty()) return ls;
         
+        int index = 0;
         String paramString = "";
-        for (String param : node.getParameterNames()) {
+        List<PathValidator> validators = new ArrayList<>();
+        for (Page.Parameter p : node.getParameters()) {
+            if (p == null) continue;
+            String param = p.getValue();
+            String validator = p.getValidator();
             if (param == null || param.trim().isEmpty()) continue;
             paramString += "/#{" + param.trim() + "}";
+            if (validator != null && !validator.trim().isEmpty()) {
+                PathValidator pv = new PathValidator();
+                pv.setIndex(index);
+                pv.setValidatorIds(validator);
+                validators.add(pv);
+            }
+            index++;
         }
         
         for (PageMapping mapping : mappings) {
             String link = mapping.getPermalink();
             Language lng = mapping.getLanguage();
+            String action = mapping.getPage().getAction();
             if (link == null || lng == null || lng.getCode() == null) continue;
             link += paramString;
             String id = mapping.getLanguage().getCode() + node.getId();
             LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
-            createMapping(ls, mapping, id, link, view);
-            createMapping(ls, mapping, id, link + '/', view);
+            createMapping(ls, mapping, id, link, view, action, validators);
+            createMapping(ls, mapping, id, link + '/', view, action, validators);
         }
 
         return ls;
     }
     
-    private static void createMapping(List<UrlMapping> ls, PageMapping mapping, String id, String link, String view) {
+    private static void createMapping(List<UrlMapping> ls, PageMapping mapping, String id, String link, String view, String action, List<PathValidator> validators) {
         UrlMapping map = new UrlMapping();
         map.setId(id);
         map.setPattern(link);
         map.setViewId(view);
+        if (action != null && !action.isEmpty()) map.addAction(new UrlAction(action));
+        if (!validators.isEmpty()) map.setPathValidators(validators);
         ls.add(map);
         NODES.put(map, mapping);
     }

@@ -7,6 +7,7 @@ sebezhetőség:
 - a nem pretty url-ek se legyenek elérhetőek + a generált kimenetben a nem pretty url-ek cserélődjenek le pretty url-re
 
 fejlesztés:
+- page parameter validator to source code
 - ha nincs alapértelmezett oldal, mert mondjuk 1 oldal sincs a rendszerben,
   jó lenne egy alapértelmezett oldal, ami ezt jelzi és mutat linket a CMS oldalra
 - locale display language helyett adatbázisban használt érték (nagy betűvel kezdve)

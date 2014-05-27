@@ -159,9 +159,9 @@ INSERT INTO `page-mappings` (`name`, `pretty-name`, `node-id`, `language-code`) 
 
 CREATE TABLE IF NOT EXISTS `page-params` (
   `page-id` bigint(20) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
   `index` int(11) NOT NULL,
-  `action` varchar(255) DEFAULT NULL,
+  `bean-variable` varchar(255) DEFAULT NULL,
   `validator` varchar(255) DEFAULT NULL,
   KEY `page-id` (`page-id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -183,6 +183,7 @@ INSERT INTO `page-params` (`page-id`, `name`, `index`) VALUES
 CREATE TABLE IF NOT EXISTS `pages` (
   `id` bigint(20) NOT NULL,
   `view-path` varchar(255) NOT NULL,
+  `action` varchar(255) DEFAULT NULL,
   `site-dependent` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

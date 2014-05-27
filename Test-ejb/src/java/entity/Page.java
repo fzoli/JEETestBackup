@@ -43,14 +43,17 @@ public class Page extends Node<Page, PageMapping> {
     @Column(name="site-dependent", nullable=false)
     private boolean siteDependent;
     
+    @Column(name="action")
+    private String action;
+    
     @Embeddable
     public static class Parameter implements Serializable {
         
-        @Column(name="name", nullable = false)
+        @Column(name="name")
         private String name;
-
-        @Column(name="action")
-        private String action;
+        
+        @Column(name="bean-variable")
+        private String beanVariable;
         
         @Column(name="validator")
         private String validator;
@@ -63,14 +66,27 @@ public class Page extends Node<Page, PageMapping> {
             this(name, null);
         }
         
-        public Parameter(String name, String defaultValue) {
-            this(name, null, defaultValue, null);
+        public Parameter(String name, String beanVariable) {
+            this(name, beanVariable, null);
         }
         
-        public Parameter(String name, String action, String defaultValue, String validator) {
+        private Parameter(String name, String beanVariable, String validator) {
             this.name = name;
-            this.action = action;
+            this.beanVariable = beanVariable;
             this.validator = validator;
+        }
+        
+        public boolean isInvalid() {
+            return getValue() == null;
+        }
+        
+        public String getValue() {
+            if (name == null && beanVariable == null) return null;
+            String value = name == null ? "" : name;
+            if (name != null && beanVariable != null) value += " : ";
+            if (beanVariable != null) value += beanVariable;
+            if (value.trim().isEmpty()) return null;
+            return value;
         }
         
         public String getName() {
@@ -81,12 +97,12 @@ public class Page extends Node<Page, PageMapping> {
             this.name = name;
         }
 
-        public String getAction() {
-            return action;
+        public String getBeanVariable() {
+            return beanVariable;
         }
 
-        public void setAction(String action) {
-            this.action = action;
+        public void setBeanVariable(String beanVariable) {
+            this.beanVariable = beanVariable;
         }
 
         public String getValidator() {
@@ -124,15 +140,25 @@ public class Page extends Node<Page, PageMapping> {
         return parameters;
     }
 
-    public List<String> getParameterNames() {
+    public List<String> getParameterNames(boolean asValue) {
         if (parameters != null) {
             List<String> params = new ArrayList<>();
             for (Parameter param : parameters) {
-                params.add(param == null ? null : param.getName());
+                params.add(param == null ? null : (asValue ? param.getValue() : param.getName()));
             }
             return params;
         }
         return null;
+    }
+
+    @Override
+    public boolean isDisabled() {
+        if (parameters != null) {
+            for (Parameter param : parameters) {
+                if (param == null || param.isInvalid()) return true;
+            }
+        }
+        return super.isDisabled();
     }
     
     public List<PageFilter> getPageFilters() {
@@ -145,6 +171,14 @@ public class Page extends Node<Page, PageMapping> {
     
     public void setSiteDependent(boolean siteDependent) {
         this.siteDependent = siteDependent;
+    }
+    
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
     }
     
     public String getViewPath() {
@@ -176,7 +210,7 @@ public class Page extends Node<Page, PageMapping> {
     }
     
     public boolean isParametersValid(List<String> paramValues, boolean strict) {
-        List<String> paramNames = getParameterNames();
+        List<String> paramNames = getParameterNames(true);
         boolean params = paramNames != null && !paramNames.isEmpty();
         return (!params && !strict) || (!params && (paramValues == null || paramValues.isEmpty())) || (params && paramValues != null && paramValues.size() == paramNames.size());
     }
