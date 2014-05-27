@@ -161,6 +161,8 @@ CREATE TABLE IF NOT EXISTS `page-params` (
   `page-id` bigint(20) NOT NULL,
   `name` varchar(255) NOT NULL,
   `index` int(11) NOT NULL,
+  `action` varchar(255) DEFAULT NULL,
+  `validator` varchar(255) DEFAULT NULL,
   KEY `page-id` (`page-id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

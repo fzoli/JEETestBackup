@@ -1,5 +1,5 @@
 bug:
-- a PrettyFaces újratöltése után nem frissül jól a konfiguráció 
+- a PrettyFaces újratöltése után nem frissül jól a konfiguráció
 - a PrettyHomeServlet a nem JSF oldalakat is tiltja
 
 sebezhetőség:
