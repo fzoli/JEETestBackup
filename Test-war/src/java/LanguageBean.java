@@ -24,6 +24,7 @@ public class LanguageBean implements Serializable{
 	static{
 		countries = new LinkedHashMap<String,Object>();
 		countries.put("English", Locale.ENGLISH); //label, value
+                countries.put("Hungarian", new Locale("hu","HU"));
 		countries.put("Chinese", Locale.SIMPLIFIED_CHINESE);
 	}
  
@@ -36,9 +37,13 @@ public class LanguageBean implements Serializable{
 		return localeCode;
 	}
  
- 
+        public void test() {
+            System.out.println("language bean test method");
+        }
+        
 	public void setLocaleCode(String localeCode) {
-		this.localeCode = localeCode;
+            System.out.println("set locale code: " + localeCode);
+            this.localeCode = localeCode;
 	}
  
 	//value change event listener

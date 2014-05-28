@@ -234,7 +234,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         map.setId(id);
         map.setPattern(link);
         map.setViewId(view);
-        if (action != null && !action.isEmpty()) map.addAction(new UrlAction(action));
+        if (action != null && !action.isEmpty()) map.addAction(new UrlAction("#{" + action + "}"));
         if (!validators.isEmpty()) map.setPathValidators(validators);
         ls.add(map);
         NODES.put(map, mapping);
