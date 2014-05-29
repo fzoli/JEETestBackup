@@ -46,6 +46,9 @@ public class Page extends Node<Page, PageMapping> {
     @Column(name="action")
     private String action;
     
+    @Column(name="action-inherited", nullable = false)
+    private boolean actionInherited;
+    
     @Embeddable
     public static class Parameter implements Serializable {
         
@@ -180,6 +183,14 @@ public class Page extends Node<Page, PageMapping> {
     public void setAction(String action) {
         this.action = action;
     }
+
+    public boolean isActionInherited() {
+        return actionInherited;
+    }
+
+    public void setActionInherited(boolean actionInherited) {
+        this.actionInherited = actionInherited;
+    }
     
     public String getViewPath() {
         return getViewPath(null);
@@ -195,6 +206,17 @@ public class Page extends Node<Page, PageMapping> {
 
     public void setViewPath(String viewPath) {
         this.viewPath = viewPath;
+    }
+    
+    public List<String> getActions() {
+        List<String> l = new ArrayList<>();
+        for (Page p : getWay(true)) {
+            String a = p.getAction();
+            if (p == this || p.isActionInherited()) {
+                if (a != null && !a.trim().isEmpty()) l.add(a);
+            }
+        }
+        return l;
     }
     
     public List<Page> getWay(boolean fromRoot) {

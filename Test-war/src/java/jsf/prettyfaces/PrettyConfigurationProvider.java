@@ -217,24 +217,26 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         for (PageMapping mapping : mappings) {
             String link = mapping.getPermalink();
             Language lng = mapping.getLanguage();
-            String action = mapping.getPage().getAction();
+            List<String> actions = mapping.getPage().getActions();
             if (link == null || lng == null || lng.getCode() == null) continue;
             link += paramString;
             String id = mapping.getLanguage().getCode() + node.getId();
             LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
-            createMapping(ls, mapping, id, link, view, action, validators);
-            createMapping(ls, mapping, id, link + '/', view, action, validators);
+            createMapping(ls, mapping, id, link, view, actions, validators);
+            createMapping(ls, mapping, id, link + '/', view, actions, validators);
         }
 
         return ls;
     }
     
-    private static void createMapping(List<UrlMapping> ls, PageMapping mapping, String id, String link, String view, String action, List<PathValidator> validators) {
+    private static void createMapping(List<UrlMapping> ls, PageMapping mapping, String id, String link, String view, List<String> actions, List<PathValidator> validators) {
         UrlMapping map = new UrlMapping();
         map.setId(id);
         map.setPattern(link);
         map.setViewId(view);
-        if (action != null && !action.isEmpty()) map.addAction(new UrlAction("#{" + action + "}"));
+        if (actions != null) for (String action : actions) {
+            map.addAction(new UrlAction("#{" + action + "}"));
+        }
         if (!validators.isEmpty()) map.setPathValidators(validators);
         ls.add(map);
         NODES.put(map, mapping);
