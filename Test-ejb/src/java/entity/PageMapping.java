@@ -1,6 +1,5 @@
 package entity;
 
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -53,30 +52,27 @@ public class PageMapping extends NodeMapping<Page> {
         this.prettyName = prettyName;
     }
     
+    public String getPrettyName(Page page) {
+        if (getLanguage() == null || getLanguage().getCode() == null) return null;
+        PageMapping pm = Page.findPageMapping(page, getLanguage().getCode(), false);
+        if (pm == null) return null;
+        String pn = pm.getPrettyName();
+        if (pn == null || pn.isEmpty()) return null;
+        return pn;
+    }
+    
     public String getPermalink() {
-        String link = Strings.join(getPage().getWay(true), "/", new Strings.Formatter<Page>() {
-
-            @Override
-            public String toString(Page node) {
-                if (getLanguage() == null || getLanguage().getCode() == null) return null;
-                List<PageMapping> mappings = node.getMappings();
-                if (mappings == null) return null;
-                PageMapping pm = null;
-                for (PageMapping mapping : mappings) {
-                    if (mapping == null) continue;
-                    if (getLanguage().equals(mapping.getLanguage())) {
-                        pm = mapping;
-                        break;
-                    }
-                }
-                if (pm == null) return null;
-                String pn = pm.getPrettyName();
-                if (pn == null || pn.isEmpty()) return null;
-                return pn;
-            }
-            
-        });
+        String link = Strings.join(getPage().getWay(true), "/", FORMATTER);
         return link.startsWith("/") ? link : "/" + link;
     }
+    
+    private final transient Strings.Formatter<Page> FORMATTER = new Strings.Formatter<Page>() {
+
+        @Override
+        public String toString(Page page) {
+            return getPrettyName(page);
+        }
+
+    };
     
 }
