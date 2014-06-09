@@ -50,7 +50,7 @@ public class PageBean implements PageBeanLocal {
         Page node = nodes.isEmpty() ? new Page("home.xhtml") : nodes.get(0);
         List<Page.Parameter> params = node.getParameters();
         if (params.size() >= 2) {
-            Collections.swap(params, 0, 1);
+            Collections.swap(params, 0, 1); // TODO: it has no effect when persist
         }
         else {
             params.add(new Page.Parameter("value" + (params.size() + 1)));

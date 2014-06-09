@@ -3,23 +3,93 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://java.sun.com/jsf/facelets">
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
     <h:head>
         <title><ui:insert name="title">Facelet Title</ui:insert></title>
+        <h:outputStylesheet library="css" name="style.css" />
     </h:head>
     <h:body>
-        <h1><ui:insert name="content">Hello from Facelets</ui:insert></h1>
-        <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
-        <h3>
-            <h:form>
-                <h:panelGrid columns="2">
-                        Language: 
-                        <h:selectOneMenu value="#{language.localeCode}" onchange="submit()"
-                                valueChangeListener="#{language.countryLocaleCodeChanged}">
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" resizable="false" closable="false" collapsible="false">
+                
+                <h:form>
+                    <p:menubar>
+                        <p:submenu label="File" icon="ui-icon-document">
+                            <p:submenu label="New" icon="ui-icon-contact">
+                                <p:menuitem value="Project" url="#" />
+                                <p:menuitem value="Other" url="#" />
+                            </p:submenu>
+                            <p:menuitem value="Open" url="#" />
+                            <p:separator />
+                            <p:menuitem value="Quit" url="#" />
+                        </p:submenu>
+
+                        <p:submenu label="Edit" icon="ui-icon-pencil">
+                            <p:menuitem value="Undo" url="#" icon="ui-icon-arrowreturnthick-1-w" />
+                            <p:menuitem value="Redo" url="#" icon="ui-icon-arrowreturnthick-1-e" />
+                        </p:submenu>
+
+                        <p:submenu label="Help" icon="ui-icon-help">
+                            <p:menuitem value="Contents" url="#" />
+                            <p:submenu label="Search" icon="ui-icon-search">
+                                <p:submenu label="Text">
+                                    <p:menuitem value="Workspace" url="#" />
+                                </p:submenu>
+                                <p:menuitem value="File" url="#" />
+                            </p:submenu>
+                        </p:submenu>
+
+                        <p:menuitem value="Quit" url="http://www.primefaces.org" icon="ui-icon-close" />
+
+                        <f:facet name="options">
+                            <p:selectOneMenu value="#{language.localeCode}"
+                                             valueChangeListener="#{language.countryLocaleCodeChanged}"
+                                             onchange="window.location.reload();">
                                 <f:selectItems value="#{language.countriesInMap}" />
-                        </h:selectOneMenu>
-                </h:panelGrid>
-            </h:form>
-        </h3>
+                                <p:ajax update="@this" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                        
+                    </p:menubar>
+                </h:form>
+                
+                <p:breadCrumb style="margin-top: 5px">
+                    <p:menuitem value="Categories" url="#" />
+                    <p:menuitem value="Sports" url="#" />
+                    <p:menuitem value="Basketball" url="#" />
+                    <p:menuitem value="NBA" url="#" />
+                    <p:menuitem value="Teams" url="#" />
+                    <p:menuitem value="L.A. Lakers" url="#" />
+                    <p:menuitem value="Roster" url="#" />
+                    <p:menuitem value="Kobe Bryant" url="#" />
+                </p:breadCrumb>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="west" size="200" header="Left" resizable="true" closable="false" collapsible="true">
+                <h:outputText value="West unit content." />
+            </p:layoutUnit>
+
+            <p:layoutUnit position="center">
+                <h1><ui:insert name="content">Hello from Facelets</ui:insert></h1>
+                <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
+                <h3>
+                    <h:form>
+                        <h:panelGrid columns="2">
+                                Language:
+                                <p:selectOneMenu value="#{language.localeCode}"
+                                                 valueChangeListener="#{language.countryLocaleCodeChanged}"
+                                                 onchange="window.location.reload();">
+                                    <f:selectItem noSelectionOption="true" itemLabel="Please select" />
+                                    <f:selectItems value="#{language.countriesInMap}" />
+                                    <p:ajax update="@this" />
+                                </p:selectOneMenu>
+                        </h:panelGrid>
+                    </h:form>
+                </h3>
+            </p:layoutUnit>
+
+        </p:layout>
     </h:body>
 </html>

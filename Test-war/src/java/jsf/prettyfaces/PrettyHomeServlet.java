@@ -31,7 +31,7 @@ public class PrettyHomeServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
             else {
-                response.sendRedirect(request.getContextPath() + mapping.getPermalink());
+                response.sendRedirect(request.getContextPath() + mapping.getPermalink(""));
             }
         }
     }

@@ -57,6 +57,10 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     }
     
     static FilterType getFilterType(Site site, PageMapping pageMapping, List<PageFilter> pageFilters) {
+        return getFilterType(false, site, pageMapping, pageFilters);
+    }
+    
+    private static FilterType getFilterType(boolean skipSiteChk, Site site, PageMapping pageMapping, List<PageFilter> pageFilters) {
         if (pageMapping != null) {
             Page page = pageMapping.getPage();
             if (page == null) {
@@ -68,7 +72,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
                 }
                 else {
                     if (site == null) {
-                        if (page.isSiteDependent()) return FilterType.SITE_UNKNOWN;
+                        if (!skipSiteChk && page.isSiteDependent()) return FilterType.SITE_UNKNOWN;
                     }
                     else {
                         if (site.isDisabled()) {
@@ -90,17 +94,30 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     static PageMapping getFirstPage(HttpServletRequest request) {
         String language = request.getLocale().getLanguage();
         Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
+        return getFirstPage(site, language);
+    }
+    
+    private static PageMapping getFirstPage(Site site, String language) {
         if (site == null) return null;
         if (site.getHomePage() != null) {
             PageMapping pm = Page.findPageMapping(site.getHomePage(), language, true);
             if (pm != null) return pm;
         }
-        List<Page> mainPages = pageBean.getPageTree().getOrderedChildren();
+        return getFirstPage(site, pageBean.getPageTree(), language);
+    }
+    
+    static PageMapping getFirstPage(Site site, Page page, String language) {
+        return getFirstPage(false, site, page, language);
+    }
+    
+    private static PageMapping getFirstPage(boolean skipSiteChk, Site site, Page page, String language) {
+        List<Page> pages = page.getOrderedChildren();
         List<PageFilter> pageFilters = pageBean.getPageFilters();
-        for (Page page : mainPages) {
-            PageMapping pm = Page.findPageMapping(page, language, true);
-            if (pm != null && PrettyConfigurationProvider.getFilterType(site, pm, pageFilters) == null) {
-                return pm;
+        for (Page p : pages) {
+            PageMapping pm = Page.findPageMapping(p, language, true);
+            if (pm != null && PrettyConfigurationProvider.getFilterType(skipSiteChk, site, pm, pageFilters) == null) {
+                if (p.getViewPath() != null) return pm;
+                return getFirstPage(skipSiteChk, site, p, language);
             }
         }
         return null;
@@ -110,7 +127,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
      * Returns the pretty URL.
      * WARNING: This method returns the first match!
      */
-    static String findPrettyURL(String viewId, Locale locale, List<String> paramValues) {
+    static String findPrettyURL(String viewId, Locale locale, String requestUri) {
         if (pageRoot == null || locale == null || viewId == null) return null;
         viewId = stripPageRoot(viewId);
         String language = locale.getLanguage();
@@ -120,19 +137,12 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             PageMapping mapping = e.getValue();
             if (mapping.getLanguage() == null || mapping.getPage() == null) continue;
             Page page = mapping.getPage();
-            if (language.equalsIgnoreCase(mapping.getLanguage().getCode()) && page.isParametersValid(paramValues, true)) {
+            if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {
                 String path = page.getViewPath();
                 if (!isPathJSF(path)) continue;
                 path = stripPageRoot(path);
                 if (viewId.equals(path)) {
-                    StringBuilder prettyURL = new StringBuilder(pageRoot + mapping.getPermalink());
-                    if (paramValues != null) {
-                        for (String paramValue : paramValues) {
-                            if (paramValue == null || paramValue.trim().isEmpty()) continue;
-                            prettyURL.append('/').append(paramValue);
-                        }
-                    }
-                    return prettyURL.toString();
+                    return pageRoot + mapping.getPermalink(requestUri);
                 }
             }
         }
@@ -191,36 +201,44 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         if (node.getId() == null) return ls;
         
         String view = node.getViewPath(pageRoot);
-        if (view == null) return ls;
+        boolean findParentView = view == null;
         
         List<PageMapping> mappings = node.getMappings();
         if (mappings == null || mappings.isEmpty()) return ls;
         
         int index = 0;
-        String paramString = "";
         List<PathValidator> validators = new ArrayList<>();
-        for (Page.Parameter p : node.getParameters()) {
-            if (p == null) continue;
-            String param = p.getValue();
-            String validator = p.getValidator();
-            if (param == null || param.trim().isEmpty()) continue;
-            paramString += "/#{" + param.trim() + "}";
-            if (validator != null && !validator.trim().isEmpty()) {
-                PathValidator pv = new PathValidator();
-                pv.setIndex(index);
-                pv.setValidatorIds(validator);
-                validators.add(pv);
+        List<String> paramNames = new ArrayList<>();
+        for (Page pg : node.getWay(true)) {
+            for (Page.Parameter p : pg.getParameters()) {
+                if (p == null) continue;
+                String name = p.getName();
+                String param = p.getValue();
+                String validator = p.getValidator();
+                if (param == null || param.trim().isEmpty()) continue;
+                if (paramNames.contains(name)) throw new IllegalArgumentException("duplicated parameter name - " + name);
+                paramNames.add(name);
+                if (validator != null && !validator.trim().isEmpty()) {
+                    PathValidator pv = new PathValidator();
+                    pv.setIndex(index);
+                    pv.setValidatorIds(validator);
+                    validators.add(pv);
+                }
+                index++;
             }
-            index++;
         }
         
         for (PageMapping mapping : mappings) {
-            String link = mapping.getPermalink();
+            String link = mapping.getPermalink(new PrettyPageFormatter(mapping));
             Language lng = mapping.getLanguage();
             List<String> actions = mapping.getPage().getActions();
             if (link == null || lng == null || lng.getCode() == null) continue;
-            link += paramString;
             String id = mapping.getLanguage().getCode() + node.getId();
+            if (findParentView) {
+                PageMapping parentMapping = getFirstPage(true, null, node, lng.getCode());
+                if (parentMapping == null) continue;
+                view = parentMapping.getPage().getViewPath(pageRoot);
+            }
             LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
             createMapping(ls, mapping, id, link, view, actions, validators);
             createMapping(ls, mapping, id, link + '/', view, actions, validators);
@@ -240,6 +258,23 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         if (!validators.isEmpty()) map.setPathValidators(validators);
         ls.add(map);
         NODES.put(map, mapping);
+    }
+    
+    private static class PrettyPageFormatter extends PageMapping.PageFormatter {
+
+        public PrettyPageFormatter(PageMapping mapping) {
+            super(mapping, null);
+        }
+
+        @Override
+        protected String getParameterString(Page page) {
+            String ps = "";
+            for (Page.Parameter p : page.getParameters()) {
+                ps += "/#{" + p.getName() + "}";
+            }
+            return ps;
+        }
+        
     }
     
 }

@@ -4,7 +4,6 @@ import bean.PageBeanLocal;
 import com.sun.faces.application.view.MultiViewHandler;
 import entity.PageMapping;
 import entity.Site;
-import java.io.IOException;
 import java.util.Locale;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
@@ -30,7 +29,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     
     @Override
     public UIViewRoot createView(FacesContext context, String viewId) {
-        filterPages(context);
+        if (!filterPages(context)) redirectIfNeed(context);
         return super.createView(context, viewId);
     }
 
@@ -51,7 +50,22 @@ public class PrettyViewHandler extends MultiViewHandler {
         return pageMapping == null ? locale : pageMapping.getLanguage().getLocale(locale);
     }
     
-    private void filterPages(FacesContext context) {
+    private void redirectIfNeed(FacesContext context) {
+        PageMapping mapping = PrettyConfigurationProvider.getPageMapping(context);
+        if (mapping != null && mapping.getPage() != null && mapping.getLanguage() != null) {
+            if (mapping.getPage().getViewPath() == null) {
+                PageMapping firstPage = PrettyConfigurationProvider.getFirstPage(Site.findSiteByDomain(getPageBean().getSites(), context.getExternalContext().getRequestServerName()), mapping.getPage(), mapping.getLanguage().getCode());
+                try {
+                    context.getExternalContext().redirect(context.getExternalContext().getApplicationContextPath() + firstPage.getPermalink(""));
+                }
+                catch (Exception ex) { // no first page or redirect error
+                    LOGGER.e("redirect failed", ex);
+                }
+            }
+        }
+    }
+    
+    private boolean filterPages(FacesContext context) {
         String domain = context.getExternalContext().getRequestServerName();
         Site site = Site.findSiteByDomain(getPageBean().getSites(), domain);
         PageMapping mapping = PrettyConfigurationProvider.getPageMapping(context);
@@ -74,7 +88,9 @@ public class PrettyViewHandler extends MultiViewHandler {
                     onSiteUnknown(context, domain);
                     break;
             }
+            return true;
         }
+        return false;
     }
     
     protected String getRealRequestURI(FacesContext context, boolean stripAppContext) {
@@ -98,11 +114,11 @@ public class PrettyViewHandler extends MultiViewHandler {
     
     @Override
     protected void send404Error(FacesContext context) {
-        context.getExternalContext().setResponseStatus(404);
         try {
+            context.getExternalContext().setResponseStatus(404);
             ((HttpServletResponse) context.getExternalContext().getResponse()).sendError(HttpServletResponse.SC_NOT_FOUND);
         }
-        catch (IOException ex) {
+        catch (Exception ex) { // IllegalState vagy IOException
             LOGGER.e("404 error failed", ex);
         }
         context.responseComplete();
