@@ -47,6 +47,9 @@ public class Page extends Node<Page, PageMapping> {
     @Column(name="action")
     private String action;
     
+    @Column(name="view-path-generated", nullable = false)
+    private boolean viewPathGenerated;
+    
     @Column(name="action-inherited", nullable = false)
     private boolean actionInherited;
     
@@ -183,6 +186,16 @@ public class Page extends Node<Page, PageMapping> {
 
     @Override
     public boolean isDisabled() {
+        for (Page p : getWay(false)) {
+            if (p.isPageDisabled()) return true;
+        }
+        return false;
+    }
+    
+    private boolean isPageDisabled() {
+        if (isNameInvalid()) {
+            return true;
+        }
         if (parameters != null) {
             for (Parameter param : parameters) {
                 if (param == null || param.isInvalid(this)) return true;
@@ -209,6 +222,18 @@ public class Page extends Node<Page, PageMapping> {
 
     public void setAction(String action) {
         this.action = action;
+    }
+
+    public boolean isNameInvalid() {
+        return isViewPathGenerated() && getViewPath() == null;
+    }
+    
+    public boolean isViewPathGenerated() {
+        return viewPathGenerated;
+    }
+
+    public void setViewPathGenerated(boolean viewPathGenerated) {
+        this.viewPathGenerated = viewPathGenerated;
     }
 
     public boolean isActionInherited() {

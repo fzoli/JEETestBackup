@@ -201,12 +201,21 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         }
     }
     
+    private static String getViewPath(Page node) {
+        if (node.isViewPathGenerated()) {
+            String vp = node.getViewPath();
+            if (vp == null) return null;
+            return "#{" + vp + "}";
+        }
+        return node.getViewPath(pageRoot);
+    }
+    
     private static List<UrlMapping> createMappings(Page node) {
         List<UrlMapping> ls = new ArrayList<>();
         
-        if (node.getId() == null) return ls;
+        if (node.getId() == null || node.isDisabled()) return ls;
         
-        String view = node.getViewPath(pageRoot);
+        String view = getViewPath(node);
         boolean findParentView = view == null;
         
         List<PageMapping> mappings = node.getMappings();
@@ -242,7 +251,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (findParentView) {
                 PageMapping parentMapping = getFirstPage(true, null, node, lng.getCode(), null);
                 if (parentMapping == null) continue;
-                view = parentMapping.getPage().getViewPath(pageRoot);
+                view = getViewPath(parentMapping.getPage());
             }
             int paramCount = mapping.getPage().getParameters().size();
             for (int paramLimit = mapping.getPage().isParameterIncremented() ? 0 : paramCount; paramLimit <= paramCount; paramLimit++) {
