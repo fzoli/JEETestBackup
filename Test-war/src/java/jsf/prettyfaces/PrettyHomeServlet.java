@@ -1,8 +1,11 @@
 package jsf.prettyfaces;
 
+import bean.PageBeanLocal;
 import entity.PageMapping;
+import entity.Site;
 import java.io.File;
 import java.io.IOException;
+import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,8 +20,13 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "PrettyHomeServlet", urlPatterns = {"/"})
 public class PrettyHomeServlet extends HttpServlet {
     
+    @EJB
+    private PageBeanLocal pageBean;
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        PageMapping mapping = PrettyConfigurationProvider.getFirstPage(request);
+        Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
+        String defLanguage = site != null ? (site.getDefLanguage() != null ? site.getDefLanguage().getCode() : "en") : "en";
+        PageMapping mapping = PrettyConfigurationProvider.getFirstPage(request, defLanguage);
         if (mapping == null) {
             // TODO:
             // - allow non-JSF pages

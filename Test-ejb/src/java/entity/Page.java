@@ -273,14 +273,14 @@ public class Page extends Node<Page, PageMapping> {
         }
     }
     
-    public static PageMapping findPageMapping(Page page, String language, boolean skipParam) {
+    public static PageMapping findPageMapping(Page page, String language, String defLanguage, boolean skipParam) {
         if (page == null || (skipParam && page.isParameterRequired(true)) || language == null) return null;
         List<PageMapping> mappings = page.getMappings();
         if (mappings == null || mappings.isEmpty()) return null;
         PageMapping pm = mappings.get(0);
         for (PageMapping mapping : mappings) {
             if (mapping == null || mapping.getLanguage() == null) continue;
-            if ("en".equalsIgnoreCase(mapping.getLanguage().getCode())) {
+            if (defLanguage != null && defLanguage.equalsIgnoreCase(mapping.getLanguage().getCode())) {
                 pm = mapping;
             }
             if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {

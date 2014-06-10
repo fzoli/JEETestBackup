@@ -25,6 +25,9 @@ public class Site extends Node<Site, SiteMapping> {
     @JoinColumn(name="home-page", nullable = true)
     private Page homePage;
     
+    @JoinColumn(name="def-lang", nullable = true)
+    private Language defLanguage;
+    
     protected Site() {
         super();
     }
@@ -39,6 +42,14 @@ public class Site extends Node<Site, SiteMapping> {
 
     public void setHomePage(Page homePage) {
         this.homePage = homePage;
+    }
+
+    public Language getDefLanguage() {
+        return defLanguage;
+    }
+
+    public void setDefLanguage(Language defLanguage) {
+        this.defLanguage = defLanguage;
     }
 
     public List<Domain> getDomains() {

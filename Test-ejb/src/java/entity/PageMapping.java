@@ -112,7 +112,7 @@ public class PageMapping extends NodeMapping<Page> {
         
         private String getPrettyName(Page page) {
             if (getLanguage() == null || getLanguage().getCode() == null) return null;
-            PageMapping pm = Page.findPageMapping(page, getLanguage().getCode(), false);
+            PageMapping pm = Page.findPageMapping(page, getLanguage().getCode(), null, false);
             if (pm == null) return null;
             String pn = pm.getPrettyName();
             if (pn == null || pn.isEmpty()) return null;

@@ -91,33 +91,33 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         return null;
     }
     
-    static PageMapping getFirstPage(HttpServletRequest request) {
+    static PageMapping getFirstPage(HttpServletRequest request, String defLanguage) {
         String language = request.getLocale().getLanguage();
         Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
-        return getFirstPage(site, language);
+        return getFirstPage(site, language, defLanguage);
     }
     
-    private static PageMapping getFirstPage(Site site, String language) {
+    private static PageMapping getFirstPage(Site site, String language, String defLanguage) {
         if (site == null) return null;
         if (site.getHomePage() != null) {
-            PageMapping pm = Page.findPageMapping(site.getHomePage(), language, true);
+            PageMapping pm = Page.findPageMapping(site.getHomePage(), language, defLanguage, true);
             if (pm != null) return pm;
         }
-        return getFirstPage(site, pageBean.getPageTree(), language);
+        return getFirstPage(site, pageBean.getPageTree(), language, defLanguage);
     }
     
-    static PageMapping getFirstPage(Site site, Page page, String language) {
-        return getFirstPage(false, site, page, language);
+    static PageMapping getFirstPage(Site site, Page page, String language, String defLanguage) {
+        return getFirstPage(false, site, page, language, defLanguage);
     }
     
-    private static PageMapping getFirstPage(boolean skipSiteChk, Site site, Page page, String language) {
+    private static PageMapping getFirstPage(boolean skipSiteChk, Site site, Page page, String language, String defLanguage) {
         List<Page> pages = page.getOrderedChildren();
         List<PageFilter> pageFilters = pageBean.getPageFilters();
         for (Page p : pages) {
-            PageMapping pm = Page.findPageMapping(p, language, true);
+            PageMapping pm = Page.findPageMapping(p, language, defLanguage, true);
             if (pm != null && PrettyConfigurationProvider.getFilterType(skipSiteChk, site, pm, pageFilters) == null) {
                 if (p.getViewPath() != null) return pm;
-                return getFirstPage(skipSiteChk, site, p, language);
+                return getFirstPage(skipSiteChk, site, p, language, defLanguage);
             }
         }
         return null;
@@ -235,7 +235,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (link == null || lng == null || lng.getCode() == null) continue;
             String id = mapping.getLanguage().getCode() + node.getId();
             if (findParentView) {
-                PageMapping parentMapping = getFirstPage(true, null, node, lng.getCode());
+                PageMapping parentMapping = getFirstPage(true, null, node, lng.getCode(), null);
                 if (parentMapping == null) continue;
                 view = parentMapping.getPage().getViewPath(pageRoot);
             }
