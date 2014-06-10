@@ -25,8 +25,8 @@ public class PrettyHomeServlet extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
-        String defLanguage = site != null ? (site.getDefLanguage() != null ? site.getDefLanguage().getCode() : "en") : "en";
-        PageMapping mapping = PrettyConfigurationProvider.getFirstPage(request, defLanguage);
+        String defLanguage = site != null ? (site.getDefLanguage() != null ? site.getDefLanguage().getCode() : null) : null;
+        PageMapping mapping = PrettyConfigurationProvider.getFirstPage(request, defLanguage == null ? "en" : defLanguage, defLanguage != null);
         if (mapping == null) {
             // TODO:
             // - allow non-JSF pages

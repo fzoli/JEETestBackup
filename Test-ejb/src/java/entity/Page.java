@@ -50,6 +50,9 @@ public class Page extends Node<Page, PageMapping> {
     @Column(name="action-inherited", nullable = false)
     private boolean actionInherited;
     
+    @Column(name="parameter-incremented", nullable = false)
+    private boolean parameterIncremented;
+    
     @Embeddable
     public static class Parameter implements Serializable {
         
@@ -215,6 +218,14 @@ public class Page extends Node<Page, PageMapping> {
     public void setActionInherited(boolean actionInherited) {
         this.actionInherited = actionInherited;
     }
+
+    public boolean isParameterIncremented() {
+        return parameterIncremented;
+    }
+
+    public void setParameterIncremented(boolean parameterIncremented) {
+        this.parameterIncremented = parameterIncremented;
+    }
     
     public String getViewPath() {
         return getViewPath(null);
@@ -277,7 +288,8 @@ public class Page extends Node<Page, PageMapping> {
         if (page == null || (skipParam && page.isParameterRequired(true)) || language == null) return null;
         List<PageMapping> mappings = page.getMappings();
         if (mappings == null || mappings.isEmpty()) return null;
-        PageMapping pm = mappings.get(0);
+//        PageMapping pm = mappings.get(0); // never returns null but mixes languages
+        PageMapping pm = null; // the path can be broken
         for (PageMapping mapping : mappings) {
             if (mapping == null || mapping.getLanguage() == null) continue;
             if (defLanguage != null && defLanguage.equalsIgnoreCase(mapping.getLanguage().getCode())) {

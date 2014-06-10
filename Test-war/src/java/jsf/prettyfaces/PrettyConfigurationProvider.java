@@ -41,7 +41,9 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     private static final Log LOGGER = Log.getLogger(PrettyConfigurationProvider.class);
     
     static PageMapping getPageMapping(UrlMapping mapping) {
-        return NODES.get(mapping);
+        synchronized (NODES) {
+            return NODES.get(mapping);
+        }
     }
     
     static PageMapping getPageMapping(FacesContext context) {
@@ -91,10 +93,10 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         return null;
     }
     
-    static PageMapping getFirstPage(HttpServletRequest request, String defLanguage) {
+    static PageMapping getFirstPage(HttpServletRequest request, String defLanguage, boolean overrideLanguage) {
         String language = request.getLocale().getLanguage();
         Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
-        return getFirstPage(site, language, defLanguage);
+        return getFirstPage(site, overrideLanguage && defLanguage != null ? defLanguage : language, defLanguage);
     }
     
     private static PageMapping getFirstPage(Site site, String language, String defLanguage) {
@@ -131,18 +133,20 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         if (pageRoot == null || locale == null || viewId == null) return null;
         viewId = stripPageRoot(viewId);
         String language = locale.getLanguage();
-        Iterator<Map.Entry<UrlMapping, PageMapping>> it = NODES.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<UrlMapping, PageMapping> e = it.next();
-            PageMapping mapping = e.getValue();
-            if (mapping.getLanguage() == null || mapping.getPage() == null) continue;
-            Page page = mapping.getPage();
-            if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {
-                String path = page.getViewPath();
-                if (!isPathJSF(path)) continue;
-                path = stripPageRoot(path);
-                if (viewId.equals(path)) {
-                    return pageRoot + mapping.getPermalink(requestUri);
+        synchronized (NODES) {
+            Iterator<Map.Entry<UrlMapping, PageMapping>> it = NODES.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<UrlMapping, PageMapping> e = it.next();
+                PageMapping mapping = e.getValue();
+                if (mapping.getLanguage() == null || mapping.getPage() == null) continue;
+                Page page = mapping.getPage();
+                if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {
+                    String path = page.getViewPath();
+                    if (!isPathJSF(path)) continue;
+                    path = stripPageRoot(path);
+                    if (viewId.equals(path)) {
+                        return pageRoot + mapping.getPermalink(requestUri);
+                    }
                 }
             }
         }
@@ -175,14 +179,16 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     }
     
     private static List<UrlMapping> loadMappings() {
-        NODES.clear();
         List<UrlMapping> mappings = new ArrayList<>();
-        if (pageBean != null) {
-            pageBean.clearPagesFromCache();
-            Page root = pageBean.getPageTree();
-            fillList(root.getChildren(), mappings);
+        synchronized (NODES) {
+            NODES.clear();
+            if (pageBean != null) {
+                pageBean.clearPagesFromCache();
+                Page root = pageBean.getPageTree();
+                fillList(root.getChildren(), mappings);
+            }
+            Collections.reverse(mappings); // solves parameter "bug"
         }
-        Collections.reverse(mappings); // solves parameter "bug"
         return mappings;
     }
 
@@ -229,19 +235,23 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         }
         
         for (PageMapping mapping : mappings) {
-            String link = mapping.getPermalink(new PrettyPageFormatter(mapping));
             Language lng = mapping.getLanguage();
             List<String> actions = mapping.getPage().getActions();
-            if (link == null || lng == null || lng.getCode() == null) continue;
-            String id = mapping.getLanguage().getCode() + node.getId();
+            if (lng == null || lng.getCode() == null) continue;
+            String id = mapping.getLanguage().getCode() + '-' + node.getId();
             if (findParentView) {
                 PageMapping parentMapping = getFirstPage(true, null, node, lng.getCode(), null);
                 if (parentMapping == null) continue;
                 view = parentMapping.getPage().getViewPath(pageRoot);
             }
-            LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
-            createMapping(ls, mapping, id, link, view, actions, validators);
-            createMapping(ls, mapping, id, link + '/', view, actions, validators);
+            int paramCount = mapping.getPage().getParameters().size();
+            for (int paramLimit = mapping.getPage().isParameterIncremented() ? 0 : paramCount; paramLimit <= paramCount; paramLimit++) {
+                String link = mapping.getPermalink(new PrettyPageFormatter(mapping, paramLimit));
+                if (link == null) continue; // the path is broken or the language not matches; next...
+                String mappingId =  id + '.' + paramLimit;
+                createMapping(ls, mapping, mappingId + "-x", link, view, actions, validators);
+                createMapping(ls, mapping, mappingId + "-y", link + '/', view, actions, validators);
+            }
         }
 
         return ls;
@@ -258,18 +268,25 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         if (!validators.isEmpty()) map.setPathValidators(validators);
         ls.add(map);
         NODES.put(map, mapping);
+        LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
     }
     
     private static class PrettyPageFormatter extends PageMapping.PageFormatter {
 
-        public PrettyPageFormatter(PageMapping mapping) {
+        private final int paramLimit;
+        
+        public PrettyPageFormatter(PageMapping mapping, int paramLimit) {
             super(mapping, null);
+            this.paramLimit = paramLimit;
         }
 
         @Override
         protected String getParameterString(Page page) {
+            int i = 0;
             String ps = "";
+            boolean dst = mapping.getPage() == page;
             for (Page.Parameter p : page.getParameters()) {
+                if (dst && ++i > paramLimit) break;
                 ps += "/#{" + p.getName() + "}";
             }
             return ps;

@@ -59,15 +59,17 @@ public class PageMapping extends NodeMapping<Page> {
         return getPermalink(url == null || url.isEmpty() ? SIMPLE_FORMATTER : new PageFormatter(this, url));
     }
     
+    // returns null if the path is broken!
     public String getPermalink(Strings.Formatter<Page> formatter) {
         String link = Strings.join(getPage().getWay(true), "/", formatter);
+        if (link == null) return null;
         return link.startsWith("/") ? link : "/" + link;
     }
     
     public static class PageFormatter implements Strings.Formatter<Page> {
 
         private final String url;
-        private final PageMapping mapping;
+        protected final PageMapping mapping;
         
         public PageFormatter(PageMapping mapping, String url) {
             this.url = url;
