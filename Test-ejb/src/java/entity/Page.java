@@ -2,7 +2,6 @@ package entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CollectionTable;
@@ -186,13 +185,6 @@ public class Page extends Node<Page, PageMapping> {
 
     @Override
     public boolean isDisabled() {
-        for (Page p : getWay(false)) {
-            if (p.isPageDisabled()) return true;
-        }
-        return false;
-    }
-    
-    private boolean isPageDisabled() {
         if (isNameInvalid()) {
             return true;
         }
@@ -278,24 +270,6 @@ public class Page extends Node<Page, PageMapping> {
         }
         return l;
     }
-    
-    public List<Page> getWay(boolean fromRoot) {
-        Page node = this;
-        List<Page> way = new ArrayList<>();
-        while (!node.isRoot()) {
-            way.add(node);
-            node = node.getParent();
-        }
-        way.add(node);
-        if (fromRoot) Collections.reverse(way);
-        return way;
-    }
-    
-//    public boolean isParametersValid(List<String> paramValues, boolean strict) {
-//        List<String> paramNames = getParameterNames(true);
-//        boolean params = paramNames != null && !paramNames.isEmpty();
-//        return (!params && !strict) || (!params && (paramValues == null || paramValues.isEmpty())) || (params && paramValues != null && paramValues.size() == paramNames.size());
-//    }
     
     public boolean isParameterRequired(boolean all) {
         if (all) {

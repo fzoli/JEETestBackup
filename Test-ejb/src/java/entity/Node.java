@@ -124,6 +124,26 @@ public class Node<NodeType extends Node, MappingType extends NodeMapping> extend
         this.disabled = disabled;
     }
     
+    public boolean isDisabled(boolean withParents) {
+        if (!withParents) return isDisabled();
+        for (NodeType n : getWay(false)) {
+            if (n.isDisabled()) return true;
+        }
+        return false;
+    }
+    
+    public List<NodeType> getWay(boolean fromRoot) {
+        NodeType node = (NodeType) this;
+        List<NodeType> way = new ArrayList<>();
+        while (!node.isRoot()) {
+            way.add(node);
+            node = (NodeType) node.getParent();
+        }
+        way.add(node);
+        if (fromRoot) Collections.reverse(way);
+        return way;
+    }
+    
     @Override
     public String toString() {
         return getInfo();

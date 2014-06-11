@@ -1,6 +1,7 @@
 bug:
 - a PrettyFaces újratöltése után nem frissül jól a konfiguráció
 - a PrettyHomeServlet a nem JSF oldalakat is tiltja
+- page parameters lista indexei nem frissülnek
 
 sebezhetőség:
 - az eredeti jsf oldalak ne legyenek elérhetőek

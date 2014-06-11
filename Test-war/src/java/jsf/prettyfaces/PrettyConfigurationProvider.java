@@ -69,7 +69,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
                 return FilterType.PAGE_UNKNOWN;
             }
             else {
-                if (page.isDisabled()) {
+                if (page.isDisabled(true)) {
                     return FilterType.PAGE_DISABLED;
                 }
                 else {
@@ -213,7 +213,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     private static List<UrlMapping> createMappings(Page node) {
         List<UrlMapping> ls = new ArrayList<>();
         
-        if (node.getId() == null || node.isDisabled()) return ls;
+        if (node.getId() == null) return ls;
         
         String view = getViewPath(node);
         boolean findParentView = view == null;
