@@ -22,3 +22,21 @@ a:hover {
     user-select: none;
     cursor: default;
 }
+
+span.ui-autocomplete {
+    position: relative;
+    display: inline-block;
+    width: 206px; 
+}
+
+span.ui-autocomplete button.ui-button {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 32px;
+}
+
+span.ui-autocomplete input.ui-autocomplete-input {
+    width: 164px;
+}
