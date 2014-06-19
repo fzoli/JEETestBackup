@@ -111,12 +111,13 @@
             <h:panelGrid columns="1" cellpadding="5">
                 <h:outputText value="This is a Modal Dialog."  />
                 <p:autoComplete id="ac_lng_code_hint" dropdown="true" maxlength="2" completeMethod="#{language.completeCodeHint}">
-                    <p:ajax event="itemSelect" listener="#{language.hintSelected}" />
+                    <p:ajax event="query" update="lang_add_save_btn" />
+                    <p:ajax event="itemSelect" listener="#{language.hintSelected}" update="lang_add_save_btn" />
                 </p:autoComplete>
             </h:panelGrid>
             <p:watermark for="ac_lng_code_hint" value="Language*" />
             <p:separator />
-            <p:commandButton id="lang_add_save_btn" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.test}" oncomplete="handleLanguageAddRequest(xhr, status, args)" />
+            <p:commandButton id="lang_add_save_btn" disabled="#{language.codeHintInvalid}" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.test}" oncomplete="handleLanguageAddRequest(xhr, status, args)" />
         </p:dialog>
         
         <p:blockUI block="lang_add_dlg" trigger="lang_add_save_btn">

@@ -213,7 +213,7 @@ public class LanguageBean implements Serializable{
     };
     
     private String localeCode;
-
+    
     private static final Map<String,Locale> countries = new LinkedHashMap<>();
     
     static {
@@ -225,6 +225,10 @@ public class LanguageBean implements Serializable{
         return countries;
     }
 
+    public Boolean getCodeHintInvalid() {
+        return !validateCodeHint();
+    }
+
     public String getLocaleCode() {
         return localeCode;
     }
@@ -232,7 +236,7 @@ public class LanguageBean implements Serializable{
     public void test() {
         RequestContext rcontext = RequestContext.getCurrentInstance();
         FacesContext fcontext = FacesContext.getCurrentInstance();
-        boolean saved = validateLanguageCode(codeHint);
+        boolean saved = validateCodeHint();
         if (rcontext != null) {
             rcontext.addCallbackParam("saved", saved);
         }
@@ -264,6 +268,10 @@ public class LanguageBean implements Serializable{
         }
     }
     
+    public boolean validateCodeHint() {
+        return validateLanguageCode(codeHint);
+    }
+    
     public boolean validateLanguageCode(String value) {
         if (value == null) return false;
         Pattern p = Pattern.compile("^[a-z]{2}$");
@@ -290,13 +298,13 @@ public class LanguageBean implements Serializable{
     
     public List<String> completeCodeHint(String query) {
         codeHint = query;
-        System.out.println("code hint: " + codeHint);
+        System.out.println("typed code hint: " + codeHint);
         return completeHint(query, 0);
     }
     
     public void hintSelected(SelectEvent event) {
         codeHint = event.getObject().toString();
-        System.out.println("new code hint: " + codeHint);
+        System.out.println("selected code hint: " + codeHint);
     }
     
     private List<String> completeHint(String query, int hintIndex) {
