@@ -22,6 +22,9 @@ public class Language extends PrimaryStringObject<Language> {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "english-name", nullable = false)
+    private String englishName;
+    
     protected Language() {
         super(Language.class);
     }
@@ -43,6 +46,24 @@ public class Language extends PrimaryStringObject<Language> {
 
     public String getName() {
         return name;
+    }
+
+    public String getEnglishName() {
+        return englishName;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEnglishName(String englishName) {
+        this.englishName = englishName;
+    }
+    
+    public String getText() {
+        if (getName() == null) return getEnglishName();
+        if ((getEnglishName() == null || getEnglishName().trim().isEmpty()) || getName().equals(getEnglishName())) return getName();
+        return getName() + " (" + getEnglishName() + ")";
     }
     
     public Locale getLocale() {

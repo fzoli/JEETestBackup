@@ -1,11 +1,11 @@
+import bean.PageBeanLocal;
+import entity.Language;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
+import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -212,25 +212,22 @@ public class LanguageBean implements Serializable{
         {"zu", "isiZulu", "Zulu"}
     };
     
-    private String localeCode;
+    @EJB
+    private PageBeanLocal bean;
     
-    private static final Map<String,Locale> countries = new LinkedHashMap<>();
+    private String lngCodeCms;
+    private Language lngCms;
     
-    static {
-        countries.put("English", Locale.ENGLISH); //label, value
-        countries.put("Hungarian", new Locale("hu","HU"));
-    }
-    
-    public Map<String, Locale> getCountriesInMap() {
-        return countries;
+    public List<Language> getLanguages() {
+        return bean.getLanguages();
     }
 
     public Boolean getCodeHintInvalid() {
         return !validateCodeHint();
     }
 
-    public String getLocaleCode() {
-        return localeCode;
+    public String getCmsLanguageCode() {
+        return lngCodeCms;
     }
     
     public void test() {
@@ -248,22 +245,20 @@ public class LanguageBean implements Serializable{
 
     public void setLocaleCode(String localeCode) {
         System.out.println("set locale code: " + localeCode);
-        this.localeCode = localeCode;
     }
 
-    //value change event listener
-    public void countryLocaleCodeChanged(ValueChangeEvent e) {
-        System.out.println("locale changed");
-        applyLocaleCode(e.getNewValue().toString());
+    public void cmsLanguageChanged(ValueChangeEvent e) {
+        setCmsLanguage(e.getNewValue().toString());
     }
 
-    public void applyLocaleCode(String newLocaleValue) {
-        //loop country map to compare the locale code
-        for (Map.Entry<String, Locale> entry : countries.entrySet()) {
-            if (entry.getValue().toString().equals(newLocaleValue)) {
-                Locale locale = entry.getValue();
-                localeCode = newLocaleValue;
-                FacesContext.getCurrentInstance().getViewRoot().setLocale(locale);
+    public void setCmsLanguage(String lngCode) {
+        if (lngCode == null) return;
+        for (Language l : getLanguages()) {
+            if (l != null && l.getCode().equals(lngCode)) {
+                lngCodeCms = lngCode;
+                lngCms = l;
+                System.out.println("cms lng changed to " + l.getName());
+                break;
             }
         }
     }
@@ -280,7 +275,8 @@ public class LanguageBean implements Serializable{
     
     public List<String> completeText(String query) {
         List<String> results = new ArrayList<>();
-        for (String lng : countries.keySet()) {
+        for (Language l : getLanguages()) {
+            String lng = l.getName();
             if (lng.toLowerCase().startsWith(query.toLowerCase())) results.add(lng);
         }
         return results;

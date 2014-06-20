@@ -46,10 +46,10 @@
                         <p:menuitem value="Quit" url="http://www.primefaces.org" icon="ui-icon-close" />
 
                         <f:facet name="options">
-                            <p:selectOneMenu value="#{language.localeCode}"
-                                             valueChangeListener="#{language.countryLocaleCodeChanged}"
+                            <p:selectOneMenu value="#{language.cmsLanguageCode}"
+                                             valueChangeListener="#{language.cmsLanguageChanged}"
                                              onchange="window.location.reload();">
-                                <f:selectItems value="#{language.countriesInMap}" />
+                                <f:selectItems value="#{language.languages}" var="lng" itemLabel="#{lng.name}" itemValue="#{lng.code}"/>
                                 <p:ajax update="@this" />
                             </p:selectOneMenu>
                         </f:facet>
@@ -76,20 +76,6 @@
             <p:layoutUnit position="center">
                 <h1><ui:insert name="content">Hello from Facelets</ui:insert></h1>
                 <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
-                <h3>
-                    <h:form>
-                        <h:panelGrid columns="2">
-                                Language:
-                                <p:selectOneMenu value="#{language.localeCode}"
-                                                 valueChangeListener="#{language.countryLocaleCodeChanged}"
-                                                 onchange="window.location.reload();">
-                                    <f:selectItem noSelectionOption="true" itemLabel="Please select" />
-                                    <f:selectItems value="#{language.countriesInMap}" />
-                                    <p:ajax update="@this" />
-                                </p:selectOneMenu>
-                        </h:panelGrid>
-                    </h:form>
-                </h3>
             </p:layoutUnit>
 
         </p:layout>
