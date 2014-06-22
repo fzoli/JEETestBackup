@@ -231,6 +231,11 @@ public class LanguageBean implements Serializable{
     }
     
     public void test() {
+        System.out.println("language bean test method");
+    }
+
+    public void testSave() {
+        System.out.println("language bean test save method");
         RequestContext rcontext = RequestContext.getCurrentInstance();
         FacesContext fcontext = FacesContext.getCurrentInstance();
         boolean saved = validateCodeHint();
@@ -238,11 +243,10 @@ public class LanguageBean implements Serializable{
             rcontext.addCallbackParam("saved", saved);
         }
         if (fcontext != null) {
-            if (!saved) fcontext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Language is not saved."));
+            if (!saved) fcontext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid language code", "Language is not saved."));
         }
-        System.out.println("language bean test method");
     }
-
+    
     public void setLocaleCode(String localeCode) {
         System.out.println("set locale code: " + localeCode);
     }

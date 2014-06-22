@@ -8,15 +8,17 @@
     <h:head>
         <title><ui:insert name="title">Facelet Title</ui:insert></title>
         <h:outputStylesheet library="css" name="style.css" />
+        <h:outputScript library="js" name="csv.js" />
     </h:head>
     <h:body>
+        
         <p:growl id="growl" sticky="false" showDetail="true" life="3000" />
         <p:layout fullPage="true">
 
             <p:layoutUnit position="north" resizable="false" closable="false" collapsible="false">
-                
                 <h:form>
                     <p:menubar>
+                        
                         <p:submenu label="File" icon="ui-icon-document">
                             <p:submenu label="New" icon="ui-icon-contact">
                                 <p:menuitem value="Project" url="#" />
@@ -56,17 +58,18 @@
                         
                     </p:menubar>
                 </h:form>
-                
-                <p:breadCrumb style="margin-top: 5px">
-                    <p:menuitem value="Categories" url="#" />
-                    <p:menuitem value="Sports" url="#" />
-                    <p:menuitem value="Basketball" url="#" />
-                    <p:menuitem value="NBA" url="#" />
-                    <p:menuitem value="Teams" url="#" />
-                    <p:menuitem value="L.A. Lakers" url="#" />
-                    <p:menuitem value="Roster" url="#" />
-                    <p:menuitem value="Kobe Bryant" url="#" />
-                </p:breadCrumb>
+                <h:form>
+                    <p:breadCrumb style="margin-top: 5px">
+                        <p:menuitem value="Categories" url="#" />
+                        <p:menuitem value="Sports" url="#" />
+                        <p:menuitem value="Basketball" url="#" />
+                        <p:menuitem value="NBA" url="#" />
+                        <p:menuitem value="Teams" url="#" />
+                        <p:menuitem value="L.A. Lakers" url="#" />
+                        <p:menuitem value="Roster" url="#" />
+                        <p:menuitem value="Kobe Bryant" url="#" />
+                    </p:breadCrumb>
+                </h:form>
             </p:layoutUnit>
 
             <p:layoutUnit position="west" size="200" header="Left" resizable="true" closable="false" collapsible="true">
@@ -76,11 +79,12 @@
             <p:layoutUnit position="center">
                 <h1><ui:insert name="content">Hello from Facelets</ui:insert></h1>
                 <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
+                <h3><h:messages /></h3>
             </p:layoutUnit>
 
         </p:layout>
         
-        <p:dialog id="lang_dlg" header="Language editor" widgetVar="dlg_lang" width="360" modal="true" resizable="false" dynamic="true">
+        <p:dialog id="lang_dlg" header="Language editor" widgetVar="dlg_lang" width="360" modal="true" resizable="false" dynamic="true">            
             <h:panelGrid cellpadding="5">
                 <h:panelGroup>
                     <p:autoComplete id="ac_lng_code" dropdown="true" completeMethod="#{language.completeText}" forceSelection="true" />
@@ -90,8 +94,13 @@
             </h:panelGrid>
             <p:watermark for="ac_lng_code" value="Language" />
             <p:separator />
-            <p:commandButton id="lang_save_btn" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.test}" oncomplete="handleLanguageSetRequest(xhr, status, args)" />
+            <p:commandButton id="lang_save_btn" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.testSave}" oncomplete="handleLanguageSetRequest(xhr, status, args)" />
         </p:dialog>
+
+        <p:blockUI block="lang_dlg" trigger="lang_save_btn">
+            Modifying the language...<br />
+            <p:graphicImage name="images/ajaxloadingbar.gif"/>
+        </p:blockUI>
         
         <p:dialog id="lang_add_dlg" header="New language" widgetVar="dlg_lang_add" width="360" modal="true" resizable="false" dynamic="true">
             <h:panelGrid columns="1" cellpadding="5">
@@ -103,37 +112,13 @@
             </h:panelGrid>
             <p:watermark for="ac_lng_code_hint" value="Language*" />
             <p:separator />
-            <p:commandButton id="lang_add_save_btn" disabled="#{language.codeHintInvalid}" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.test}" oncomplete="handleLanguageAddRequest(xhr, status, args)" />
+            <p:commandButton id="lang_add_save_btn" disabled="#{language.codeHintInvalid}" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.testSave}" oncomplete="handleLanguageAddRequest(xhr, status, args)" />
         </p:dialog>
-        
+
         <p:blockUI block="lang_add_dlg" trigger="lang_add_save_btn">
             Creating the language...<br />
             <p:graphicImage name="images/ajaxloadingbar.gif"/>
         </p:blockUI>
-        
-        <p:blockUI block="lang_dlg" trigger="lang_save_btn">
-            Modifying the language...<br />
-            <p:graphicImage name="images/ajaxloadingbar.gif"/>
-        </p:blockUI>
-        
-        <script type="text/javascript">
-            function handleLanguageAddRequest(xhr, status, args) {
-                handleLanguageRequest(xhr, status, args, 'dlg_lang_add');
-            }
-            
-            function handleLanguageSetRequest(xhr, status, args) {
-                handleLanguageRequest(xhr, status, args, 'dlg_lang');
-            }
-            
-            function handleLanguageRequest(xhr, status, args, id) {
-                if(args.validationFailed || !args.saved) {
-                    PF(id).jq.effect("shake", {times:5}, 100);
-                }
-                else {
-                    PF(id).hide();
-                }
-            }
-        </script>
         
     </h:body>
 </html>
