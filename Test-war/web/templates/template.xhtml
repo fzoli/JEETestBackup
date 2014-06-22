@@ -8,12 +8,13 @@
     <h:head>
         <title><ui:insert name="title">Facelet Title</ui:insert></title>
         <h:outputStylesheet library="css" name="style.css" />
+        <h:outputStylesheet library="css" name="cms.css" />
         <h:outputScript library="js" name="csv.js" />
     </h:head>
     <h:body>
         <p:layout fullPage="true">
 
-            <p:layoutUnit position="north" resizable="false" closable="false" collapsible="false">
+            <p:layoutUnit position="north" resizable="false" closable="false" collapsible="false" id="cms_north">
                 <h:form>
                     <p:menubar>
                         
