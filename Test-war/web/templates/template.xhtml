@@ -11,8 +11,6 @@
         <h:outputScript library="js" name="csv.js" />
     </h:head>
     <h:body>
-        
-        <p:growl id="growl" sticky="false" showDetail="true" life="3000" />
         <p:layout fullPage="true">
 
             <p:layoutUnit position="north" resizable="false" closable="false" collapsible="false">
@@ -84,41 +82,49 @@
 
         </p:layout>
         
-        <p:dialog id="lang_dlg" header="Language editor" widgetVar="dlg_lang" width="360" modal="true" resizable="false" dynamic="true">            
-            <h:panelGrid cellpadding="5">
-                <h:panelGroup>
-                    <p:autoComplete id="ac_lng_code" dropdown="true" completeMethod="#{language.completeText}" forceSelection="true" />
-                    <p:commandButton id="cb_lng_add" icon="ui-icon-plus" title="Add language" style="margin-left: 5px" onclick="PF('dlg_lang_add').show()" />
-                </h:panelGroup>
-                <p:autoComplete id="ac_test" dropdown="true" completeMethod="#{language.completeText}" />
-            </h:panelGrid>
-            <p:watermark for="ac_lng_code" value="Language" />
-            <p:separator />
-            <p:commandButton id="lang_save_btn" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.testSave}" oncomplete="handleLanguageSetRequest(xhr, status, args)" />
-        </p:dialog>
+        <h:form>
+            <p:growl id="lang_growl" sticky="false" showDetail="true" life="3000" />
+            
+            <p:dialog id="lang_dlg" header="Language editor" widgetVar="dlg_lang" width="360" modal="true" resizable="false" dynamic="true">            
+                <h:panelGrid cellpadding="5">
+                    <h:panelGroup>
+                        <p:autoComplete id="ac_lng_code" dropdown="true" completeMethod="#{language.completeText}" forceSelection="true" />
+                        <p:commandButton id="cb_lng_add" icon="ui-icon-plus" title="Add language" style="margin-left: 5px" onclick="PF('dlg_lang_add').show()" />
+                    </h:panelGroup>
+                    <p:autoComplete id="ac_test" dropdown="true" completeMethod="#{language.completeText}" />
+                </h:panelGrid>
+                <p:watermark for="ac_lng_code" value="Language" />
+                <p:separator />
+                <p:commandButton id="lang_save_btn" value="Save" icon="ui-icon-disk" update="lang_growl" actionListener="#{language.testSave}" oncomplete="handleLanguageSetRequest(xhr, status, args)" />
+            </p:dialog>
 
-        <p:blockUI block="lang_dlg" trigger="lang_save_btn">
-            Modifying the language...<br />
-            <p:graphicImage name="images/ajaxloadingbar.gif"/>
-        </p:blockUI>
+            <p:blockUI block="lang_dlg" trigger="lang_save_btn">
+                Modifying the language...<br />
+                <p:graphicImage name="images/ajaxloadingbar.gif"/>
+            </p:blockUI>
+        </h:form>
         
-        <p:dialog id="lang_add_dlg" header="New language" widgetVar="dlg_lang_add" width="360" modal="true" resizable="false" dynamic="true">
-            <h:panelGrid columns="1" cellpadding="5">
-                <h:outputText value="This is a Modal Dialog."  />
-                <p:autoComplete id="ac_lng_code_hint" dropdown="true" maxlength="2" completeMethod="#{language.completeCodeHint}">
-                    <p:ajax event="query" update="lang_add_save_btn" />
-                    <p:ajax event="itemSelect" listener="#{language.hintSelected}" update="lang_add_save_btn" />
-                </p:autoComplete>
-            </h:panelGrid>
-            <p:watermark for="ac_lng_code_hint" value="Language*" />
-            <p:separator />
-            <p:commandButton id="lang_add_save_btn" disabled="#{language.codeHintInvalid}" value="Save" icon="ui-icon-disk" update="growl" actionListener="#{language.testSave}" oncomplete="handleLanguageAddRequest(xhr, status, args)" />
-        </p:dialog>
+        <h:form>
+            <p:growl id="lang_add_growl" sticky="false" showDetail="true" life="3000" />
+            
+            <p:dialog id="lang_add_dlg" header="New language" widgetVar="dlg_lang_add" width="360" modal="true" resizable="false" dynamic="true">
+                <h:panelGrid columns="1" cellpadding="5">
+                    <h:outputText value="This is a Modal Dialog."  />
+                    <p:autoComplete id="ac_lng_code_hint" dropdown="true" maxlength="2" completeMethod="#{language.completeCodeHint}">
+                        <p:ajax event="query" update="lang_add_save_btn" />
+                        <p:ajax event="itemSelect" listener="#{language.hintSelected}" update="lang_add_save_btn" />
+                    </p:autoComplete>
+                </h:panelGrid>
+                <p:watermark for="ac_lng_code_hint" value="Language*" />
+                <p:separator />
+                <p:commandButton id="lang_add_save_btn" disabled="#{language.codeHintInvalid}" value="Save" icon="ui-icon-disk" update="lang_add_growl" actionListener="#{language.testSave}" oncomplete="handleLanguageAddRequest(xhr, status, args)" />
+            </p:dialog>
 
-        <p:blockUI block="lang_add_dlg" trigger="lang_add_save_btn">
-            Creating the language...<br />
-            <p:graphicImage name="images/ajaxloadingbar.gif"/>
-        </p:blockUI>
+            <p:blockUI block="lang_add_dlg" trigger="lang_add_save_btn">
+                Creating the language...<br />
+                <p:graphicImage name="images/ajaxloadingbar.gif"/>
+            </p:blockUI>
+        </h:form>
         
     </h:body>
 </html>
