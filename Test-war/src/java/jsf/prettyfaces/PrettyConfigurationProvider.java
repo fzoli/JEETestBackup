@@ -129,8 +129,8 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
      * Returns the pretty URL.
      * WARNING: This method returns the first match!
      */
-    static String findPrettyURL(String viewId, Locale locale, String requestUri) {
-        if (pageRoot == null || locale == null || viewId == null) return null;
+    static String findPrettyURL(String appCtxPath, String viewId, Locale locale, String requestUri) {
+        if (pageRoot == null || appCtxPath == null || locale == null || viewId == null) return null;
         viewId = stripPageRoot(viewId);
         String language = locale.getLanguage();
         synchronized (NODES) {
@@ -145,7 +145,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
                     if (!isPathJSF(path)) continue;
                     path = stripPageRoot(path);
                     if (viewId.equals(path)) {
-                        return pageRoot + mapping.getPermalink(requestUri);
+                        return appCtxPath + mapping.getPermalink(requestUri);
                     }
                 }
             }

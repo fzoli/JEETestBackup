@@ -38,7 +38,7 @@ public class PrettyViewHandler extends MultiViewHandler {
         if (context.getViewRoot().getViewId().equals(viewId)) {
             return getRealRequestURI(context, false);
         }
-        String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), null);
+        String prettyURL = PrettyConfigurationProvider.findPrettyURL(getContextPath(context), viewId, calculateLocale(context), null);
         if (prettyURL != null) return prettyURL;
         return super.getActionURL(context, viewId);
     }
@@ -56,7 +56,7 @@ public class PrettyViewHandler extends MultiViewHandler {
             if (mapping.getPage().getViewPath() == null) {
                 PageMapping firstPage = PrettyConfigurationProvider.getFirstPage(Site.findSiteByDomain(getPageBean().getSites(), context.getExternalContext().getRequestServerName()), mapping.getPage(), mapping.getLanguage().getCode(), null);
                 try {
-                    context.getExternalContext().redirect(context.getExternalContext().getApplicationContextPath() + firstPage.getPermalink(""));
+                    context.getExternalContext().redirect(getContextPath(context) + firstPage.getPermalink(""));
                 }
                 catch (Exception ex) { // no first page or redirect error
                     LOGGER.e("redirect failed", ex);
@@ -109,7 +109,11 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     private String stripContextPath(FacesContext context, String requestURI) {
-        return requestURI.substring(context.getExternalContext().getApplicationContextPath().length());
+        return requestURI.substring(getContextPath(context).length());
+    }
+    
+    private String getContextPath(FacesContext context) {
+        return context.getExternalContext().getApplicationContextPath();
     }
     
     @Override
