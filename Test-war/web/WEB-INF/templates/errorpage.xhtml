@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:of="http://omnifaces.org/functions">
+    <h:head>
+        <title><ui:insert name="title">Error title</ui:insert></title>
+    </h:head>
+    <h:body>
+        <ui:insert name="content">
+            <ui:insert name="errorContent">
+                <ul>
+                    <li>Ajax request: #{facesContext.partialViewContext.ajaxRequest ? 'Yes' : 'No'}</li>
+                    <li>Status code: #{requestScope['javax.servlet.error.status_code']}</li>
+                    <li>Exception type: #{requestScope['javax.servlet.error.exception_type']}</li>
+                    <li>Exception message: #{requestScope['javax.servlet.error.message']}</li>
+                    <li>Stack trace: <pre><code>#{of:printStackTrace(requestScope['javax.servlet.error.exception'])}</code></pre></li>
+                </ul>
+            </ui:insert>
+        </ui:insert>
+    </h:body>
+</html>

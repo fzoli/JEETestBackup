@@ -22,4 +22,16 @@
     <welcome-file-list>
         <welcome-file>/</welcome-file>
     </welcome-file-list>
+    <error-page>
+        <exception-type>javax.faces.application.ViewExpiredException</exception-type>
+        <location>/faces/errorpages/expired.xhtml</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.sql.SQLException</exception-type>
+        <location>/faces/errorpages/database.xhtml</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.RuntimeException</exception-type>
+        <location>/faces/errorpages/bug.xhtml</location>
+    </error-page>
 </web-app>

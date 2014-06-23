@@ -79,6 +79,24 @@
                 <h1><ui:insert name="content">Hello from Facelets</ui:insert></h1>
                 <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
                 <h3><h:messages /></h3>
+                
+                <h:form>
+                    <h:commandButton value="throw runtime exception on ajax request" action="#{exceptionBean.throwRuntimeException}">
+                        <f:ajax execute="@form" render="@form" />
+                    </h:commandButton>
+                </h:form>
+                <h:form>
+                    <h:commandButton value="throw runtime exception on normal request" action="#{exceptionBean.throwRuntimeException}" />
+                </h:form>
+                <h:form>
+                    <h:commandButton value="throw SQL exception on ajax request" action="#{exceptionBean.throwSQLException}">
+                        <f:ajax execute="@form" render="@form" />
+                    </h:commandButton>
+                </h:form>
+                <h:form>
+                    <h:commandButton value="throw SQL exception on normal request" action="#{exceptionBean.throwSQLException}" />
+                </h:form>
+                
             </p:layoutUnit>
 
         </p:layout>
