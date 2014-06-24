@@ -35,10 +35,11 @@ public class PrettyViewHandler extends MultiViewHandler {
 
     @Override
     public String getActionURL(FacesContext context, String viewId) {
+        String uri = getRealRequestURI(context, false);
         if (context.getViewRoot().getViewId().equals(viewId)) {
-            return getRealRequestURI(context, false);
+            return uri;
         }
-        String prettyURL = PrettyConfigurationProvider.findPrettyURL(getContextPath(context), viewId, calculateLocale(context), null);
+        String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), uri);
         if (prettyURL != null) return prettyURL;
         return super.getActionURL(context, viewId);
     }
@@ -53,7 +54,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     private void redirectIfNeed(FacesContext context) {
         PageMapping mapping = PrettyConfigurationProvider.getPageMapping(context);
         if (mapping != null && mapping.getPage() != null && mapping.getLanguage() != null) {
-            if (mapping.getPage().getViewPath() == null) {
+            if (mapping.getPage().getRealViewPath(false) == null) {
                 PageMapping firstPage = PrettyConfigurationProvider.getFirstPage(Site.findSiteByDomain(getPageBean().getSites(), context.getExternalContext().getRequestServerName()), mapping.getPage(), mapping.getLanguage().getCode(), null);
                 try {
                     context.getExternalContext().redirect(getContextPath(context) + firstPage.getPermalink(""));

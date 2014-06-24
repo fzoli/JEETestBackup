@@ -13,6 +13,7 @@ import entity.Page;
 import entity.PageFilter;
 import entity.PageMapping;
 import entity.Site;
+import entity.spec.Helpers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -21,7 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
 import javax.faces.context.FacesContext;
-import javax.faces.webapp.FacesServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import logging.Log;
@@ -118,7 +118,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         for (Page p : pages) {
             PageMapping pm = Page.findPageMapping(p, language, defLanguage, true);
             if (pm != null && PrettyConfigurationProvider.getFilterType(skipSiteChk, site, pm, pageFilters) == null) {
-                if (p.getViewPath() != null) return pm;
+                if (p.getRealViewPath(false) != null) return pm;
                 return getFirstPage(skipSiteChk, site, p, language, defLanguage);
             }
         }
@@ -129,8 +129,8 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
      * Returns the pretty URL.
      * WARNING: This method returns the first match!
      */
-    static String findPrettyURL(String appCtxPath, String viewId, Locale locale, String requestUri) {
-        if (pageRoot == null || appCtxPath == null || locale == null || viewId == null) return null;
+    static String findPrettyURL(String viewId, Locale locale, String requestUri) {
+        if (pageRoot == null || locale == null || viewId == null) return null;
         viewId = stripPageRoot(viewId);
         String language = locale.getLanguage();
         synchronized (NODES) {
@@ -141,11 +141,16 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
                 if (mapping.getLanguage() == null || mapping.getPage() == null) continue;
                 Page page = mapping.getPage();
                 if (language.equalsIgnoreCase(mapping.getLanguage().getCode())) {
-                    String path = page.getViewPath();
+                    String path = page.getRealViewPath(false);
                     if (!isPathJSF(path)) continue;
                     path = stripPageRoot(path);
                     if (viewId.equals(path)) {
-                        return appCtxPath + mapping.getPermalink(requestUri);
+                        try {
+                            return Helpers.pageHelper.getAppCtxPath() + mapping.getPermalink(requestUri);
+                        }
+                        catch (Exception ex) {
+                            // ignore lowlevel URL
+                        }
                     }
                 }
             }
@@ -167,8 +172,9 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     @Override
     public PrettyConfig loadConfiguration(ServletContext sc) {
+        if (Helpers.pageHelper == null) Helpers.pageHelper = new PrettyPageHelper(sc);
+        if (pageRoot == null) pageRoot = Helpers.pageHelper.getFacesDir();
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
-        if (pageRoot == null) pageRoot = Servlets.getMappingDir(sc, FacesServlet.class);
         PrettyConfig cfg = new PrettyConfig();
         cfg.setMappings(loadMappings());
         return cfg;
@@ -207,7 +213,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (vp == null) return null;
             return "#{" + vp + "}";
         }
-        return node.getViewPath(pageRoot);
+        return node.getViewPath(true);
     }
     
     private static List<UrlMapping> createMappings(Page node) {

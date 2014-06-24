@@ -1,5 +1,6 @@
 package entity;
 
+import entity.spec.Helpers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -245,10 +246,11 @@ public class Page extends Node<Page, PageMapping> {
     }
     
     public String getViewPath() {
-        return getViewPath(null);
+        return getViewPath(false);
     }
     
-    public String getViewPath(String root) {
+    public String getViewPath(boolean withDir) {
+        String root = withDir ? getFacesDir() : null;
         if (viewPath == null) return null;
         String view = viewPath.trim();
         if (view.isEmpty()) return null;
@@ -258,6 +260,24 @@ public class Page extends Node<Page, PageMapping> {
     
     public void setViewPath(String viewPath) {
         this.viewPath = viewPath;
+    }
+    
+    public String getRealViewPath(boolean withDir) {
+        try {
+            return Helpers.pageHelper.getRealViewPath(this, withDir);
+        }
+        catch (Exception ex) {
+            return getViewPath(withDir);
+        }
+    }
+    
+    private String getFacesDir() {
+        try {
+            return Helpers.pageHelper.getFacesDir();
+        }
+        catch (Exception ex) {
+            return null;
+        }
     }
     
     public List<String> getActions() {

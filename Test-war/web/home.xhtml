@@ -1,17 +1,18 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
-    <h:head>
-        <title>Facelet Title</title>
-    </h:head>
-    <h:body>
-        <h1><h:outputText value="#{homedict['hello']}" /> from <a href="#{request.contextPath}/Tester">Facelets</a></h1>
-        <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
-        <h3>
-            #{requestScope["value1"]}
-            <br />
-            #{requestScope["value2"]}
-        </h3>
-    </h:body>
-</html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/template.xhtml">
+<ui:define name="title">
+    This is the new title
+</ui:define>
+<ui:define name="content">
+    <h1><h:outputText value="#{homedict['hello']}" /> from <a href="#{request.contextPath}/Tester">Facelets</a></h1>
+    <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
+    <h3>
+        #{requestScope["value1"]}
+        <br />
+        #{requestScope["value2"]}
+    </h3>
+</ui:define>
+</ui:composition>

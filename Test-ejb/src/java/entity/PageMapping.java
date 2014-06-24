@@ -1,5 +1,8 @@
 package entity;
 
+import entity.spec.Helpers;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -55,7 +58,7 @@ public class PageMapping extends NodeMapping<Page> {
     
     // a menürendszerben minden page mapping látható lesz mindaddig míg egy olyan oldal nem jön, aminek paramétere van
     // a praméterneveknek egyedinek kell lenniük egy útvonalon belül
-    public String getPermalink(String url) {
+    public String getPermalink(String url) throws Exception {
         return getPermalink(url == null || url.isEmpty() ? SIMPLE_FORMATTER : new PageFormatter(this, url));
     }
     
@@ -72,8 +75,18 @@ public class PageMapping extends NodeMapping<Page> {
         protected final PageMapping mapping;
         
         public PageFormatter(PageMapping mapping, String url) {
-            this.url = url;
+            this.url = stripAppCtxFromUrl(url);
             this.mapping = mapping;
+        }
+        
+        private String stripAppCtxFromUrl(String url) {
+            try {
+                return Helpers.pageHelper.stripAppCtxFromUrl(url);
+            }
+            catch (Exception ex) {
+                // do not strip if the helper has not been set yet (e.g. during deploy)
+                return url;
+            }
         }
         
         @Override
@@ -88,28 +101,51 @@ public class PageMapping extends NodeMapping<Page> {
         protected String getParameterString(Page page) {
             String ps = "";
             List<Page.Parameter> params = page.getParameters();
+            if ((url == null || url.isEmpty()) && !(params == null || params.isEmpty()) && !page.isParameterIncremented()) {
+                throw new RuntimeException("url is not specified");
+            }
             if (url != null && params != null && !params.isEmpty()) {
-                int level = page.getLevel(true);
-                int param = params.size();
+
                 // /alma/korte/egy/ketto/barack/egy
                 // alma: level 1, params 0, return ""
                 // korte: level 2, params 2, return "egy/ketto"
                 // barack: level 3, params 1, return "egy"
                 // mélyebb pl: level 4, params X, exception
-                int first = level - param + 1;
-                int last = first + param - 1;
-                int index = 0, count = 0;
-                for (String value : url.split("/")) {
-                    if (value.isEmpty()) continue;
-                    index++;
-                    if (index >= first && index <= last) {
-                        count++;
-                        ps += "/" + value;
+                
+                List<String> vals = new ArrayList<>(Arrays.asList(url.split("/")));
+                if (!vals.isEmpty() && vals.get(0).isEmpty()) vals.remove(0);
+                
+                List<Page> ways = page.getWay(true);
+                for (Page way : ways) {
+                    String n = getPrettyName(way);
+                    if (vals.isEmpty()) return throwException(way, "", new RuntimeException("lowlevel url"));
+                    String v = vals.get(0);
+                    vals.remove(0);
+                    if (!n.equals(v)) return throwException(way, "", new RuntimeException("different url"));
+                    for (int i = 0; i < way.getParameters().size(); i++) {
+                        if (!vals.isEmpty()) {
+                            if (way == page) ps +=  "/" + vals.get(0);
+                            vals.remove(0);
+                        }
+                        else {
+                            return throwException(way, ps, new RuntimeException("not enought parameters"));
+                        }
                     }
                 }
-                if (count < param) throw new IllegalArgumentException(getPrettyName(page) + " lowlevel url");
+                
             }
             return ps;
+        }
+        
+        private String throwException(Page way, String ret, RuntimeException ex) {
+            boolean lastWay = mapping.getPage() == way;
+            if (lastWay) {
+                if (!way.isParameterIncremented()) throw ex;
+            }
+            else {
+                throw ex;
+            }
+            return ret;
         }
         
         private String getPrettyName(Page page) {
