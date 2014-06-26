@@ -91,7 +91,7 @@ public class PageMapping extends NodeMapping<Page> {
         
         @Override
         public String toString(Page page) {
-            String name = getPrettyName(page);
+            String name = getPrettyName(page, true);
             if (name == null) return null;
             String param = getParameterString(page);
             if (param == null || param.isEmpty()) return name;
@@ -117,7 +117,7 @@ public class PageMapping extends NodeMapping<Page> {
                 
                 List<Page> ways = page.getWay(true);
                 for (Page way : ways) {
-                    String n = getPrettyName(way);
+                    String n = getPrettyName(way, false);
                     if (vals.isEmpty()) return throwException(way, "", new RuntimeException("lowlevel url"));
                     String v = vals.get(0);
                     vals.remove(0);
@@ -148,9 +148,9 @@ public class PageMapping extends NodeMapping<Page> {
             return ret;
         }
         
-        private String getPrettyName(Page page) {
+        private String getPrettyName(Page page, boolean allowIncrementedParams) {
             if (getLanguage() == null || getLanguage().getCode() == null) return null;
-            PageMapping pm = Page.findPageMapping(page, getLanguage().getCode(), null, false);
+            PageMapping pm = Page.findPageMapping(page, getLanguage().getCode(), null, false, allowIncrementedParams);
             if (pm == null) return null;
             String pn = pm.getPrettyName();
             if (pn == null || pn.isEmpty()) return null;

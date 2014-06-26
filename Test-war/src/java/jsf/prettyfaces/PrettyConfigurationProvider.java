@@ -93,33 +93,37 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         return null;
     }
     
-    static PageMapping getFirstPage(HttpServletRequest request, String defLanguage, boolean overrideLanguage) {
+    static PageMapping getFirstPage(HttpServletRequest request, String defLanguage, boolean overrideLanguage, boolean allowIncrementedParams) {
         String language = request.getLocale().getLanguage();
         Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
-        return getFirstPage(site, overrideLanguage && defLanguage != null ? defLanguage : language, defLanguage);
+        return getFirstPage(site, overrideLanguage && defLanguage != null ? defLanguage : language, defLanguage, allowIncrementedParams);
     }
     
-    private static PageMapping getFirstPage(Site site, String language, String defLanguage) {
+    private static PageMapping getFirstPage(Site site, String language, String defLanguage, boolean allowIncrementedParams) {
         if (site == null) return null;
         if (site.getHomePage() != null) {
-            PageMapping pm = Page.findPageMapping(site.getHomePage(), language, defLanguage, true);
+            PageMapping pm = Page.findPageMapping(site.getHomePage(), language, defLanguage, true, allowIncrementedParams);
             if (pm != null) return pm;
         }
-        return getFirstPage(site, pageBean.getPageTree(), language, defLanguage);
+        return getFirstPage(site, pageBean.getPageTree(), language, defLanguage, allowIncrementedParams);
     }
     
-    static PageMapping getFirstPage(Site site, Page page, String language, String defLanguage) {
-        return getFirstPage(false, site, page, language, defLanguage);
+    static PageMapping getFirstPage(Site site, Page page, String language, String defLanguage, boolean allowIncrementedParams) {
+        return getFirstPage(false, site, page, language, defLanguage, allowIncrementedParams);
     }
     
-    private static PageMapping getFirstPage(boolean skipSiteChk, Site site, Page page, String language, String defLanguage) {
+    private static PageMapping getFirstPage(boolean skipSiteChk, Site site, Page page, String language, String defLanguage, boolean allowIncrementedParams) {
+        return getFirstPage(skipSiteChk, site, page, language, defLanguage, true, allowIncrementedParams);
+    }
+    
+    private static PageMapping getFirstPage(boolean skipSiteChk, Site site, Page page, String language, String defLanguage, boolean skipParam, boolean allowIncrementedParams) {
         List<Page> pages = page.getOrderedChildren();
         List<PageFilter> pageFilters = pageBean.getPageFilters();
         for (Page p : pages) {
-            PageMapping pm = Page.findPageMapping(p, language, defLanguage, true);
+            PageMapping pm = Page.findPageMapping(p, language, defLanguage, skipParam, allowIncrementedParams);
             if (pm != null && PrettyConfigurationProvider.getFilterType(skipSiteChk, site, pm, pageFilters) == null) {
                 if (p.getRealViewPath(false) != null) return pm;
-                return getFirstPage(skipSiteChk, site, p, language, defLanguage);
+                return getFirstPage(skipSiteChk, site, p, language, defLanguage, skipParam, allowIncrementedParams);
             }
         }
         return null;
@@ -255,7 +259,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
             if (lng == null || lng.getCode() == null) continue;
             String id = mapping.getLanguage().getCode() + '-' + node.getId();
             if (findParentView) {
-                PageMapping parentMapping = getFirstPage(true, null, node, lng.getCode(), null);
+                PageMapping parentMapping = getFirstPage(true, null, node, lng.getCode(), null, false, true);
                 if (parentMapping == null) continue;
                 view = getViewPath(parentMapping.getPage());
             }

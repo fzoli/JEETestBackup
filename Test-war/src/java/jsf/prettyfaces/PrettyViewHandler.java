@@ -55,7 +55,7 @@ public class PrettyViewHandler extends MultiViewHandler {
         PageMapping mapping = PrettyConfigurationProvider.getPageMapping(context);
         if (mapping != null && mapping.getPage() != null && mapping.getLanguage() != null) {
             if (mapping.getPage().getRealViewPath(false) == null) {
-                PageMapping firstPage = PrettyConfigurationProvider.getFirstPage(Site.findSiteByDomain(getPageBean().getSites(), context.getExternalContext().getRequestServerName()), mapping.getPage(), mapping.getLanguage().getCode(), null);
+                PageMapping firstPage = PrettyConfigurationProvider.getFirstPage(Site.findSiteByDomain(getPageBean().getSites(), context.getExternalContext().getRequestServerName()), mapping.getPage(), mapping.getLanguage().getCode(), null, true);
                 try {
                     context.getExternalContext().redirect(getContextPath(context) + firstPage.getPermalink(""));
                 }

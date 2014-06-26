@@ -55,7 +55,7 @@ public class PrettyHomeServlet extends HttpServlet {
     private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
         String defLanguage = site != null ? (site.getDefLanguage() != null ? site.getDefLanguage().getCode() : null) : null;
-        PageMapping mapping = PrettyConfigurationProvider.getFirstPage(request, defLanguage == null ? "en" : defLanguage, defLanguage != null);
+        PageMapping mapping = PrettyConfigurationProvider.getFirstPage(request, defLanguage == null ? "en" : defLanguage, defLanguage != null, false);
         if (mapping == null) {
             onHomepageNotFound(request, response);
         }

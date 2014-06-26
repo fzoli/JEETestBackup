@@ -291,20 +291,29 @@ public class Page extends Node<Page, PageMapping> {
         return l;
     }
     
-    public boolean isParameterRequired(boolean all) {
+    public boolean isParameterRequired(boolean all, boolean allowIncrementedParams) {
         if (all) {
             for (Page p : getWay(false)) {
-                if (p.getParameters() != null && !p.getParameters().isEmpty()) return true;
+                if (p.isParameterRequired(this, allowIncrementedParams)) return true;
             }
             return false;
         }
         else {
-            return getParameters() != null && !getParameters().isEmpty();
+            return isParameterRequired(allowIncrementedParams);
         }
     }
     
-    public static PageMapping findPageMapping(Page page, String language, String defLanguage, boolean skipParam) {
-        if (page == null || (skipParam && page.isParameterRequired(true)) || language == null) return null;
+    public boolean isParameterRequired(boolean allowIncrementedParams) {
+        return isParameterRequired(this, allowIncrementedParams);
+    }
+    
+    private boolean isParameterRequired(Page page, boolean allowIncrementedParams) {
+        if (this == page && isParameterIncremented() && allowIncrementedParams) return false;
+        return getParameters() != null && !getParameters().isEmpty();
+    }
+    
+    public static PageMapping findPageMapping(Page page, String language, String defLanguage, boolean skipParam, boolean allowIncrementedParams) {
+        if (page == null || (skipParam && page.isParameterRequired(true, allowIncrementedParams)) || language == null) return null;
         List<PageMapping> mappings = page.getMappings();
         if (mappings == null || mappings.isEmpty()) return null;
 //        PageMapping pm = mappings.get(0); // never returns null but mixes languages

@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title><ui:insert name="title">Facelet Title</ui:insert></title>
+        <h:outputStylesheet library="css" name="style.css" />
+        <h:outputStylesheet library="css" name="cms.css" />
+        <h:outputScript library="js" name="cms.js" />
+    </h:head>
+    <h:body>
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" resizable="false" closable="false" collapsible="false" id="cms_north">
+                <h:form>
+                    <p:tabMenu activeIndex="1" style="margin-bottom: 5px">
+                        <p:menuitem value="Home" icon="ui-icon-star" outcome="/home" />
+                        <p:menuitem value="Cms" icon="ui-icon-disk" outcome="/cms/pages" />
+                        <p:menuitem value="Test" icon="ui-icon-disk" outcome="/cms/none" />
+                    </p:tabMenu>
+                </h:form>
+                <h:form>
+                    <p:menubar>
+                        
+                        <p:submenu label="File" icon="ui-icon-document">
+                            <p:submenu label="New" icon="ui-icon-contact">
+                                <p:menuitem value="Project" url="#" />
+                                <p:menuitem value="Other" url="#" />
+                            </p:submenu>
+                            <p:menuitem value="Open" url="#" />
+                            <p:separator />
+                            <p:menuitem value="Quit" url="#" />
+                        </p:submenu>
+
+                        <p:submenu label="Edit" icon="ui-icon-pencil">
+                            <p:menuitem value="Language" url="#" icon="ui-icon-flag" onclick="PF('dlg_lang').show();return false" />
+                            <p:menuitem value="Undo" url="#" icon="ui-icon-arrowreturnthick-1-w" />
+                            <p:menuitem value="Redo" url="#" icon="ui-icon-arrowreturnthick-1-e" />
+                        </p:submenu>
+
+                        <p:submenu label="Help" icon="ui-icon-help">
+                            <p:menuitem value="Contents" url="#" />
+                            <p:submenu label="Search" icon="ui-icon-search">
+                                <p:submenu label="Text">
+                                    <p:menuitem value="Workspace" url="#" />
+                                </p:submenu>
+                                <p:menuitem value="File" url="#" />
+                            </p:submenu>
+                        </p:submenu>
+
+                        <p:menuitem value="Quit" url="http://www.primefaces.org" icon="ui-icon-close" />
+
+                        <f:facet name="options">
+                            <p:selectOneMenu value="#{language.cmsLanguageCode}"
+                                             valueChangeListener="#{language.cmsLanguageChanged}"
+                                             onchange="window.location.reload();">
+                                <f:selectItems value="#{language.languages}" var="lng" itemLabel="#{lng.name}" itemValue="#{lng.code}"/>
+                                <p:ajax update="@this" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                        
+                    </p:menubar>
+                </h:form>
+                <h:form>
+                    <p:breadCrumb style="margin-top: 5px">
+                        <p:menuitem value="Categories" url="#" />
+                        <p:menuitem value="Sports" url="#" />
+                        <p:menuitem value="Basketball" url="#" />
+                        <p:menuitem value="NBA" url="#" />
+                        <p:menuitem value="Teams" url="#" />
+                        <p:menuitem value="L.A. Lakers" url="#" />
+                        <p:menuitem value="Roster" url="#" />
+                        <p:menuitem value="Kobe Bryant" url="#" />
+                    </p:breadCrumb>
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="west" size="200" header="Left" resizable="true" closable="false" collapsible="true">
+                <h:outputText value="West unit content." />
+            </p:layoutUnit>
+
+            <p:layoutUnit position="center">
+                <h1><ui:insert name="content">Hello from Facelets</ui:insert></h1>
+                <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
+                <h3><h:messages /></h3>
+                
+                <h:form>
+                    <h:commandButton value="throw runtime exception on ajax request" action="#{exceptionBean.throwRuntimeException}">
+                        <f:ajax execute="@form" render="@form" />
+                    </h:commandButton>
+                </h:form>
+                <h:form>
+                    <h:commandButton value="throw runtime exception on normal request" action="#{exceptionBean.throwRuntimeException}" />
+                </h:form>
+                <h:form>
+                    <h:commandButton value="throw SQL exception on ajax request" action="#{exceptionBean.throwSQLException}">
+                        <f:ajax execute="@form" render="@form" />
+                    </h:commandButton>
+                </h:form>
+                <h:form>
+                    <h:commandButton value="throw SQL exception on normal request" action="#{exceptionBean.throwSQLException}" />
+                </h:form>
+                
+            </p:layoutUnit>
+
+        </p:layout>
+        
+        <h:form>
+            <p:growl id="lang_growl" sticky="false" showDetail="true" life="3000" />
+            
+            <p:dialog id="lang_dlg" header="Language editor" widgetVar="dlg_lang" width="360" modal="true" resizable="false" dynamic="true">            
+                <h:panelGrid cellpadding="5">
+                    <h:panelGroup>
+                        <p:autoComplete id="ac_lng_code" dropdown="true" completeMethod="#{language.completeText}" forceSelection="true" />
+                        <p:commandButton id="cb_lng_add" icon="ui-icon-plus" title="Add language" style="margin-left: 5px" onclick="PF('dlg_lang_add').show()" />
+                    </h:panelGroup>
+                    <p:autoComplete id="ac_test" dropdown="true" completeMethod="#{language.completeText}" />
+                </h:panelGrid>
+                <p:watermark for="ac_lng_code" value="Language" />
+                <p:separator />
+                <p:commandButton id="lang_save_btn" value="Save" icon="ui-icon-disk" update="lang_growl" actionListener="#{language.testSave}" oncomplete="handleLanguageSetRequest(xhr, status, args)" />
+            </p:dialog>
+
+            <p:blockUI block="lang_dlg" trigger="lang_save_btn">
+                Modifying the language...<br />
+                <p:graphicImage name="images/ajaxloadingbar.gif"/>
+            </p:blockUI>
+        </h:form>
+        
+        <h:form>
+            <p:growl id="lang_add_growl" sticky="false" showDetail="true" life="3000" />
+            
+            <p:dialog id="lang_add_dlg" header="New language" widgetVar="dlg_lang_add" width="360" modal="true" resizable="false" dynamic="true">
+                <h:panelGrid columns="1" cellpadding="5">
+                    <h:outputText value="This is a Modal Dialog."  />
+                    <p:autoComplete id="ac_lng_code_hint" dropdown="true" maxlength="2" completeMethod="#{language.completeCodeHint}">
+                        <p:ajax event="query" update="lang_add_save_btn" />
+                        <p:ajax event="itemSelect" listener="#{language.hintSelected}" update="lang_add_save_btn" />
+                    </p:autoComplete>
+                </h:panelGrid>
+                <p:watermark for="ac_lng_code_hint" value="Language*" />
+                <p:separator />
+                <p:commandButton id="lang_add_save_btn" disabled="#{language.codeHintInvalid}" value="Save" icon="ui-icon-disk" update="lang_add_growl" actionListener="#{language.testSave}" oncomplete="handleLanguageAddRequest(xhr, status, args)" />
+            </p:dialog>
+
+            <p:blockUI block="lang_add_dlg" trigger="lang_add_save_btn">
+                Creating the language...<br />
+                <p:graphicImage name="images/ajaxloadingbar.gif"/>
+            </p:blockUI>
+        </h:form>
+        
+    </h:body>
+</html>

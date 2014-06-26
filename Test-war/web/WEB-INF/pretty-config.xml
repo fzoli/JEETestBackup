@@ -33,13 +33,13 @@
    -->
 
     <url-mapping id="cms"> 
-        <pattern value="/cms" /> 
-        <view-id value="/faces/sample.xhtml" />
+        <pattern value="/cms/" /> 
+        <view-id value="/faces/cms/pages.xhtml" />
     </url-mapping>
 
-    <url-mapping id="cmsTest"> 
-        <pattern value="/cms/test" /> 
-        <view-id value="/faces/test.xhtml" />
+    <url-mapping id="cmsTest">
+        <pattern value="/cms/test" />
+        <view-id value="/faces/cms/none.xhtml" />
     </url-mapping>
 
 </pretty-config>
