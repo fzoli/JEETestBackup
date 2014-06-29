@@ -37,8 +37,10 @@ public class PrettyViewHandler extends MultiViewHandler {
     public String getActionURL(FacesContext context, String viewId) {
         String uri = getRealRequestURI(context, false);
         if (context.getViewRoot().getViewId().equals(viewId)) {
+            // TODO: ha vannak extra paraméterek és ebben a metódusban törődni kell velük, akkor ez nem jó megoldás (mert nem módosul az url)
             return uri;
         }
+        // TODO: ha itt megszerezhetőek az esetleges extra paraméterek, akkor használni kéne; egyébként megnézni, a prettyfaces hol generálja az url-t
         String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), uri);
         if (prettyURL != null) return prettyURL;
         return super.getActionURL(context, viewId);

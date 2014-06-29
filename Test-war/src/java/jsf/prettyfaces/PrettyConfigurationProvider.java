@@ -32,13 +32,24 @@ import logging.Log;
  */
 public class PrettyConfigurationProvider implements ConfigurationProvider {
     
-    private static String pageRoot;
+    private static String pageRoot, ctxPath;
     
     private static PageBeanLocal pageBean;
     
     private static final WeakHashMap<UrlMapping, PageMapping> NODES = new WeakHashMap<>();
     
     private static final Log LOGGER = Log.getLogger(PrettyConfigurationProvider.class);
+    
+    static UrlMapping getUrlMapping(PageMapping mapping) {
+        synchronized (NODES) {
+            Iterator<Map.Entry<UrlMapping, PageMapping>> it = NODES.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<UrlMapping, PageMapping> e = it.next();
+                if (e.getValue() == mapping) return e.getKey();
+            }
+            return null;
+        }
+    }
     
     static PageMapping getPageMapping(UrlMapping mapping) {
         synchronized (NODES) {
@@ -134,6 +145,38 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
      * WARNING: This method returns the first match!
      */
     static String findPrettyURL(String viewId, Locale locale, String requestUri) {
+        return findPrettyData(viewId, locale, new PageMappingUrlFormatterByUri(requestUri));
+    }
+    
+    /**
+     * Returns the pretty URL.
+     * WARNING: This method returns the first match!
+     */
+    static String findPrettyURL(String viewId, Locale locale, String requestUri, Map<String, String> requestParams) {
+        return findPrettyData(viewId, locale, new PageMappingUrlFormatterByUriAndParams(requestUri, requestParams));
+    }
+    
+    /**
+     * Returns the PageMapping.
+     * WARNING: This method returns the first match!
+     */
+    static PageMapping findPageMapping(String viewId, Locale locale) {
+        return findPrettyData(viewId, locale, PAGE_MAPPING_DUMMY_FORMATTER);
+    }
+    
+    /**
+     * Returns the UrlMapping.
+     * WARNING: This method returns the first match!
+     */
+    static UrlMapping findUrlMapping(String viewId, Locale locale) {
+        return getUrlMapping(findPageMapping(viewId, locale));
+    }
+    
+    /**
+     * Returns the pretty URL.
+     * WARNING: This method returns the first match!
+     */
+    private static <T> T findPrettyData(String viewId, Locale locale, PageMappingFormatter<T> formatter) {
         if (pageRoot == null || locale == null || viewId == null) return null;
         viewId = stripPageRoot(viewId);
         String language = locale.getLanguage();
@@ -150,7 +193,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
                     path = stripPageRoot(path);
                     if (viewId.equals(path)) {
                         try {
-                            return Helpers.pageHelper.getAppCtxPath() + mapping.getPermalink(requestUri);
+                            return formatter.format(mapping);
                         }
                         catch (Exception ex) {
                             // ignore lowlevel URL
@@ -178,6 +221,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     public PrettyConfig loadConfiguration(ServletContext sc) {
         if (Helpers.pageHelper == null) Helpers.pageHelper = new PrettyPageHelper(sc);
         if (pageRoot == null) pageRoot = Helpers.pageHelper.getFacesDir();
+        if (ctxPath == null) ctxPath = Helpers.pageHelper.getAppCtxPath();
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
         PrettyConfig cfg = new PrettyConfig();
         cfg.setMappings(loadMappings());
@@ -290,12 +334,58 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
     }
     
+    private static interface PageMappingFormatter<T> {
+        public T format(PageMapping mapping) throws Exception;
+    }
+    
+    private static interface PageMappingUrlFormatter extends PageMappingFormatter<String> {}
+    
+    private static final PageMappingFormatter<PageMapping> PAGE_MAPPING_DUMMY_FORMATTER = new PageMappingFormatter<PageMapping>() {
+
+        @Override
+        public PageMapping format(PageMapping mapping) throws Exception {
+            return mapping;
+        }
+        
+    };
+    
+    private static class PageMappingUrlFormatterByUri implements PageMappingUrlFormatter {
+
+        protected final String requestUri;
+        
+        public PageMappingUrlFormatterByUri(String requestUri) {
+            this.requestUri = requestUri;
+        }
+        
+        @Override
+        public String format(PageMapping mapping) throws Exception {
+            return ctxPath + mapping.getPermalink(requestUri);
+        }
+        
+    }
+    
+    private static class PageMappingUrlFormatterByUriAndParams extends PageMappingUrlFormatterByUri {
+
+        private final Map<String, String> requestParams;
+        
+        public PageMappingUrlFormatterByUriAndParams(String requestUri, Map<String, String> requestParams) {
+            super(requestUri);
+            this.requestParams = requestParams;
+        }
+        
+        @Override
+        public String format(PageMapping mapping) throws Exception {
+            return ctxPath + mapping.getPermalink(requestUri, requestParams);
+        }
+        
+    }
+    
     private static class PrettyPageFormatter extends PageMapping.PageFormatter {
 
         private final int paramLimit;
         
         public PrettyPageFormatter(PageMapping mapping, int paramLimit) {
-            super(mapping, null);
+            super(mapping);
             this.paramLimit = paramLimit;
         }
 

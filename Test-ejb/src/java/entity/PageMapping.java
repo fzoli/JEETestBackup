@@ -3,7 +3,9 @@ package entity;
 import entity.spec.Helpers;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -59,7 +61,15 @@ public class PageMapping extends NodeMapping<Page> {
     // a menürendszerben minden page mapping látható lesz mindaddig míg egy olyan oldal nem jön, aminek paramétere van
     // a praméterneveknek egyedinek kell lenniük egy útvonalon belül
     public String getPermalink(String url) throws Exception {
-        return getPermalink(url == null || url.isEmpty() ? SIMPLE_FORMATTER : new PageFormatter(this, url));
+        return getPermalink(url == null || url.isEmpty() ? SIMPLE_URL_FORMATTER : new PageFormatterByUrl(this, url));
+    }
+    
+    public String getPermalink(Map<String, String> params) throws Exception {
+        return getPermalink(new PageFormatterByParams(this, params));
+    }
+    
+    public String getPermalink(String url, Map<String, String> params) throws Exception {
+        return getPermalink(new PageFormatterByUrlAndParams(this, url, params));
     }
     
     // returns null if the path is broken!
@@ -71,12 +81,62 @@ public class PageMapping extends NodeMapping<Page> {
     
     public static class PageFormatter implements Strings.Formatter<Page> {
 
-        private final String url;
         protected final PageMapping mapping;
         
-        public PageFormatter(PageMapping mapping, String url) {
-            this.url = stripAppCtxFromUrl(url);
+        public PageFormatter(PageMapping mapping) {
             this.mapping = mapping;
+        }
+        
+        @Override
+        public String toString(Page page) {
+            String name = getPrettyName(page, true);
+            if (name == null) return null;
+            String param = getParameterString(page);
+            if (param == null || param.isEmpty()) return name;
+            return name + param;
+        }
+        
+        protected String getParameterString(Page page) {
+            return "";
+        }
+        
+        protected String getPrettyName(Page page, boolean allowIncrementedParams) {
+            if (getLanguage() == null || getLanguage().getCode() == null) return null;
+            PageMapping pm = Page.findPageMapping(page, getLanguage().getCode(), null, false, allowIncrementedParams);
+            if (pm == null) return null;
+            String pn = pm.getPrettyName();
+            if (pn == null || pn.isEmpty()) return null;
+            return pn;
+        }
+        
+        protected String throwException(Page way, String ret, RuntimeException ex) {
+            if (isLastWay(way)) {
+                if (!way.isParameterIncremented()) throw ex;
+            }
+            else {
+                throw ex;
+            }
+            return ret;
+        }
+        
+        protected boolean isLastWay(Page way) {
+            return mapping.getPage() == way;
+        }
+        
+        private Language getLanguage() {
+            if (mapping == null) return null;
+            return mapping.getLanguage();
+        }
+        
+    }
+    
+    private static class PageFormatterByUrl extends PageFormatter {
+
+        private final String url;
+        
+        public PageFormatterByUrl(PageMapping mapping, String url) {
+            super(mapping);
+            this.url = stripAppCtxFromUrl(url);
         }
         
         private String stripAppCtxFromUrl(String url) {
@@ -90,14 +150,6 @@ public class PageMapping extends NodeMapping<Page> {
         }
         
         @Override
-        public String toString(Page page) {
-            String name = getPrettyName(page, true);
-            if (name == null) return null;
-            String param = getParameterString(page);
-            if (param == null || param.isEmpty()) return name;
-            return name + param;
-        }
-        
         protected String getParameterString(Page page) {
             String ps = "";
             List<Page.Parameter> params = page.getParameters();
@@ -137,33 +189,66 @@ public class PageMapping extends NodeMapping<Page> {
             return ps;
         }
         
-        private String throwException(Page way, String ret, RuntimeException ex) {
-            boolean lastWay = mapping.getPage() == way;
-            if (lastWay) {
-                if (!way.isParameterIncremented()) throw ex;
-            }
-            else {
-                throw ex;
-            }
-            return ret;
-        }
+    }
+    
+    private static class PageFormatterByParams extends PageFormatter {
+
+        protected final Map<String, String> PARAMS;
         
-        private String getPrettyName(Page page, boolean allowIncrementedParams) {
-            if (getLanguage() == null || getLanguage().getCode() == null) return null;
-            PageMapping pm = Page.findPageMapping(page, getLanguage().getCode(), null, false, allowIncrementedParams);
-            if (pm == null) return null;
-            String pn = pm.getPrettyName();
-            if (pn == null || pn.isEmpty()) return null;
-            return pn;
+        public PageFormatterByParams(PageMapping mapping, Map<String, String> params) {
+            super(mapping);
+            PARAMS = params;
         }
-        
-        private Language getLanguage() {
-            if (mapping == null) return null;
-            return mapping.getLanguage();
+
+        @Override
+        protected String getParameterString(Page page) {
+            String ps = "";
+            for (Page.Parameter param : page.getParameters()) {
+                String val = PARAMS.get(param.getName());
+                if (val == null) return throwException(page, ps, new RuntimeException("not enought parameters"));
+                ps += "/" + val;
+            }
+            return ps;
         }
         
     }
     
-    private final transient Strings.Formatter<Page> SIMPLE_FORMATTER = new PageFormatter(this, null);
+    private static class PageFormatterByUrlAndParams extends PageFormatterByParams {
+
+        private final PageFormatter fmtUrl;
+        
+        public PageFormatterByUrlAndParams(PageMapping mapping, String url, Map<String, String> params) {
+            super(mapping, params);
+            fmtUrl = new PageFormatterByUrl(mapping, url);
+        }
+
+        @Override
+        protected String getParameterString(Page page) {
+            List<Page.Parameter> params = page.getParameters();
+            if (params.isEmpty()) return "";
+            try {
+                // try loading url params as default values
+                Map<String, String> urlParams = new HashMap<>();
+                String[] urlSplit = fmtUrl.getParameterString(page).split("/");
+                for (int i = 1; i < urlSplit.length; i++) {
+                    urlParams.put(params.get(i).getName(), urlSplit[i]);
+                }
+                // default values are loaded
+                if (!urlParams.isEmpty()) {
+                    // override default values
+                    urlParams.putAll(PARAMS);
+                    // refresh the original map
+                    PARAMS.putAll(urlParams);
+                }
+            }
+            catch (Exception ex) {
+                // loading params by url is failed
+            }
+            return super.getParameterString(page);
+        }
+        
+    }
+    
+    private final transient Strings.Formatter<Page> SIMPLE_URL_FORMATTER = new PageFormatterByUrl(this, null);
     
 }
