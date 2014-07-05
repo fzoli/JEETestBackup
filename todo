@@ -16,6 +16,10 @@ fejlesztés:
   (ne kelljen default properties fájlt létrehozni)
 
 továbbfejlesztés:
+- áttérés PrettyFaces-ről Rewrite-ra és az első url / helyett /hu legyen (illetve a nyelv kódja) elkerülve ezt: https://github.com/ocpsoft/rewrite/issues/126
+- a siteba opcionális paraméter, hogy melyik bean metódus tér vissza boolean értékkel, ami megadja, hogy be van-e lépve az user;
+  ha nincs belépve, minden url-re a siteon a kezdőképernyő jön be (ami dinamikusan adja meg a nézetet attól függően, van-e user belépve)
+- az előzőhöz hasonlóan page-be egy opc. paraméter, melyik metódus adja meg, hogy elérhető-e az oldal (ha nem érhető el, 404 error és nincs listázva; öröklődjön!)
 - jsf oldalon nyelvválasztó, mely az adott oldal címére mutat az adott nyelvhez
   (csak az adott oldalhoz tartozó nyelvek megjelenítése)
 - a shops tábla address és name oszlopa legyen nyelvfüggő
