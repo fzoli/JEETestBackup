@@ -16,7 +16,9 @@ fejlesztés:
   (ne kelljen default properties fájlt létrehozni)
 
 továbbfejlesztés:
-- áttérés PrettyFaces-ről Rewrite-ra és az első url / helyett /hu legyen (illetve a nyelv kódja) elkerülve ezt: https://github.com/ocpsoft/rewrite/issues/126
+- áttérés PrettyFaces-ről Rewrite-ra
+  FONTOS: a nyelvi kódnak paraméternek kell lennie és a ViewHandler#getActionURL metódusnak GET paraméterként includeolnia kell
+  Rewrite átírása, hogy a nyelvi kódot törölje az OutboundRewrite esetén, de vegye figyelembe a paramétert és szűrje ki a nem megfelelő nyelvű találatokat
 - a siteba opcionális paraméter, hogy melyik bean metódus tér vissza boolean értékkel, ami megadja, hogy be van-e lépve az user;
   ha nincs belépve, minden url-re a siteon a kezdőképernyő jön be (ami dinamikusan adja meg a nézetet attól függően, van-e user belépve)
 - az előzőhöz hasonlóan page-be egy opc. paraméter, melyik metódus adja meg, hogy elérhető-e az oldal (ha nem érhető el, 404 error és nincs listázva; öröklődjön!)
