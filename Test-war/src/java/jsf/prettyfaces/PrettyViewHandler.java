@@ -42,6 +42,8 @@ public class PrettyViewHandler extends MultiViewHandler {
 //        String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), uri);
 //        if (prettyURL != null) return prettyURL;
         String url = super.getActionURL(context, viewId);
+        // returns the original url if it already contains the language
+        if (url.contains("?" + KEY_LANGUAGE + "=") || url.contains("&" + KEY_LANGUAGE + "=")) return url;
         // add class parameter to the URL, rewriting removes it
         return url + (url.contains("?") ? "&" : "?") + KEY_LANGUAGE + "=" + context.getViewRoot().getLocale().getLanguage();
     }
