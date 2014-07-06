@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://github.com/ocpsoft/rewrite/blob/07c653fb09fe362ec5b8196d9cecdef6b865add5/impl-servlet/src/main/java/org/ocpsoft/rewrite/servlet/impl/DefaultHttpRewriteProvider.java
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,9 @@ import org.ocpsoft.rewrite.util.ServiceLogger;
 import org.ocpsoft.urlbuilder.AddressBuilder;
 
 /**
+ * Original file: https://github.com/ocpsoft/rewrite/blob/07c653fb09fe362ec5b8196d9cecdef6b865add5/impl-servlet/src/main/java/org/ocpsoft/rewrite/servlet/impl/DefaultHttpRewriteProvider.java
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
- * 
+ * @author <a href="mailto:f.zoli@mailbox.hu">Zoltan Farkas</a>
  */
 public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements NonEnriching
 {
