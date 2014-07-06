@@ -59,7 +59,8 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
    private final Pattern CLASS_REMOVER_2 = Pattern.compile("[?&]$");
    
    /**
-    * Returns the name of the class parameter in the URLs.
+    * Returns the name of the class parameter in the outbound URLs.
+    * @return the parameter name
     */
    protected String getClassKey() {
        return PrettyViewHandler.KEY_LANGUAGE;
@@ -68,6 +69,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
    /**
     * Returns whether the rule should be performed.
     * If the rule will be performed, it removes the class parameter from the URL.
+    * @return false if the rule is not filtered so can be performed; otherwise true
     */
    private boolean isRuleFiltered(HttpServletRewrite event, Rule rule) {
        if (getClassKey() != null && event instanceof HttpOutboundServletRewrite) {

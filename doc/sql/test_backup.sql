@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Hoszt: localhost
--- Létrehozás ideje: 2014. jún. 10. 21:15
+-- Létrehozás ideje: 2014. júl. 06. 13:49
 -- Szerver verzió: 5.5.37
 -- PHP verzió: 5.4.4-14+deb7u10
 
@@ -52,6 +52,7 @@ INSERT INTO `domains` (`domain`, `site-id`) VALUES
 CREATE TABLE IF NOT EXISTS `languages` (
   `code` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
+  `english-name` varchar(255) NOT NULL,
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -59,9 +60,9 @@ CREATE TABLE IF NOT EXISTS `languages` (
 -- A tábla adatainak kiíratása `languages`
 --
 
-INSERT INTO `languages` (`code`, `name`) VALUES
-('en', 'English'),
-('hu', 'Magyar');
+INSERT INTO `languages` (`code`, `name`, `english-name`) VALUES
+('en', 'English', 'English'),
+('hu', 'Magyar', 'Hungarian');
 
 -- --------------------------------------------------------
 
@@ -179,8 +180,7 @@ CREATE TABLE IF NOT EXISTS `page-params` (
 
 INSERT INTO `page-params` (`page-id`, `name`, `bean-variable`, `validator`, `index`) VALUES
 (1, 'value1', NULL, 'testValidator', 0),
-(1, 'value2', NULL, NULL, 1),
-(5, 'kakukk', NULL, NULL, 0);
+(1, 'value2', NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -205,9 +205,9 @@ CREATE TABLE IF NOT EXISTS `pages` (
 
 INSERT INTO `pages` (`id`, `view-path`, `action`, `view-path-generated`, `action-inherited`, `parameter-incremented`, `site-dependent`) VALUES
 (1, '/faces/home.xhtml', 'language.test', 0, 0, 1, 0),
-(2, 'sample.xhtml', NULL, 0, 0, 0, 0),
-(5, '/no-faces/sample.xhtml', NULL, 0, 0, 0, 0),
-(6, NULL, NULL, 0, 0, 0, 0),
+(2, 'test.xhtml', NULL, 0, 0, 0, 0),
+(5, 'index.xhtml', NULL, 0, 0, 0, 0),
+(6, '/no-faces/blabla.xhtml', NULL, 0, 0, 0, 0),
 (7, 'sample.xhtml', NULL, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
@@ -335,9 +335,9 @@ ALTER TABLE `site-mappings`
 -- Megkötések a táblához `sites`
 --
 ALTER TABLE `sites`
-  ADD CONSTRAINT `sites_ibfk_2` FOREIGN KEY (`def-lang`) REFERENCES `languages` (`code`),
   ADD CONSTRAINT `FK_sites_id` FOREIGN KEY (`id`) REFERENCES `nodes` (`id`),
-  ADD CONSTRAINT `sites_ibfk_1` FOREIGN KEY (`home-page`) REFERENCES `pages` (`id`);
+  ADD CONSTRAINT `sites_ibfk_1` FOREIGN KEY (`home-page`) REFERENCES `pages` (`id`),
+  ADD CONSTRAINT `sites_ibfk_2` FOREIGN KEY (`def-lang`) REFERENCES `languages` (`code`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
