@@ -9,22 +9,25 @@ import java.util.regex.Pattern;
  */
 public class UrlParameters {
 
-    private final Pattern PARAM_PATTERN/*, PARAM_REPLACER*/, PARAM_REMOVER_0, PARAM_REMOVER_1, PARAM_REMOVER_2, PARAM_REMOVER_3;
+    private final Pattern PARAM_PATTERN, PARAM_REMOVER_0, PARAM_REMOVER_1, PARAM_REMOVER_2, PARAM_REMOVER_3;
     
-    private final String CLASS_KEY;
+    private final String KEY;
     
-    public UrlParameters(String classKey) {
-        CLASS_KEY = classKey;
-        PARAM_PATTERN = Pattern.compile(String.format("(.*)([?&])(%s=([^&\\s]+))(.*)", classKey));
-//        PARAM_REPLACER = Pattern.compile(String.format("([?&]%s=)([^&\\s]+)", classKey));
-        PARAM_REMOVER_0 = Pattern.compile(String.format("([?&])(%s=([^&\\s]+))", classKey));
+    public UrlParameters(String key) {
+        KEY = key;
+        PARAM_PATTERN = Pattern.compile(String.format("(.*)([?&])(%s=([^&\\s]+))(.*)", key));
+        PARAM_REMOVER_0 = Pattern.compile(String.format("([?&])(%s=([^&\\s]+))", key));
         PARAM_REMOVER_1 = Pattern.compile("&{2,}");
         PARAM_REMOVER_2 = Pattern.compile("\\?&");
         PARAM_REMOVER_3 = Pattern.compile("[?&]$");
     }
 
+    public final String getKey() {
+        return KEY;
+    }
+    
     public String get(String url) {
-        if (CLASS_KEY == null) return null;
+        if (KEY == null) return null;
         Matcher m = PARAM_PATTERN.matcher(url);
         if (m.matches()) {
             return m.group(4);
@@ -33,9 +36,9 @@ public class UrlParameters {
     }
     
     public String remove(String url) {
-        if (CLASS_KEY == null) return url;
+        if (KEY == null) return url;
         Matcher matcher = PARAM_REMOVER_0.matcher(url);
-        url = matcher.replaceAll("$1"); // removes the class parameter
+        url = matcher.replaceAll("$1"); // removes the parameter
         matcher = PARAM_REMOVER_1.matcher(url);
         url = matcher.replaceAll("&"); // replaces && to &
         matcher = PARAM_REMOVER_2.matcher(url);
@@ -45,20 +48,13 @@ public class UrlParameters {
     }
 
     public String set(String url, String value) {
-        if (CLASS_KEY == null) {
+        if (KEY == null) {
             return url;
         }
         if (get(url) != null) {
             url = remove(url);
         }
-        return url + (url.contains("?") ? (url.charAt(url.length() - 1) == '?'  ? "" : (url.charAt(url.length() - 1) == '&' ? "" : "&")) : "?") + CLASS_KEY + "=" + value;
-//        if (get(url) == null) {
-//            url += (url.contains("?") ? "&" : "?") + CLASS_KEY + "=" + value;
-//        }
-//        else {
-//            url = PARAM_REPLACER.matcher(url).replaceAll("$1" + value);
-//        }
-//        return url;
+        return url + (url.contains("?") ? (url.charAt(url.length() - 1) == '?'  ? "" : (url.charAt(url.length() - 1) == '&' ? "" : "&")) : "?") + KEY + "=" + value;
     }
     
     private static final String[] test = {

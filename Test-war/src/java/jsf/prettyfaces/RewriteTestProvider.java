@@ -5,6 +5,7 @@ import org.ocpsoft.rewrite.annotation.RewriteConfiguration;
 import org.ocpsoft.rewrite.config.Condition;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
+import org.ocpsoft.rewrite.config.Rule;
 import org.ocpsoft.rewrite.context.EvaluationContext;
 import org.ocpsoft.rewrite.event.Rewrite;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
@@ -20,94 +21,51 @@ import util.UrlParameters;
 @RewriteConfiguration
 public class RewriteTestProvider extends HttpConfigurationProvider {
     
-    private static abstract class CJoin extends Join {
-        
-        private String classValue;
-        private UrlParameters classHelper;
-        
-        protected CJoin(String pattern, boolean requestBinding) {
-            super(pattern, requestBinding);
-        }
-        
-        public CJoin withClass(String classValue) {
-            this.classValue = classValue;
-            return this;
-        }
-        
-        @Override
-        public CJoin to(String resource) {
-            super.to(resource);
-            return this;
-        }
-        
-        public abstract String getClassKey();
-
-        private UrlParameters getClassHelper() {
-            if (classHelper != null) return classHelper;
-            return classHelper = new UrlParameters(getClassKey());
-        }
-        
-        public String getClassValue() {
-            return classValue;
-        }
-        
-        public String getClassValue(String url) {
-            return getClassHelper().get(url);
-        }
-        
-        public void removeClass(HttpOutboundServletRewrite event) {
-            event.setOutboundAddress(AddressBuilder.create(getClassHelper().remove(event.getAddress().toString())));
-        }
-        
-    }
-    
-    private static class LJoin extends CJoin {
-        
-        protected LJoin(String pattern, boolean requestBinding) {
-            super(pattern, requestBinding);
-        }
-
-        @Override
-        public String getClassKey() {
-            return PrettyViewHandler.KEY_LANGUAGE;
-        }
-        
-        public static LJoin path(final String pattern) {
-            return new LJoin(pattern, true);
-        }
-        
-    }
-    
     private static class CCondition implements Condition {
 
-        private final CJoin rule;
+        private final String ruleClass;
+        private final UrlParameters helper;
         
-        public CCondition(CJoin rule) {
-            this.rule = rule;
+        public CCondition(UrlParameters helper, String ruleClass) {
+            this.helper = helper;
+            this.ruleClass = ruleClass;
+        }
+        
+        private void removeClass(HttpOutboundServletRewrite event) {
+            event.setOutboundAddress(AddressBuilder.create(helper.remove(event.getAddress().toString())));
         }
         
         @Override
         public boolean evaluate(Rewrite rwrt, EvaluationContext ec) {
-            String classKey = rule.getClassKey();
+            String classKey = helper.getKey();
             if (classKey != null && rwrt instanceof HttpOutboundServletRewrite) {
                 HttpOutboundServletRewrite event = (HttpOutboundServletRewrite) rwrt;
-                String eventClass = rule.getClassValue(event.getAddress().toString());
-                if (eventClass == null) {
-                    rule.removeClass(event);
+                if (ruleClass == null) {
+                    removeClass(event);
                     return true;
                 }
-                String ruleClass = rule.getClassValue();
-                if (ruleClass == null) {
-                    rule.removeClass(event);
+                String eventClass = helper.get(event.getAddress().toString());
+                if (eventClass == null) {
+                    removeClass(event);
                     return true;
                 }
                 boolean enabled = eventClass.equals(ruleClass);
                 if (enabled) {
-                    rule.removeClass(event);
+                    removeClass(event);
                 }
                 return enabled;
             }
             return true;
+        }
+        
+    }
+    
+    private static class LCondition extends CCondition {
+        
+        private static final UrlParameters helper = new UrlParameters(PrettyViewHandler.KEY_LANGUAGE);
+        
+        public LCondition(String ruleClass) {
+            super(helper, ruleClass);
         }
         
     }
@@ -119,11 +77,13 @@ public class RewriteTestProvider extends HttpConfigurationProvider {
 
     @Override
     public Configuration getConfiguration(final ServletContext context) {
-        final CJoin ruleHu = LJoin.path("/tigris").to("/faces/tiger.xhtml").withClass("hu");
-        final CJoin ruleEn = LJoin.path("/tiger").to("/faces/tiger.xhtml").withClass("en");
+        Condition conditionHu = new LCondition("hu");
+        Condition conditionEn = new LCondition("en");
+        Rule ruleHu = Join.path("/tigris").to("/faces/tiger.xhtml");
+        Rule ruleEn = Join.path("/tiger").to("/faces/tiger.xhtml");
         return ConfigurationBuilder.begin()
-            .addRule(ruleHu).when(new CCondition(ruleHu))
-            .addRule(ruleEn).when(new CCondition(ruleEn));
+            .addRule(ruleHu).when(conditionHu)
+            .addRule(ruleEn).when(conditionEn);
     }
     
 }
