@@ -54,7 +54,8 @@ public class UrlParameters {
         if (get(url) != null) {
             url = remove(url);
         }
-        return url + (url.contains("?") ? (url.charAt(url.length() - 1) == '?'  ? "" : (url.charAt(url.length() - 1) == '&' ? "" : "&")) : "?") + KEY + "=" + value;
+        char last = url.length() > 0 ? url.charAt(url.length() - 1) : '\0';
+        return url + (url.contains("?") ? (last == '?' ? "" : (last == '&' ? "" : "&")) : "?") + KEY + "=" + value;
     }
     
     private static final String[] test = {
