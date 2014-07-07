@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import jsf.prettyfaces.PrettyConfigurationProvider.FilterType;
 import logging.Log;
+import util.UrlParameters;
 
 /**
  * @author zoli
@@ -21,6 +22,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     private static final Log LOGGER = Log.getLogger(PrettyViewHandler.class);
     
     public static final String KEY_LANGUAGE = "lang";
+    private static final UrlParameters HELPER = new UrlParameters(KEY_LANGUAGE);
     
     private PageBeanLocal pageBean;
 
@@ -42,10 +44,7 @@ public class PrettyViewHandler extends MultiViewHandler {
 //        String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), uri);
 //        if (prettyURL != null) return prettyURL;
         String url = super.getActionURL(context, viewId);
-        // returns the original url if it already contains the language
-        if (url.contains("?" + KEY_LANGUAGE + "=") || url.contains("&" + KEY_LANGUAGE + "=")) return url;
-        // add class parameter to the URL, rewriting removes it
-        return url + (url.contains("?") ? "&" : "?") + KEY_LANGUAGE + "=" + context.getViewRoot().getLocale().getLanguage();
+        return HELPER.set(url, context.getViewRoot().getLocale().getLanguage());
     }
     
     @Override
