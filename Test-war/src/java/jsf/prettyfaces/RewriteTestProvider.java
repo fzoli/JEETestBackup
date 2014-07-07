@@ -21,51 +21,50 @@ import util.UrlParameters;
 @RewriteConfiguration
 public class RewriteTestProvider extends HttpConfigurationProvider {
     
-    private static class CCondition implements Condition {
+    private static class ParameterCondition implements Condition {
 
-        private final String ruleClass;
+        private final String value;
         private final UrlParameters helper;
         
-        public CCondition(UrlParameters helper, String ruleClass) {
+        public ParameterCondition(UrlParameters helper, String value) {
             this.helper = helper;
-            this.ruleClass = ruleClass;
-        }
-        
-        private void removeClass(HttpOutboundServletRewrite event) {
-            event.setOutboundAddress(AddressBuilder.create(helper.remove(event.getAddress().toString())));
+            this.value = value;
         }
         
         @Override
         public boolean evaluate(Rewrite rwrt, EvaluationContext ec) {
-            String classKey = helper.getKey();
-            if (classKey != null && rwrt instanceof HttpOutboundServletRewrite) {
+            if (helper.getKey() != null && rwrt instanceof HttpOutboundServletRewrite) {
                 HttpOutboundServletRewrite event = (HttpOutboundServletRewrite) rwrt;
-                if (ruleClass == null) {
-                    removeClass(event);
+                if (value == null) {
+                    removeParameter(event);
                     return true;
                 }
                 String eventClass = helper.get(event.getAddress().toString());
                 if (eventClass == null) {
-                    removeClass(event);
+                    removeParameter(event);
                     return true;
                 }
-                boolean enabled = eventClass.equals(ruleClass);
+                boolean enabled = eventClass.equals(value);
                 if (enabled) {
-                    removeClass(event);
+                    removeParameter(event);
                 }
                 return enabled;
             }
             return true;
         }
         
+        private void removeParameter(HttpOutboundServletRewrite event) {
+            event.setOutboundAddress(AddressBuilder.create(helper.remove(event.getAddress().toString())));
+        }
+        
     }
     
-    private static class LCondition extends CCondition {
+    private static class LngCondition extends ParameterCondition {
         
         private static final UrlParameters helper = new UrlParameters(PrettyViewHandler.KEY_LANGUAGE);
         
-        public LCondition(String ruleClass) {
-            super(helper, ruleClass);
+        public LngCondition(String value) {
+            super(helper, value);
         }
         
     }
@@ -77,8 +76,8 @@ public class RewriteTestProvider extends HttpConfigurationProvider {
 
     @Override
     public Configuration getConfiguration(final ServletContext context) {
-        Condition conditionHu = new LCondition("hu");
-        Condition conditionEn = new LCondition("en");
+        Condition conditionHu = new LngCondition("hu");
+        Condition conditionEn = new LngCondition("en");
         Rule ruleHu = Join.path("/tigris").to("/faces/tiger.xhtml");
         Rule ruleEn = Join.path("/tiger").to("/faces/tiger.xhtml");
         return ConfigurationBuilder.begin()
