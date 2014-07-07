@@ -39,12 +39,12 @@ public class RewriteTestProvider extends HttpConfigurationProvider {
                     removeParameter(event);
                     return true;
                 }
-                String eventClass = helper.get(event.getAddress().toString());
-                if (eventClass == null) {
+                String eventValue = helper.get(event.getAddress().toString());
+                if (eventValue == null) {
                     removeParameter(event);
                     return true;
                 }
-                boolean enabled = eventClass.equals(value);
+                boolean enabled = eventValue.equals(value);
                 if (enabled) {
                     removeParameter(event);
                 }
