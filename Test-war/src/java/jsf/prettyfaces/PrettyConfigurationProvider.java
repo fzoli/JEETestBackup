@@ -230,6 +230,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     public static void reloadConfiguration(ServletContext sc) {
         new PrettyConfigurator(sc).configure();
+        ConfigurationCacheProvider.reset();
     }
     
     private static List<UrlMapping> loadMappings() {
