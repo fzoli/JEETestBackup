@@ -18,10 +18,9 @@ package org.ocpsoft.rewrite.servlet.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
-import jsf.prettyfaces.PrettyViewHandler;
+import hu.farcsal.cms.prettyfaces.PrettyViewHandler;
+import hu.farcsal.util.UrlParameters;
 import org.ocpsoft.common.services.NonEnriching;
 import org.ocpsoft.common.services.ServiceLoader;
 import org.ocpsoft.common.util.Iterators;
@@ -55,16 +54,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
    private volatile ConfigurationLoader loader;
    private volatile List<RuleCacheProvider> ruleCacheProviders;
 
-   private final Pattern CLASS_REMOVER_1 = Pattern.compile(String.format("([?&])(%s=.{0,2})", getClassKey()));
-   private final Pattern CLASS_REMOVER_2 = Pattern.compile("[?&]$");
-   
-   /**
-    * Returns the name of the class parameter in the outbound URLs.
-    * @return the parameter name
-    */
-   protected String getClassKey() {
-       return PrettyViewHandler.KEY_LANGUAGE;
-   }
+   private static final UrlParameters HELPER = new UrlParameters(PrettyViewHandler.KEY_LANGUAGE);
    
    /**
     * Returns whether the rule should be performed.
@@ -72,7 +62,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
     * @return false if the rule is not filtered so can be performed; otherwise true
     */
    private boolean isRuleFiltered(HttpServletRewrite event, Rule rule) {
-       if (getClassKey() != null && event instanceof HttpOutboundServletRewrite) {
+       if (event instanceof HttpOutboundServletRewrite) {
            String eventClass = getClass(event);
            if (eventClass == null) {
                removeClass((HttpOutboundServletRewrite)event);
@@ -83,6 +73,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
                removeClass((HttpOutboundServletRewrite)event);
                return false;
            }
+           System.out.print(eventClass + " - " + ruleClass);
            boolean enabled = eventClass.equals(ruleClass);
            if (enabled) {
                removeClass((HttpOutboundServletRewrite)event);
@@ -97,16 +88,13 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
     */
    private void removeClass(HttpOutboundServletRewrite event) {
        String url = event.getAddress().toString();
-       Matcher matcher = CLASS_REMOVER_1.matcher(url);
-       url = matcher.replaceFirst("$1"); // removes the class parameter
-       matcher = CLASS_REMOVER_2.matcher(url);
-       url = matcher.replaceFirst(""); // removes ? or & at the end of the string
-       event.setOutboundAddress(AddressBuilder.create(url));
+       System.out.println("removeClass: " + url);
+       event.setOutboundAddress(AddressBuilder.create(HELPER.remove(url)));
    }
    
    /**
     * Returns the class of the rule.
-    * Test method. Rule#getClass should exist.
+    * Test method.
     */
    private String getClass(Rule rule) {
        try {
@@ -126,19 +114,12 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
    
    /**
     * Returns the class of the event.
-    * Test method. HttpServletRewrite#getClass should exist.
+    * Test method.
     */
    private String getClass(HttpServletRewrite event) {
-       try {
-           String q = event.getAddress().getQuery();
-           String from = PrettyViewHandler.KEY_LANGUAGE + "=";
-           q = q.substring(q.indexOf(from) + from.length());
-           q = q.substring(0, 2);
-           return q;
-       }
-       catch (Exception ex) {
-           return null;
-       }
+       String url = event.getAddress().toString();
+       System.out.println("getClass: " + url);
+       return HELPER.get(url);
    }
    
    @Override
@@ -198,7 +179,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
 
                if (rule.evaluate(event, context))
                {
-                  if (handleBindings(event, context, values) && !isRuleFiltered(event, rule))
+                  if (!isRuleFiltered(event, rule) && handleBindings(event, context, values))
                   {
                      context.setState(RewriteState.PERFORMING);
                      log.debug("Rule [" + rule + "] matched and will be performed.");
@@ -254,7 +235,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
          context.setState(RewriteState.EVALUATING);
          if (rule.evaluate(event, context))
          {
-            if (handleBindings(event, context, values) && !isRuleFiltered(event, rule))
+            if (!isRuleFiltered(event, rule) && handleBindings(event, context, values))
             {
                context.setState(RewriteState.PERFORMING);
                log.debug("Rule [" + rule + "] matched and will be performed.");
@@ -323,4 +304,5 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
    {
       return 0;
    }
+   
 }
