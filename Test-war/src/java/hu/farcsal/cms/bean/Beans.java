@@ -16,7 +16,7 @@ public class Beans {
     public static PageBeanLocal lookupPageBeanLocal() {
         try {
             Context c = new InitialContext();
-            return (PageBeanLocal) c.lookup("java:global/Test/Test-ejb/PageBean!hu.farcsal.cms.bean.PageBeanLocal");
+            return (PageBeanLocal) c.lookup("java:app/Test-ejb/PageBean!" + PageBeanLocal.class.getName());
         }
         catch (NamingException ne) {
             LOGGER.e("exception caught", ne);
