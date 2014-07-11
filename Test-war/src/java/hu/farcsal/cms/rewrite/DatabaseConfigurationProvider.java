@@ -14,7 +14,6 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import hu.farcsal.log.Log;
 import org.ocpsoft.rewrite.annotation.RewriteConfiguration;
-import org.ocpsoft.rewrite.config.Condition;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
 import org.ocpsoft.rewrite.config.Rule;
@@ -27,13 +26,13 @@ import hu.farcsal.util.UrlParameters;
  * @author zoli
  */
 @RewriteConfiguration
-public class RewriteDatabaseProvider extends HttpConfigurationProvider {
+public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     
     private static final UrlParameters LNG_PARAM = new UrlParameters(PrettyViewHandler.KEY_LANGUAGE);
     
-    private static class LngCondition extends ParameterCondition {
+    private static class LanguageProcessor extends ParameterProcessor {
         
-        public LngCondition(String lngCode) {
+        public LanguageProcessor(String lngCode) {
             super(LNG_PARAM, lngCode);
         }
         
@@ -67,7 +66,7 @@ public class RewriteDatabaseProvider extends HttpConfigurationProvider {
         return 0;
     }
     
-    private static final Log LOGGER = Log.getLogger(RewriteDatabaseProvider.class);
+    private static final Log LOGGER = Log.getLogger(DatabaseConfigurationProvider.class);
     
     private static String pageRoot, ctxPath;
     public static PageBeanLocal pageBean;
@@ -88,22 +87,22 @@ public class RewriteDatabaseProvider extends HttpConfigurationProvider {
         return node.getViewPath(true);
     }
     
-    private static List<LngCondition> createLanguageConditions() {
-        List<LngCondition> l = new ArrayList<>();
+    private static List<LanguageProcessor> createLanguageConditions() {
+        List<LanguageProcessor> l = new ArrayList<>();
         for (Language lng : pageBean.getLanguages()) {
-            l.add(new LngCondition(lng.getCode()));
+            l.add(new LanguageProcessor(lng.getCode()));
         }
         return l;
     }
     
-    private static LngCondition getLanguageCondition(List<LngCondition> l, Language lng) {
-        for (LngCondition c : l) {
+    private static LanguageProcessor getLanguageCondition(List<LanguageProcessor> l, Language lng) {
+        for (LanguageProcessor c : l) {
             if (c.getValue().equals(lng.getCode())) return c;
         }
         return null;
     }
     
-    private static void append(ConfigurationBuilder cfg, List<Page> pages, List<LngCondition> lngConditions) {
+    private static void append(ConfigurationBuilder cfg, List<Page> pages, List<LanguageProcessor> lngConditions) {
         for (Page p : pages) {
             append(cfg, p, lngConditions);
             if (p.isChildAvailable()) {
@@ -112,7 +111,7 @@ public class RewriteDatabaseProvider extends HttpConfigurationProvider {
         }
     }
     
-    private static void append(ConfigurationBuilder cfg, Page node, List<LngCondition> lngConditions) {
+    private static void append(ConfigurationBuilder cfg, Page node, List<LanguageProcessor> lngConditions) {
         if (node.getId() == null) return;
         
         String view = getViewPath(node);
@@ -126,7 +125,7 @@ public class RewriteDatabaseProvider extends HttpConfigurationProvider {
             List<String> actions = mapping.getPage().getActions();
             if (lng == null || lng.getCode() == null) continue;
             String id = mapping.getLanguage().getCode() + '-' + node.getId();
-            LngCondition lngCondition = getLanguageCondition(lngConditions, lng);
+            LanguageProcessor lngCondition = getLanguageCondition(lngConditions, lng);
             if (findParentView) {
                 PageMapping parentMapping = Pages.getFirstPage(true, null, node, lng.getCode(), null, false, true);
                 if (parentMapping == null) continue;
@@ -144,8 +143,8 @@ public class RewriteDatabaseProvider extends HttpConfigurationProvider {
         
     }
     
-    private static void createRule(ConfigurationBuilder cfg, LngCondition lngCondition, PageMapping mapping, String id, String link, String view, List<String> actions) {
-        cfg.addRule(Join.path(link).to(view)).when(lngCondition);
+    private static void createRule(ConfigurationBuilder cfg, LanguageProcessor lngCondition, PageMapping mapping, String id, String link, String view, List<String> actions) {
+        cfg.addRule(Join.path(link).to(view)).when(lngCondition).perform(lngCondition);
         LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
     }
     
@@ -153,18 +152,18 @@ public class RewriteDatabaseProvider extends HttpConfigurationProvider {
     public Configuration getConfiguration(final ServletContext context) {
         initProvider(context);
         
-//        List<LngCondition> lngConditions = createLanguageConditions();
-        ConfigurationBuilder cfg = ConfigurationBuilder.begin(); return cfg;
+        List<LanguageProcessor> lngConditions = createLanguageConditions();
+        ConfigurationBuilder cfg = ConfigurationBuilder.begin(); //return cfg;
         
 //        append(cfg, pageBean.getPageTree().getChildren(), lngConditions);
         
-//        Condition conditionHu = new LngCondition("hu");
-//        Condition conditionEn = new LngCondition("en");
-//        Rule ruleHu = Join.path("/tigris").to("/faces/tiger.xhtml");
-//        Rule ruleEn = Join.path("/tiger").to("/faces/tiger.xhtml");
-//        return cfg
-//            .addRule(ruleHu).when(conditionHu)
-//            .addRule(ruleEn).when(conditionEn);
+        LanguageProcessor conditionHu = new LanguageProcessor("hu");
+        LanguageProcessor conditionEn = new LanguageProcessor("en");
+        Rule ruleHu = Join.path("/tigris").to("/faces/tiger.xhtml");
+        Rule ruleEn = Join.path("/tiger").to("/faces/tiger.xhtml");
+        return cfg
+            .addRule(ruleHu).when(conditionHu).perform(conditionHu)
+            .addRule(ruleEn).when(conditionEn).perform(conditionEn);
     }
     
 }

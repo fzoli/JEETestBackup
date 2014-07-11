@@ -179,7 +179,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
 
                if (rule.evaluate(event, context))
                {
-                  if (!isRuleFiltered(event, rule) && handleBindings(event, context, values))
+                  if (handleBindings(event, context, values) && !isRuleFiltered(event, rule))
                   {
                      context.setState(RewriteState.PERFORMING);
                      log.debug("Rule [" + rule + "] matched and will be performed.");
@@ -235,7 +235,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
          context.setState(RewriteState.EVALUATING);
          if (rule.evaluate(event, context))
          {
-            if (!isRuleFiltered(event, rule) && handleBindings(event, context, values))
+            if (handleBindings(event, context, values) && !isRuleFiltered(event, rule))
             {
                context.setState(RewriteState.PERFORMING);
                log.debug("Rule [" + rule + "] matched and will be performed.");

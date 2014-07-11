@@ -6,47 +6,49 @@ import org.ocpsoft.rewrite.event.Rewrite;
 import org.ocpsoft.rewrite.servlet.http.event.HttpOutboundServletRewrite;
 import org.ocpsoft.urlbuilder.AddressBuilder;
 import hu.farcsal.util.UrlParameters;
+import org.ocpsoft.rewrite.config.Operation;
 
 /**
- *
+ * 
  * @author zoli
  */
-class ParameterCondition implements Condition {
+class ParameterProcessor implements Condition, Operation {
 
     private final String value;
     private final UrlParameters helper;
 
-    public ParameterCondition(UrlParameters helper, String value) {
+    public ParameterProcessor(UrlParameters helper, String value) {
         this.helper = helper;
         this.value = value;
     }
-
+    
     public String getValue() {
         return value;
     }
 
+    private boolean isOutbound(Rewrite rwrt) {
+        return helper.getKey() != null && rwrt instanceof HttpOutboundServletRewrite;
+    }
+    
     @Override
     public boolean evaluate(Rewrite rwrt, EvaluationContext ec) {
-        if (helper.getKey() != null && rwrt instanceof HttpOutboundServletRewrite) {
+        if (isOutbound(rwrt)) {
             HttpOutboundServletRewrite event = (HttpOutboundServletRewrite) rwrt;
-            if (value == null) {
-                removeParameter(event);
-                return true;
-            }
+            if (value == null) return true;
             String eventValue = helper.get(event.getAddress().toString());
-            if (eventValue == null) {
-                removeParameter(event);
-                return true;
-            }
-            boolean enabled = eventValue.equals(value);
-            if (enabled) {
-                removeParameter(event);
-            }
-            return enabled;
+            if (eventValue == null) return true;
+            return eventValue.equals(value);
         }
         return true;
     }
 
+    @Override
+    public void perform(Rewrite rwrt, EvaluationContext ec) {
+        if (isOutbound(rwrt)) {
+            removeParameter((HttpOutboundServletRewrite) rwrt);
+        }
+    }
+    
     private void removeParameter(HttpOutboundServletRewrite event) {
         event.setOutboundAddress(AddressBuilder.create(helper.remove(event.getAddress().toString())));
     }
