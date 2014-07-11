@@ -62,24 +62,24 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
     * @return false if the rule is not filtered so can be performed; otherwise true
     */
    private boolean isRuleFiltered(HttpServletRewrite event, Rule rule) {
-       if (event instanceof HttpOutboundServletRewrite) {
-           String eventClass = getClass(event);
-           if (eventClass == null) {
-               removeClass((HttpOutboundServletRewrite)event);
-               return false;
-           }
-           String ruleClass = getClass(rule);
-           if (ruleClass == null) {
-               removeClass((HttpOutboundServletRewrite)event);
-               return false;
-           }
-           System.out.print(eventClass + " - " + ruleClass);
-           boolean enabled = eventClass.equals(ruleClass);
-           if (enabled) {
-               removeClass((HttpOutboundServletRewrite)event);
-           }
-           return !enabled;
-       }
+//       if (event instanceof HttpOutboundServletRewrite) {
+//           String eventClass = getClass(event);
+//           if (eventClass == null) {
+//               removeClass((HttpOutboundServletRewrite)event);
+//               return false;
+//           }
+//           String ruleClass = getClass(rule);
+//           if (ruleClass == null) {
+//               removeClass((HttpOutboundServletRewrite)event);
+//               return false;
+//           }
+//           System.out.print(eventClass + " - " + ruleClass);
+//           boolean enabled = eventClass.equals(ruleClass);
+//           if (enabled) {
+//               removeClass((HttpOutboundServletRewrite)event);
+//           }
+//           return !enabled;
+//       }
        return false;
    }
    

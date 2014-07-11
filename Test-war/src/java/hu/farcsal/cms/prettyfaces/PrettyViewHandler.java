@@ -35,7 +35,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     
     @Override
     public UIViewRoot createView(FacesContext context, String viewId) {
-        if (!filterPages(context)) redirectIfNeed(context);
+//        if (!filterPages(context)) redirectIfNeed(context);
         return super.createView(context, viewId);
     }
     
