@@ -21,8 +21,7 @@ public class ConfigurationCacheProvider extends HttpConfigurationCacheProvider {
    }
    
    @Override
-   public Configuration getConfiguration(ServletContext context)
-   {
+   public Configuration getConfiguration(ServletContext context) {
       if (needReset()) {
          setConfiguration(context, null);
          return null;
@@ -31,8 +30,7 @@ public class ConfigurationCacheProvider extends HttpConfigurationCacheProvider {
    }
 
    @Override
-   public void setConfiguration(ServletContext context, Configuration configuration)
-   {
+   public void setConfiguration(ServletContext context, Configuration configuration) {
       context.setAttribute(KEY, configuration);
    }
 
@@ -44,8 +42,7 @@ public class ConfigurationCacheProvider extends HttpConfigurationCacheProvider {
    }
    
    @Override
-   public int priority()
-   {
+   public int priority() {
       return 0;
    }
    

@@ -12,9 +12,7 @@ import hu.farcsal.cms.prettyfaces.PrettyViewHandler;
 import hu.farcsal.util.UrlParameters;
 import hu.farcsal.log.Log;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 import javax.servlet.ServletContext;
 import org.ocpsoft.rewrite.annotation.RewriteConfiguration;
 import org.ocpsoft.rewrite.config.Configuration;
@@ -89,7 +87,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         return node.getViewPath(true);
     }
     
-    private static List<LanguageProcessor> createLanguageConditions() {
+    private static List<LanguageProcessor> createLanguageProcessors() {
         List<LanguageProcessor> l = new ArrayList<>();
         for (Language lng : pageBean.getLanguages()) {
             l.add(new LanguageProcessor(lng.getCode()));
@@ -97,23 +95,21 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         return l;
     }
     
-    private static LanguageProcessor getLanguageCondition(List<LanguageProcessor> l, Language lng) {
-        for (LanguageProcessor c : l) {
-            if (c.getValue().equals(lng.getCode())) return c;
+    private static LanguageProcessor getLanguageProcessor(List<LanguageProcessor> l, Language lng) {
+        for (LanguageProcessor p : l) {
+            if (p.getValue().equals(lng.getCode())) return p;
         }
         return null;
     }
     
-    private static void append(ConfigurationBuilder cfg, List<Runnable> l, List<Page> pages, List<LanguageProcessor> lngConditions) {
+    private static void append(ConfigurationBuilder cfg, List<Page> pages, List<LanguageProcessor> lngProcessors) {
         for (Page p : pages) {
-            append(cfg, l, p, lngConditions);
-            if (p.isChildAvailable()) {
-                append(cfg, l, p.getChildren(), lngConditions);
-            }
+            if (p.isChildAvailable()) append(cfg, p.getChildren(), lngProcessors);
+            append(cfg, p, lngProcessors);
         }
     }
     
-    private static void append(ConfigurationBuilder cfg, List<Runnable> l, Page node, List<LanguageProcessor> lngConditions) {
+    private static void append(ConfigurationBuilder cfg, Page node, List<LanguageProcessor> lngProcessors) {
         if (node.getId() == null) return;
         
         String view = getViewPath(node);
@@ -127,59 +123,45 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
             List<String> actions = mapping.getPage().getActions();
             if (lng == null || lng.getCode() == null) continue;
             String id = mapping.getLanguage().getCode() + '-' + node.getId();
-            LanguageProcessor lngCondition = getLanguageCondition(lngConditions, lng);
+            LanguageProcessor lngProcessor = getLanguageProcessor(lngProcessors, lng);
             if (findParentView) {
                 PageMapping parentMapping = Pages.getFirstPage(true, null, node, lng.getCode(), null, false, true);
                 if (parentMapping == null) continue;
                 view = getViewPath(parentMapping.getPage());
             }
             int paramCount = mapping.getPage().getParameters().size();
-            for (int paramLimit = mapping.getPage().isParameterIncremented() ? 0 : paramCount; paramLimit <= paramCount; paramLimit++) {
+            for (int paramLimit = !mapping.getPage().isParameterIncremented() ? 0 : paramCount; paramLimit >= 0; paramLimit--) {
                 String link = mapping.getPermalink(new RewritePageFormatter(mapping, paramLimit));
                 if (link == null) continue; // the path is broken or the language not matches; next...
                 String mappingId =  id + '.' + paramLimit;
-                createRule(cfg, l, lngCondition, mapping, mappingId + "-x", link, view, actions);
-                createRule(cfg, l, lngCondition, mapping, mappingId + "-y", link + '/', view, actions);
+                createRule(cfg, lngProcessor, mapping, mappingId + "-y", link + '/', view, actions);
+                createRule(cfg, lngProcessor, mapping, mappingId + "-x", link, view, actions);
             }
         }
         
     }
     
-    private static void createRule(final ConfigurationBuilder cfg, List<Runnable> l, final LanguageProcessor lngCondition, final PageMapping mapping, final String id, final String link, final String view, final List<String> actions) {
-        l.add(new Runnable() {
-
-            @Override
-            public void run() {
-                cfg.addRule(Join.path(link).to(view)).when(lngCondition).perform(lngCondition);
-                LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
-            }
-            
-        });
+    private static void createRule(final ConfigurationBuilder cfg, final LanguageProcessor lngProcessor, final PageMapping mapping, final String id, final String link, final String view, final List<String> actions) {
+        cfg.addRule(Join.path(link).to(view)).when(lngProcessor).perform(lngProcessor);
+        LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
     }
     
     @Override
     public Configuration getConfiguration(final ServletContext context) {
         initProvider(context);
         
-        List<LanguageProcessor> lngConditions = createLanguageConditions();
+        List<LanguageProcessor> lngProcessors = createLanguageProcessors();
         ConfigurationBuilder cfg = ConfigurationBuilder.begin(); //return cfg;
         
-        List<Runnable> l = new ArrayList<>();
-        append(cfg, l, pageBean.getPageTree().getChildren(), lngConditions);
-        Collections.reverse(l);
-        ListIterator<Runnable> it = l.listIterator();
-        while (it.hasNext()) {
-            it.next().run();
-            it.remove();
-        }
+        append(cfg, pageBean.getPageTree().getChildren(), lngProcessors);
         
-        LanguageProcessor conditionHu = new LanguageProcessor("hu");
-        LanguageProcessor conditionEn = new LanguageProcessor("en");
+        LanguageProcessor processorHu = new LanguageProcessor("hu");
+        LanguageProcessor processorEn = new LanguageProcessor("en");
         Rule ruleHu = Join.path("/tigris").to("/faces/tiger.xhtml");
         Rule ruleEn = Join.path("/tiger").to("/faces/tiger.xhtml");
         return cfg
-            .addRule(ruleHu).when(conditionHu).perform(conditionHu)
-            .addRule(ruleEn).when(conditionEn).perform(conditionEn);
+            .addRule(ruleHu).when(processorHu).perform(processorHu)
+            .addRule(ruleEn).when(processorEn).perform(processorEn);
     }
     
 }
