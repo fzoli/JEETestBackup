@@ -1,7 +1,7 @@
 package hu.farcsal.cms.prettyfaces;
 
 import com.sun.faces.application.view.MultiViewHandler;
-import hu.farcsal.cms.bean.Beans;
+import hu.farcsal.cms.bean.CachedBeans;
 import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
@@ -24,7 +24,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     private PageBeanLocal pageBean;
 
     protected PageBeanLocal getPageBean() {
-        if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
+        if (pageBean == null) pageBean = CachedBeans.getPageBeanLocal();
         return pageBean;
     }
     

@@ -1,6 +1,6 @@
 package hu.farcsal.cms.util;
 
-import hu.farcsal.cms.bean.Beans;
+import hu.farcsal.cms.bean.CachedBeans;
 import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageFilter;
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class Pages {
     
-    private static final PageBeanLocal PAGE_BEAN = Beans.lookupPageBeanLocal();
+    private static final PageBeanLocal PAGE_BEAN = CachedBeans.getPageBeanLocal();
     private static final UrlParameters LNG_PARAM = new UrlParameters("lang");
     
     public enum FilterType {

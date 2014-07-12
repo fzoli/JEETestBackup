@@ -1,13 +1,13 @@
 package hu.farcsal.cms.rewrite;
 
-import hu.farcsal.cms.util.Pages;
-import hu.farcsal.cms.bean.Beans;
+import hu.farcsal.cms.bean.CachedBeans;
 import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.Language;
 import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
 import hu.farcsal.cms.rewrite.cache.PageMappingCache;
+import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.WebHelpers;
 import hu.farcsal.log.Log;
 import java.util.ArrayList;
@@ -16,10 +16,8 @@ import javax.servlet.ServletContext;
 import org.ocpsoft.rewrite.annotation.RewriteConfiguration;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
-import org.ocpsoft.rewrite.config.Direction;
 import org.ocpsoft.rewrite.config.Rule;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
-import org.ocpsoft.rewrite.servlet.config.Path;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
 
 /**
@@ -62,7 +60,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     
     @Override
     public int priority() {
-        return 0;
+        return ConfigOrder.DATABASE.getPriority();
     }
     
     private static final Log LOGGER = Log.getLogger(DatabaseConfigurationProvider.class);
@@ -72,7 +70,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     
     private static void initProvider(ServletContext context) {
         if (pageHelper == null) pageHelper = WebHelpers.getPageHelper(context);
-        if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
+        if (pageBean == null) pageBean = CachedBeans.getPageBeanLocal();
         RewriteRuleCache.clear();
     }
     
@@ -154,15 +152,8 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         ConfigurationBuilder cfg = ConfigurationBuilder.begin(); //return cfg;
         
         append(cfg, pageBean.getPageTree().getChildren(), lngProcessors);
-        cfg.addRule().when(Direction.isInbound().and(Path.matches("/"))).perform(new HomePageHandler(context, pageHelper, pageBean.getSites()));
         
-        LanguageProcessor processorHu = new LanguageProcessor("hu");
-        LanguageProcessor processorEn = new LanguageProcessor("en");
-        Rule ruleHu = Join.path("/tigris").to("/faces/tiger.xhtml");
-        Rule ruleEn = Join.path("/tiger").to("/faces/tiger.xhtml");
-        return cfg
-            .addRule(ruleHu).when(processorHu).perform(processorHu)
-            .addRule(ruleEn).when(processorEn).perform(processorEn);
+        return cfg;
     }
     
 }

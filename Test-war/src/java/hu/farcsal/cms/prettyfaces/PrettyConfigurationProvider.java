@@ -7,7 +7,7 @@ import com.ocpsoft.pretty.faces.config.mapping.PathValidator;
 import com.ocpsoft.pretty.faces.config.mapping.UrlAction;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.ocpsoft.pretty.faces.spi.ConfigurationProvider;
-import hu.farcsal.cms.bean.Beans;
+import hu.farcsal.cms.bean.CachedBeans;
 import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.Language;
 import hu.farcsal.cms.entity.Page;
@@ -147,7 +147,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         PrettyPageHelper helper = WebHelpers.getPageHelper(sc);
         if (pageRoot == null) pageRoot = helper.getFacesDir();
         if (ctxPath == null) ctxPath = helper.getAppCtxPath();
-        if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
+        if (pageBean == null) pageBean = CachedBeans.getPageBeanLocal();
         PrettyConfig cfg = new PrettyConfig();
 //        cfg.setMappings(loadMappings());
         return cfg;
