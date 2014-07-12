@@ -27,10 +27,22 @@ public abstract class RewriteRuleCache {
     
     protected abstract boolean matches(String value, MatcherType type);
     
+    /**
+     * Find the rule.
+     * @param value the URL
+     * @return the first match
+     */
     public static RewriteRuleCache findByUrl(String value) {
         return find(value, MatcherType.URL);
     }
     
+    /**
+     * Find the rule.
+     * Do NOT trust its result!
+     * Use it only for check whether there is a rule that uses the view.
+     * @param value the view id
+     * @return the first match without URL checking
+     */
     public static RewriteRuleCache findByViewId(String value) {
         return find(value, MatcherType.VIEW_ID);
     }

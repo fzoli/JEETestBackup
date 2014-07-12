@@ -15,8 +15,9 @@ public class RewriteViewHandler extends MultiViewHandler {
     @Override
     public String getActionURL(FacesContext context, String viewId) {
         String url = super.getActionURL(context, viewId);
-        if (RewriteRuleCache.findByViewId(viewId) != null)
+        if (RewriteRuleCache.findByViewId(viewId) != null) {
             url = Pages.getLanguageParameter().set(url, context.getViewRoot().getLocale().getLanguage(), false);
+        }
         return url;
     }
     
