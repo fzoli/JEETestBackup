@@ -3,12 +3,24 @@ package hu.farcsal.cms.util;
 import javax.faces.context.FacesContext;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  *
  * @author zoli
  */
 public class Faces {
+    
+    public static void send404Error(FacesContext context) {
+        try {
+            context.getExternalContext().setResponseStatus(404);
+            ((HttpServletResponse) context.getExternalContext().getResponse()).sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+        catch (Exception ex) {
+            // IllegalState or IOException
+        }
+        context.responseComplete();
+    }
     
     public static String getRealRequestURI(FacesContext context, boolean stripAppContext) {
         try {

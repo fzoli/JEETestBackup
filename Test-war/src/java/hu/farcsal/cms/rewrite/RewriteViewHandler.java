@@ -30,4 +30,9 @@ public class RewriteViewHandler extends MultiViewHandler {
         return cache == null ? locale : Language.getLocale(locale, cache.getLanguageCode());
     }
     
+    @Override
+    protected void send404Error(FacesContext context) {
+        Faces.send404Error(context);
+    }
+    
 }

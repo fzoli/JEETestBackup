@@ -12,7 +12,6 @@ import hu.farcsal.log.Log;
 import java.util.Locale;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author zoli
@@ -98,14 +97,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     
     @Override
     protected void send404Error(FacesContext context) {
-        try {
-            context.getExternalContext().setResponseStatus(404);
-            ((HttpServletResponse) context.getExternalContext().getResponse()).sendError(HttpServletResponse.SC_NOT_FOUND);
-        }
-        catch (Exception ex) { // IllegalState vagy IOException
-            LOGGER.e("404 error failed", ex);
-        }
-        context.responseComplete();
+        Faces.send404Error(context);
     }
     
     protected void onSiteFiltered(FacesContext context, String domain) {
