@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.List;
 import javax.servlet.ServletContext;
 import org.ocpsoft.rewrite.context.EvaluationContext;
+import org.ocpsoft.rewrite.servlet.config.Forward;
 import org.ocpsoft.rewrite.servlet.config.HttpOperation;
 import org.ocpsoft.rewrite.servlet.config.Redirect;
 import org.ocpsoft.rewrite.servlet.http.event.HttpServletRewrite;
@@ -17,18 +18,33 @@ import org.ocpsoft.rewrite.servlet.http.event.HttpServletRewrite;
  *
  * @author zoli
  */
-public class HomePageRedirector extends HttpOperation {
+class HomePageHandler extends HttpOperation {
 
-    protected static final Log LOGGER = Log.getLogger(HomePageRedirector.class);
+    private static final String PARAM_REDIRECTING = "hu.farcsal.cms.rewrite.HOME_PAGE_REDIRECTING";
+    
+    private static final Log LOGGER = Log.getLogger(HomePageHandler.class);
     
     private final ServletContext context;
     private final PrettyPageHelper pageHelper;
     private final List<Site> sites;
     
-    public HomePageRedirector(ServletContext context, PrettyPageHelper pageHelper, List<Site> sites) {
+    private final boolean redirecting;
+
+    public HomePageHandler(ServletContext context, PrettyPageHelper pageHelper, List<Site> sites) {
+        this(context, pageHelper, sites, isRedirecting(context));
+    }
+    
+    public HomePageHandler(ServletContext context, PrettyPageHelper pageHelper, List<Site> sites, boolean redirecting) {
         this.context = context;
         this.pageHelper = pageHelper;
         this.sites = sites;
+        this.redirecting = redirecting;
+    }
+    
+    private static boolean isRedirecting(ServletContext context) {
+        String value = context.getInitParameter(PARAM_REDIRECTING);
+        if (value == null) return false;
+        return value.equalsIgnoreCase(Boolean.toString(true));
     }
     
     protected void onHomepageNotFound(HttpServletRewrite hsr, EvaluationContext ec) {
@@ -43,10 +59,24 @@ public class HomePageRedirector extends HttpOperation {
         LOGGER.w("permalink unavailable");
     }
     
-    protected static void performRedirect(HttpServletRewrite hsr, EvaluationContext ec, String url) {
-        Redirect.temporary(
-            hsr.getRequest().getContextPath() + (url.startsWith("/") ? "" : "/") + url
-        ).performHttp(hsr, ec);
+    private void handle(HttpServletRewrite hsr, EvaluationContext ec, PageMapping mapping) {
+        if (redirecting) performRedirect(hsr, ec, mapping);
+        else performForward(hsr, ec, mapping);
+    }
+    
+    private void performRedirect(HttpServletRewrite hsr, EvaluationContext ec, PageMapping mapping) {
+        try {
+            String url = mapping.getPermalink("");
+            url = hsr.getRequest().getContextPath() + (url.startsWith("/") ? "" : "/") + url;
+            Redirect.temporary(url).performHttp(hsr, ec);
+        }
+        catch (Exception ex) {
+            onPermalinkUnavailable(hsr, ec);
+        }
+    }
+    
+    private void performForward(HttpServletRewrite hsr, EvaluationContext ec, PageMapping mapping) {
+        Forward.to(mapping.getPage().getRealViewPath(true)).performHttp(hsr, ec);
     }
     
     @Override
@@ -63,12 +93,7 @@ public class HomePageRedirector extends HttpOperation {
                 onPageFileNotExists(hsr, ec);
             }
             else {
-                try {
-                    performRedirect(hsr, ec, mapping.getPermalink(""));
-                }
-                catch (Exception ex) {
-                    onPermalinkUnavailable(hsr, ec);
-                }
+                handle(hsr, ec, mapping);
             }
         }
     }

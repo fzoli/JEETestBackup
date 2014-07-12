@@ -154,7 +154,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         ConfigurationBuilder cfg = ConfigurationBuilder.begin(); //return cfg;
         
         append(cfg, pageBean.getPageTree().getChildren(), lngProcessors);
-        cfg.addRule().when(Direction.isInbound().and(Path.matches("/"))).perform(new HomePageRedirector(context, pageHelper, pageBean.getSites()));
+        cfg.addRule().when(Direction.isInbound().and(Path.matches("/"))).perform(new HomePageHandler(context, pageHelper, pageBean.getSites()));
         
         LanguageProcessor processorHu = new LanguageProcessor("hu");
         LanguageProcessor processorEn = new LanguageProcessor("en");
