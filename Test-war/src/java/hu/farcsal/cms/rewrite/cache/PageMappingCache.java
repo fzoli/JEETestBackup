@@ -16,7 +16,7 @@ public class PageMappingCache extends RewriteRuleCache {
         this.pageMapping = pageMapping;
     }
 
-    private PageMapping getPageMapping() {
+    public PageMapping getPageMapping() {
         return pageMapping;
     }
     
@@ -36,6 +36,7 @@ public class PageMappingCache extends RewriteRuleCache {
             case VIEW_ID:
                 // find by view id
                 String view = getPageMapping().getPage().getViewPath(false);
+                if (view == null) return false;
                 if (!view.startsWith("/")) view = "/" + view;
                 return value.equals(view);
             default:

@@ -2,7 +2,6 @@ package hu.farcsal.cms.rewrite;
 
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
-import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.log.Log;
 import java.util.List;
@@ -24,18 +23,16 @@ class HomePageHandler extends HttpOperation {
     private static final Log LOGGER = Log.getLogger(HomePageHandler.class);
     
     private final ServletContext context;
-    private final PrettyPageHelper pageHelper;
     private final List<Site> sites;
     
     private final boolean redirecting;
 
-    public HomePageHandler(ServletContext context, PrettyPageHelper pageHelper, List<Site> sites) {
-        this(context, pageHelper, sites, isRedirecting(context));
+    public HomePageHandler(ServletContext context, List<Site> sites) {
+        this(context, sites, isRedirecting(context));
     }
     
-    public HomePageHandler(ServletContext context, PrettyPageHelper pageHelper, List<Site> sites, boolean redirecting) {
+    public HomePageHandler(ServletContext context, List<Site> sites, boolean redirecting) {
         this.context = context;
-        this.pageHelper = pageHelper;
         this.sites = sites;
         this.redirecting = redirecting;
     }
@@ -65,8 +62,7 @@ class HomePageHandler extends HttpOperation {
     
     private void performRedirect(HttpServletRewrite hsr, EvaluationContext ec, PageMapping mapping) {
         try {
-            String url = mapping.getPermalink("");
-            url = hsr.getRequest().getContextPath() + (url.startsWith("/") ? "" : "/") + url;
+            String url = mapping.getPermalinkWithCtxPath("");
             Redirect.temporary(url).performHttp(hsr, ec);
         }
         catch (Exception ex) {

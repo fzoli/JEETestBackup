@@ -9,6 +9,7 @@ import hu.farcsal.cms.entity.Site;
 import hu.farcsal.util.UrlParameters;
 import java.io.File;
 import java.util.List;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -96,6 +97,13 @@ public class Pages {
         return null;
     }
 
+    public static String getRealRequestURI(HttpServletRequest request, boolean stripAppContext) {
+        String uri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+        if (uri == null) uri = request.getRequestURI();
+        if (stripAppContext) uri = uri.substring(request.getServletContext().getContextPath().length());
+        return uri;
+    }
+    
     public static boolean isViewFileExists(ServletContext ctx, Page page) {
         String viewPath = WebHelpers.getPageHelper(ctx).stripFacesDir(page.getRealViewPath(false));
         return viewPath != null && new File(ctx.getRealPath(viewPath)).isFile();

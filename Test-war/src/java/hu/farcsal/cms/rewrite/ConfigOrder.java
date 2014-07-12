@@ -6,6 +6,7 @@ package hu.farcsal.cms.rewrite;
  */
 enum ConfigOrder {
     
+    VIEWLESS_PAGE,
     DATABASE,
     HOME_PAGE;
     
