@@ -5,6 +5,7 @@ import hu.farcsal.cms.bean.Beans;
 import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
+import hu.farcsal.cms.rewrite.DatabaseRuleCache;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.Pages.FilterType;
 import hu.farcsal.log.Log;
@@ -46,7 +47,8 @@ public class PrettyViewHandler extends MultiViewHandler {
 //        String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), uri);
 //        if (prettyURL != null) return prettyURL;
         String url = super.getActionURL(context, viewId);
-        url = HELPER.set(url, context.getViewRoot().getLocale().getLanguage());
+        if (DatabaseRuleCache.findByViewId(viewId) != null)
+            url = HELPER.set(url, context.getViewRoot().getLocale().getLanguage(), false);
         System.out.println("getActionURL: " + url);
         return url;
     }

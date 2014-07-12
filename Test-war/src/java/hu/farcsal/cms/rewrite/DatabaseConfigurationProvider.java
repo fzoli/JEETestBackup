@@ -73,9 +73,12 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     private static PrettyPageHelper pageHelper;
     private static PageBeanLocal pageBean;
     
+    private static DatabaseConfigurationSleeper sleeper = new DatabaseConfigurationSleeper();
+    
     private static void initProvider(ServletContext context) {
         if (pageHelper == null) pageHelper = Helpers.initPageHelper(new PrettyPageHelper(context));
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
+        DatabaseRuleCache.clear();
     }
     
     private static String getViewPath(Page node) {
@@ -142,28 +145,33 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     }
     
     private static void createRule(final ConfigurationBuilder cfg, final LanguageProcessor lngProcessor, final PageMapping mapping, final String id, final String link, final String view, final List<String> actions) {
-        cfg.addRule(Join.path(link).to(view)).when(lngProcessor).perform(lngProcessor);
+        Rule rule = Join.path(link).to(view);
+        cfg.addRule(rule).when(lngProcessor).perform(lngProcessor);
+        DatabaseRuleCache.save(rule, mapping);
         LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
     }
     
     @Override
     public Configuration getConfiguration(final ServletContext context) {
+        sleeper.setLoading(true);
         initProvider(context);
         
         List<LanguageProcessor> lngProcessors = createLanguageProcessors();
         ConfigurationBuilder cfg = ConfigurationBuilder.begin(); //return cfg;
+        cfg.addRule().when(sleeper);
         
         append(cfg, pageBean.getPageTree().getChildren(), lngProcessors);
-        
         cfg.addRule().when(Direction.isInbound().and(Path.matches("/"))).perform(new HomePageRedirector(context, pageHelper, pageBean.getSites()));
         
         LanguageProcessor processorHu = new LanguageProcessor("hu");
         LanguageProcessor processorEn = new LanguageProcessor("en");
         Rule ruleHu = Join.path("/tigris").to("/faces/tiger.xhtml");
         Rule ruleEn = Join.path("/tiger").to("/faces/tiger.xhtml");
-        return cfg
-            .addRule(ruleHu).when(processorHu).perform(processorHu)
-            .addRule(ruleEn).when(processorEn).perform(processorEn);
+        cfg.addRule(ruleHu).when(processorHu).perform(processorHu)
+           .addRule(ruleEn).when(processorEn).perform(processorEn);
+        
+        sleeper.setLoading(false);
+        return cfg;
     }
     
 }

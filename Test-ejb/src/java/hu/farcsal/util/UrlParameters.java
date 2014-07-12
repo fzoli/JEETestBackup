@@ -48,10 +48,15 @@ public class UrlParameters {
     }
 
     public String set(String url, String value) {
+        return set(url, value, true);
+    }
+    
+    public String set(String url, String value, boolean override) {
         if (KEY == null) {
             return url;
         }
         if (get(url) != null) {
+            if (!override) return url;
             url = remove(url);
         }
         char last = url.length() > 0 ? url.charAt(url.length() - 1) : '\0';
