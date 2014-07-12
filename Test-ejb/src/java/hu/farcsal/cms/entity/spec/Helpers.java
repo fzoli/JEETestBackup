@@ -26,6 +26,15 @@ public class Helpers {
         return helper;
     }
     
+    public static <T extends PageHelper> T getPageHelper(Class<T> type) {
+        synchronized (syn) {
+            if (type.isInstance(pageHelper)) {
+                return type.cast(pageHelper);
+            }
+            return null;
+        }
+    }
+    
     public static PageHelper getPageHelper() {
         synchronized (syn) {
             return pageHelper;

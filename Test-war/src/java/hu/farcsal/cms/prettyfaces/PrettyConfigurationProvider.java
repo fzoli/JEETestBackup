@@ -12,9 +12,9 @@ import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.Language;
 import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageMapping;
-import hu.farcsal.cms.entity.spec.Helpers;
 import hu.farcsal.cms.rewrite.ConfigurationCacheProvider;
 import hu.farcsal.cms.util.Pages;
+import hu.farcsal.cms.util.WebHelpers;
 import hu.farcsal.log.Log;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -144,7 +144,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     @Override
     public PrettyConfig loadConfiguration(ServletContext sc) {
-        PrettyPageHelper helper = Helpers.initPageHelper(new PrettyPageHelper(sc));
+        PrettyPageHelper helper = WebHelpers.getPageHelper(sc);
         if (pageRoot == null) pageRoot = helper.getFacesDir();
         if (ctxPath == null) ctxPath = helper.getAppCtxPath();
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();

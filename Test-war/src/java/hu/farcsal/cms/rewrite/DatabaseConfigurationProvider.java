@@ -6,9 +6,9 @@ import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.Language;
 import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageMapping;
-import hu.farcsal.cms.entity.spec.Helpers;
 import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
 import hu.farcsal.cms.rewrite.cache.PageMappingCache;
+import hu.farcsal.cms.util.WebHelpers;
 import hu.farcsal.log.Log;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     private static PageBeanLocal pageBean;
     
     private static void initProvider(ServletContext context) {
-        if (pageHelper == null) pageHelper = Helpers.initPageHelper(new PrettyPageHelper(context));
+        if (pageHelper == null) pageHelper = WebHelpers.getPageHelper(context);
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
         RewriteRuleCache.clear();
     }
