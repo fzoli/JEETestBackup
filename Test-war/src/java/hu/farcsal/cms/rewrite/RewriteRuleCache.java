@@ -50,14 +50,20 @@ public abstract class RewriteRuleCache {
         return cache;
     }
     
-    static void clear() {
-        synchronized (RULES) {
-            RULES.clear();
+    static void clear(Class<? extends RewriteRuleCache> clazz) {
+        if (clazz != null) synchronized (RULES) {
+            Iterator<Map.Entry<Rule, RewriteRuleCache>> it = RULES.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Rule, RewriteRuleCache> e = it.next();
+                if (e.getValue() != null && clazz == e.getValue().getClass()) {
+                    it.remove();
+                }
+            }
         }
     }
     
     static RewriteRuleCache save(Rule rule, RewriteRuleCache cache) {
-        synchronized (RULES) {
+        if (cache != null) synchronized (RULES) {
             RULES.put(rule, cache);
         }
         return cache;

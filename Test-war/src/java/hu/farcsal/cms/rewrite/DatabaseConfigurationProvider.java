@@ -71,7 +71,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     private static void initProvider(ServletContext context) {
         if (pageHelper == null) pageHelper = WebHelpers.getPageHelper(context);
         if (pageBean == null) pageBean = CachedBeans.getPageBeanLocal();
-        RewriteRuleCache.clear();
+        RewriteRuleCache.clear(PageMappingCache.class);
     }
     
     private static String getViewPath(Page node) {
