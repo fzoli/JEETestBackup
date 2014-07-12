@@ -33,7 +33,18 @@ public abstract class RewriteRuleCache {
      * @return the first match
      */
     public static RewriteRuleCache findByUrl(String value) {
-        return find(value, MatcherType.URL);
+        return find(null, value, MatcherType.URL);
+    }
+    
+    /**
+     * Find the rule.
+     * @param <T> cache type
+     * @param type filter
+     * @param value the URL
+     * @return the first match
+     */
+    public static <T extends RewriteRuleCache> T findByUrl(Class<T> type, String value) {
+        return find(type, value, MatcherType.URL);
     }
     
     /**
@@ -44,17 +55,18 @@ public abstract class RewriteRuleCache {
      * @return the first match without URL checking
      */
     public static RewriteRuleCache findByViewId(String value) {
-        return find(value, MatcherType.VIEW_ID);
+        return find(null, value, MatcherType.VIEW_ID);
     }
     
-    private static RewriteRuleCache find(String value, MatcherType type) {
-        RewriteRuleCache cache = null;
+    private static <T extends RewriteRuleCache> T find(Class<T> rtype, String value, MatcherType mtype) {
+        T cache = null;
         synchronized (RULES) {
             Iterator<Map.Entry<Rule, RewriteRuleCache>> it = RULES.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Rule, RewriteRuleCache> e = it.next();
-                if (e.getValue().matches(value, type)) {
-                    cache = e.getValue();
+                boolean typeMatch = rtype == null || rtype.isInstance(e.getValue());
+                if (typeMatch && e.getValue().matches(value, mtype)) {
+                    cache = (T) e.getValue();
                     break;
                 }
             }
