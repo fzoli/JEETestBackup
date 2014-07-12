@@ -28,10 +28,11 @@ public final class DatabaseRuleCache {
         if (url) {
             // find by URL
             try {
-                getPageMapping().getPermalink(value);
-                return true;
+                String link = getPageMapping().getPermalink(value);
+                return link.startsWith(value);
             }
             catch (Exception ex) {
+                // invalid URL; does not match
                 return false;
             }
         }

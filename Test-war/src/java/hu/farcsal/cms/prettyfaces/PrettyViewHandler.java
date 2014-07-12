@@ -5,16 +5,13 @@ import hu.farcsal.cms.bean.Beans;
 import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
-import hu.farcsal.cms.rewrite.DatabaseRuleCache;
+import hu.farcsal.cms.util.Faces;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.Pages.FilterType;
 import hu.farcsal.log.Log;
-import hu.farcsal.util.UrlParameters;
 import java.util.Locale;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -23,9 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 public class PrettyViewHandler extends MultiViewHandler {
 
     private static final Log LOGGER = Log.getLogger(PrettyViewHandler.class);
-    
-    public static final String KEY_LANGUAGE = "lang";
-    private static final UrlParameters HELPER = new UrlParameters(KEY_LANGUAGE);
     
     private PageBeanLocal pageBean;
 
@@ -36,7 +30,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     
     @Override
     public UIViewRoot createView(FacesContext context, String viewId) {
-//        if (!filterPages(context)) redirectIfNeed(context);
+        if (!filterPages(context)) redirectIfNeed(context);
         return super.createView(context, viewId);
     }
     
@@ -47,8 +41,7 @@ public class PrettyViewHandler extends MultiViewHandler {
 //        String prettyURL = PrettyConfigurationProvider.findPrettyURL(viewId, calculateLocale(context), uri);
 //        if (prettyURL != null) return prettyURL;
         String url = super.getActionURL(context, viewId);
-        if (DatabaseRuleCache.findByViewId(viewId) != null)
-            url = HELPER.set(url, context.getViewRoot().getLocale().getLanguage(), false);
+        url = Pages.getLanguageParameter().set(url, context.getViewRoot().getLocale().getLanguage(), false);
         System.out.println("getActionURL: " + url);
         return url;
     }
@@ -66,7 +59,7 @@ public class PrettyViewHandler extends MultiViewHandler {
             if (mapping.getPage().getRealViewPath(false) == null) {
                 PageMapping firstPage = Pages.getFirstPage(Site.findSiteByDomain(getPageBean().getSites(), context.getExternalContext().getRequestServerName()), mapping.getPage(), mapping.getLanguage().getCode(), null, true);
                 try {
-                    context.getExternalContext().redirect(getContextPath(context) + firstPage.getPermalink(""));
+                    context.getExternalContext().redirect(Faces.getContextPath(context) + firstPage.getPermalink(""));
                 }
                 catch (Exception ex) { // no first page or redirect error
                     LOGGER.e("redirect failed", ex);
@@ -103,29 +96,6 @@ public class PrettyViewHandler extends MultiViewHandler {
         return false;
     }
     
-    protected String getRealRequestURI(FacesContext context, boolean stripAppContext) {
-        try {
-            String uri = (String) context.getExternalContext().getRequestMap().get(RequestDispatcher.FORWARD_REQUEST_URI);
-            return stripAppContext ? stripContextPath(context, uri) : uri;
-        }
-        catch (Exception ex) {
-            return getRequestURI(context, stripAppContext);
-        }
-    }
-    
-    protected String getRequestURI(FacesContext context, boolean stripAppContext) {
-        String uri = ((HttpServletRequest) context.getExternalContext().getRequest()).getRequestURI();
-        return stripAppContext ? stripContextPath(context, uri) : uri;
-    }
-    
-    private String stripContextPath(FacesContext context, String requestURI) {
-        return requestURI.substring(getContextPath(context).length());
-    }
-    
-    private String getContextPath(FacesContext context) {
-        return context.getExternalContext().getApplicationContextPath();
-    }
-    
     @Override
     protected void send404Error(FacesContext context) {
         try {
@@ -139,7 +109,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onSiteFiltered(FacesContext context, String domain) {
-        LOGGER.i(String.format("Page '%s' is filtered by site '%s'", getRealRequestURI(context, true), domain));
+        LOGGER.i(String.format("Page '%s' is filtered by site '%s'", Faces.getRealRequestURI(context, true), domain));
         send404Error(context);
     }
     
@@ -154,17 +124,17 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onPageDisabled(FacesContext context) {
-        LOGGER.i(String.format("Page '%s' is disabled", getRealRequestURI(context, true)));
+        LOGGER.i(String.format("Page '%s' is disabled", Faces.getRealRequestURI(context, true)));
         send404Error(context);
     }
     
     protected void onPageUnknown(FacesContext context) {
         if (PrettyConfigurationProvider.getCurrentMapping(context) == null) {
-            LOGGER.i(String.format("URL '%s' is not a pretty URL", getRealRequestURI(context, true)));
+            LOGGER.i(String.format("URL '%s' is not a pretty URL", Faces.getRealRequestURI(context, true)));
             send404Error(context);
         }
         else {
-            LOGGER.i(String.format("URL '%s' is not from the database", getRealRequestURI(context, true)));
+            LOGGER.i(String.format("URL '%s' is not from the database", Faces.getRealRequestURI(context, true)));
         }
     }
     

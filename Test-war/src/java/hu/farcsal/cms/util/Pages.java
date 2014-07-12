@@ -6,6 +6,7 @@ import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageFilter;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
+import hu.farcsal.util.UrlParameters;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,7 +16,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class Pages {
     
-    private static final PageBeanLocal pageBean = Beans.lookupPageBeanLocal();
+    private static final PageBeanLocal PAGE_BEAN = Beans.lookupPageBeanLocal();
+    private static final UrlParameters LNG_PARAM = new UrlParameters("lang");
     
     public enum FilterType {
         PAGE_DISABLED, SITE_UNKNOWN, SITE_DISABLED, SITE_FILTERED, PAGE_UNKNOWN
@@ -58,7 +60,7 @@ public class Pages {
     
     public static PageMapping getFirstPage(HttpServletRequest request, String defLanguage, boolean overrideLanguage, boolean allowIncrementedParams) {
         String language = request.getLocale().getLanguage();
-        Site site = Site.findSiteByDomain(pageBean.getSites(), request.getServerName());
+        Site site = Site.findSiteByDomain(PAGE_BEAN.getSites(), request.getServerName());
         return getFirstPage(site, overrideLanguage && defLanguage != null ? defLanguage : language, defLanguage, allowIncrementedParams);
     }
     
@@ -68,7 +70,7 @@ public class Pages {
             PageMapping pm = Page.findPageMapping(site.getHomePage(), language, defLanguage, true, allowIncrementedParams);
             if (pm != null) return pm;
         }
-        return getFirstPage(site, pageBean.getPageTree(), language, defLanguage, allowIncrementedParams);
+        return getFirstPage(site, PAGE_BEAN.getPageTree(), language, defLanguage, allowIncrementedParams);
     }
     
     public static PageMapping getFirstPage(Site site, Page page, String language, String defLanguage, boolean allowIncrementedParams) {
@@ -81,7 +83,7 @@ public class Pages {
     
     public static PageMapping getFirstPage(boolean skipSiteChk, Site site, Page page, String language, String defLanguage, boolean skipParam, boolean allowIncrementedParams) {
         List<Page> pages = page.getOrderedChildren();
-        List<PageFilter> pageFilters = pageBean.getPageFilters();
+        List<PageFilter> pageFilters = PAGE_BEAN.getPageFilters();
         for (Page p : pages) {
             PageMapping pm = Page.findPageMapping(p, language, defLanguage, skipParam, allowIncrementedParams);
             if (pm != null && getFilterType(skipSiteChk, site, pm, pageFilters) == null) {
@@ -90,6 +92,10 @@ public class Pages {
             }
         }
         return null;
+    }
+
+    public static UrlParameters getLanguageParameter() {
+        return LNG_PARAM;
     }
     
 }

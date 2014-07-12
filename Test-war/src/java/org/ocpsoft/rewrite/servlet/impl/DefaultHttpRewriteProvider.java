@@ -15,12 +15,12 @@
  */
 package org.ocpsoft.rewrite.servlet.impl;
 
+import hu.farcsal.cms.util.Pages;
+import hu.farcsal.util.UrlParameters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.servlet.ServletContext;
-import hu.farcsal.cms.prettyfaces.PrettyViewHandler;
-import hu.farcsal.util.UrlParameters;
 import org.ocpsoft.common.services.NonEnriching;
 import org.ocpsoft.common.services.ServiceLoader;
 import org.ocpsoft.common.util.Iterators;
@@ -54,7 +54,7 @@ public class DefaultHttpRewriteProvider extends HttpRewriteProvider implements N
    private volatile ConfigurationLoader loader;
    private volatile List<RuleCacheProvider> ruleCacheProviders;
 
-   private static final UrlParameters HELPER = new UrlParameters(PrettyViewHandler.KEY_LANGUAGE);
+   private static final UrlParameters HELPER = Pages.getLanguageParameter();
    
    /**
     * Returns whether the rule should be performed.

@@ -8,8 +8,6 @@ import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.spec.Helpers;
 import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
-import hu.farcsal.cms.prettyfaces.PrettyViewHandler;
-import hu.farcsal.util.UrlParameters;
 import hu.farcsal.log.Log;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +28,10 @@ import org.ocpsoft.rewrite.servlet.config.rule.Join;
 @RewriteConfiguration
 public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     
-    private static final UrlParameters LNG_PARAM = new UrlParameters(PrettyViewHandler.KEY_LANGUAGE);
-    
     private static class LanguageProcessor extends ParameterProcessor {
         
         public LanguageProcessor(String lngCode) {
-            super(LNG_PARAM, lngCode);
+            super(Pages.getLanguageParameter(), lngCode);
         }
         
     }
