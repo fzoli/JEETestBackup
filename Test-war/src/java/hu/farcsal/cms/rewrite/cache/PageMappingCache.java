@@ -27,7 +27,7 @@ public class PageMappingCache extends RewriteRuleCache {
                 // find by URL
                 try {
                     String link = getPageMapping().getPermalink(value);
-                    return link.startsWith(value);
+                    return (link + "/").equalsIgnoreCase(value) || link.equalsIgnoreCase(value);
                 }
                 catch (Exception ex) {
                     // invalid URL; does not match
