@@ -5,7 +5,6 @@ import hu.farcsal.cms.entity.Site;
 import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.log.Log;
-import java.io.File;
 import java.util.List;
 import javax.servlet.ServletContext;
 import org.ocpsoft.rewrite.context.EvaluationContext;
@@ -88,8 +87,7 @@ class HomePageHandler extends HttpOperation {
             onHomepageNotFound(hsr, ec);
         }
         else {
-            String viewPath = pageHelper.stripFacesDir(mapping.getPage().getRealViewPath(false));
-            if (viewPath == null || !new File(context.getRealPath(viewPath)).isFile()) {
+            if (!Pages.isViewFileExists(context, mapping.getPage())) {
                 onPageFileNotExists(hsr, ec);
             }
             else {
