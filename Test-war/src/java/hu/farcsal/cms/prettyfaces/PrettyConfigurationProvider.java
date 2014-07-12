@@ -144,12 +144,12 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     @Override
     public PrettyConfig loadConfiguration(ServletContext sc) {
-        if (Helpers.pageHelper == null) Helpers.pageHelper = new PrettyPageHelper(sc);
-        if (pageRoot == null) pageRoot = Helpers.pageHelper.getFacesDir();
-        if (ctxPath == null) ctxPath = Helpers.pageHelper.getAppCtxPath();
+        PrettyPageHelper helper = Helpers.initPageHelper(new PrettyPageHelper(sc));
+        if (pageRoot == null) pageRoot = helper.getFacesDir();
+        if (ctxPath == null) ctxPath = helper.getAppCtxPath();
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
         PrettyConfig cfg = new PrettyConfig();
-        cfg.setMappings(loadMappings());
+//        cfg.setMappings(loadMappings());
         return cfg;
     }
     

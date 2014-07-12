@@ -141,7 +141,7 @@ public class PageMapping extends NodeMapping<Page> {
         
         private String stripAppCtxFromUrl(String url) {
             try {
-                return Helpers.pageHelper.stripAppCtxFromUrl(url);
+                return Helpers.getPageHelper().stripAppCtxFromUrl(url);
             }
             catch (Exception ex) {
                 // do not strip if the helper has not been set yet (e.g. during deploy)

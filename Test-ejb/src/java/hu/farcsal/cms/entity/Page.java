@@ -264,7 +264,7 @@ public class Page extends Node<Page, PageMapping> {
     
     public String getRealViewPath(boolean withDir) {
         try {
-            return Helpers.pageHelper.getRealViewPath(this, withDir);
+            return Helpers.getPageHelper().getRealViewPath(this, withDir);
         }
         catch (Exception ex) {
             return getViewPath(withDir);
@@ -273,7 +273,7 @@ public class Page extends Node<Page, PageMapping> {
     
     private String getFacesDir() {
         try {
-            return Helpers.pageHelper.getFacesDir();
+            return Helpers.getPageHelper().getFacesDir();
         }
         catch (Exception ex) {
             return null;

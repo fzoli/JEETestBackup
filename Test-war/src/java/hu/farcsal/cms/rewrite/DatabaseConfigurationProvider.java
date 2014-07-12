@@ -17,8 +17,10 @@ import javax.servlet.ServletContext;
 import org.ocpsoft.rewrite.annotation.RewriteConfiguration;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
+import org.ocpsoft.rewrite.config.Direction;
 import org.ocpsoft.rewrite.config.Rule;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
+import org.ocpsoft.rewrite.servlet.config.Path;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
 
 /**
@@ -68,13 +70,11 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     
     private static final Log LOGGER = Log.getLogger(DatabaseConfigurationProvider.class);
     
-    private static String pageRoot, ctxPath;
-    public static PageBeanLocal pageBean;
+    private static PrettyPageHelper pageHelper;
+    private static PageBeanLocal pageBean;
     
     private static void initProvider(ServletContext context) {
-        if (Helpers.pageHelper == null) Helpers.pageHelper = new PrettyPageHelper(context);
-        if (pageRoot == null) pageRoot = Helpers.pageHelper.getFacesDir();
-        if (ctxPath == null) ctxPath = Helpers.pageHelper.getAppCtxPath();
+        if (pageHelper == null) pageHelper = Helpers.initPageHelper(new PrettyPageHelper(context));
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
     }
     
@@ -154,6 +154,8 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         ConfigurationBuilder cfg = ConfigurationBuilder.begin(); //return cfg;
         
         append(cfg, pageBean.getPageTree().getChildren(), lngProcessors);
+        
+        cfg.addRule().when(Direction.isInbound().and(Path.matches("/"))).perform(new HomePageRedirector(context, pageHelper, pageBean.getSites()));
         
         LanguageProcessor processorHu = new LanguageProcessor("hu");
         LanguageProcessor processorEn = new LanguageProcessor("en");

@@ -10,9 +10,9 @@
     <h1><h:outputText value="#{homedict['hello']}" /> from <a href="#{request.contextPath}/Tester">Facelets</a></h1>
     <h2>#{facesContext.viewRoot.locale.displayLanguage.toLowerCase(facesContext.viewRoot.locale)}</h2>
     <h3>
-        #{requestScope["value1"]}
+        <h:outputText value="#{param['value1']}" />
         <br />
-        #{requestScope["value2"]}
+        <h:outputText value="#{param['value2']}" />
     </h3>
 </ui:define>
 </ui:composition>
