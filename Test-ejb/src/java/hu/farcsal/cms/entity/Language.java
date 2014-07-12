@@ -71,7 +71,12 @@ public class Language extends PrimaryStringObject<Language> {
     }
     
     public Locale getLocale(Locale defLocale) {
-        return defLocale == null ? new Locale(getCode()) : new Locale(getCode(), defLocale.getCountry());
+        return getLocale(defLocale, getCode());
+    }
+    
+    public static Locale getLocale(Locale defLocale, String code) {
+        if (code == null) return defLocale;
+        return defLocale == null ? new Locale(code) : new Locale(code, defLocale.getCountry());
     }
     
 }

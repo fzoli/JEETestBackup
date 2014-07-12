@@ -8,6 +8,7 @@ import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.spec.Helpers;
 import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
+import hu.farcsal.cms.rewrite.cache.PageMappingCache;
 import hu.farcsal.log.Log;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     private static void initProvider(ServletContext context) {
         if (pageHelper == null) pageHelper = Helpers.initPageHelper(new PrettyPageHelper(context));
         if (pageBean == null) pageBean = Beans.lookupPageBeanLocal();
-        DatabaseRuleCache.clear();
+        RewriteRuleCache.clear();
     }
     
     private static String getViewPath(Page node) {
@@ -141,7 +142,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     private static void createRule(final ConfigurationBuilder cfg, final LanguageProcessor lngProcessor, final PageMapping mapping, final String id, final String link, final String view, final List<String> actions) {
         Rule rule = Join.path(link).to(view);
         cfg.addRule(rule).when(lngProcessor).perform(lngProcessor);
-        DatabaseRuleCache.save(rule, mapping);
+        RewriteRuleCache.save(rule, new PageMappingCache(mapping));
         LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
     }
     
