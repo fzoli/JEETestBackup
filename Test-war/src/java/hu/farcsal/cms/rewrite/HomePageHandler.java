@@ -76,7 +76,7 @@ class HomePageHandler extends HttpOperation {
     }
     
     private void performForward(HttpServletRewrite hsr, EvaluationContext ec, PageMapping mapping) {
-        Forward.to(mapping.getPage().getRealViewPath(true)).performHttp(hsr, ec);
+        Forward.to(Pages.getLanguageParameter().set(mapping.getPage().getRealViewPath(true), mapping.getLanguage().getCode())).performHttp(hsr, ec);
     }
     
     @Override

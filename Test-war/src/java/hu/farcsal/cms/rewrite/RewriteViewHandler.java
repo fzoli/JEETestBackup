@@ -23,6 +23,8 @@ public class RewriteViewHandler extends MultiViewHandler {
     @Override
     public Locale calculateLocale(FacesContext context) {
         Locale locale = super.calculateLocale(context);
+        String lngParam = context.getExternalContext().getRequestParameterMap().get(Pages.getLanguageParameter().getKey());
+        if (lngParam != null) return Language.getLocale(locale, lngParam);
         RewriteRuleCache cache = RewriteRuleCache.findByUrl(Faces.getRealRequestURI(context, true));
         return cache == null ? locale : Language.getLocale(locale, cache.getLanguageCode());
     }
