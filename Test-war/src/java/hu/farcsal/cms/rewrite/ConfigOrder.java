@@ -7,6 +7,7 @@ package hu.farcsal.cms.rewrite;
 enum ConfigOrder {
     
     ZIP_OUTPUT(-100000),
+    PURE_PAGE_FILTER,
     DATABASE,
     HOME_PAGE;
     
