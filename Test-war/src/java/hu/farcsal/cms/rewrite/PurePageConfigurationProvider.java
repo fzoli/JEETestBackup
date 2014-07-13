@@ -25,6 +25,10 @@ import org.slf4j.LoggerFactory;
 @RewriteConfiguration
 public class PurePageConfigurationProvider extends HttpConfigurationProvider {
     
+    private static final String[] WHITE_LIST = {
+        "errorpages"
+    };
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(PurePageConfigurationProvider.class);
     
     private static class PurePagePatternCondition extends HttpCondition {
@@ -32,13 +36,17 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
         private final Pattern PATTERN;
         
         public PurePagePatternCondition(PrettyPageHelper helper) {
-            PATTERN = Pattern.compile(String.format("^(http://[^/]+)*(%s)(%s/.*\\.xhtml(\\?.*)*)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
+            PATTERN = Pattern.compile(String.format("^(http://[^/]+)*(%s)(%s/(.*)\\.xhtml(\\?.*)*)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
         }
 
         @Override
         public boolean evaluateHttp(HttpServletRewrite hsr, EvaluationContext ec) {
             Matcher m = PATTERN.matcher(Pages.getRealRequestURI(hsr.getRequest(), false));
             if (m.matches()) {
+                String dir = m.group(4);
+                for (String s : WHITE_LIST) {
+                    if (dir.startsWith(s)) return false;
+                }
                 if (LOGGER.isInfoEnabled()) LOGGER.info("Page '{}' filtered", m.group(3));
                 return true;
             }
