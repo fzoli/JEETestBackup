@@ -257,7 +257,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         if (!validators.isEmpty()) map.setPathValidators(validators);
         ls.add(map);
         NODES.put(map, mapping);
-        LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
+        LOGGER.i("Mapping[%s]: %s -> %s", id, link, view);
     }
     
     private static interface PageMappingFormatter<T> {

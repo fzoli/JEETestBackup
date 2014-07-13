@@ -1,18 +1,19 @@
 package hu.farcsal.cms.rewrite;
 
-import org.ocpsoft.rewrite.config.Condition;
-import org.ocpsoft.rewrite.context.EvaluationContext;
-import org.ocpsoft.rewrite.event.Rewrite;
-import org.ocpsoft.rewrite.servlet.http.event.HttpOutboundServletRewrite;
-import org.ocpsoft.urlbuilder.AddressBuilder;
 import hu.farcsal.util.UrlParameters;
 import org.ocpsoft.rewrite.config.Operation;
+import org.ocpsoft.rewrite.context.EvaluationContext;
+import org.ocpsoft.rewrite.event.Rewrite;
+import org.ocpsoft.rewrite.servlet.config.HttpCondition;
+import org.ocpsoft.rewrite.servlet.http.event.HttpOutboundServletRewrite;
+import org.ocpsoft.rewrite.servlet.http.event.HttpServletRewrite;
+import org.ocpsoft.urlbuilder.AddressBuilder;
 
 /**
  * 
  * @author zoli
  */
-class ParameterProcessor implements Condition, Operation {
+class ParameterProcessor extends HttpCondition implements Operation {
 
     private final String value;
     private final UrlParameters helper;
@@ -31,7 +32,7 @@ class ParameterProcessor implements Condition, Operation {
     }
     
     @Override
-    public boolean evaluate(Rewrite rwrt, EvaluationContext ec) {
+    public boolean evaluateHttp(HttpServletRewrite rwrt, EvaluationContext ec) {
         if (isOutbound(rwrt)) {
             HttpOutboundServletRewrite event = (HttpOutboundServletRewrite) rwrt;
             if (value == null) return true;

@@ -4,6 +4,7 @@ import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.log.Log;
+import hu.farcsal.util.WebConfig;
 import java.util.List;
 import javax.servlet.ServletContext;
 import org.ocpsoft.rewrite.context.EvaluationContext;
@@ -28,19 +29,13 @@ class HomePageHandler extends HttpOperation {
     private final boolean redirecting;
 
     public HomePageHandler(ServletContext context, List<Site> sites) {
-        this(context, sites, isRedirecting(context));
+        this(context, sites, WebConfig.isTrue(context, PARAM_REDIRECTING));
     }
     
     public HomePageHandler(ServletContext context, List<Site> sites, boolean redirecting) {
         this.context = context;
         this.sites = sites;
         this.redirecting = redirecting;
-    }
-    
-    private static boolean isRedirecting(ServletContext context) {
-        String value = context.getInitParameter(PARAM_REDIRECTING);
-        if (value == null) return false;
-        return value.equalsIgnoreCase(Boolean.toString(true));
     }
     
     protected void onHomepageNotFound(HttpServletRewrite hsr, EvaluationContext ec) {

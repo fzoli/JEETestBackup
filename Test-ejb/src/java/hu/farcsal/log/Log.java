@@ -47,28 +47,28 @@ public class Log {
         return new Log(name);
     }
     
-    private void log(Type type, String text) {
-        LOGGER.log(type.getLevel(), text);
+    private void log(Type type, String text, Object... args) {
+        LOGGER.log(type.getLevel(), String.format(text, args));
     }
     
-    private void log(Type type, String text, Throwable t) {
-        LOGGER.log(type.getLevel(), text, t);
+    private void log(Type type, Throwable t, String text, Object... args) {
+        LOGGER.log(type.getLevel(), String.format(text, args), t);
     }
     
-    public void i(String text) {
-        log(Type.INFO, text);
+    public void i(String text, Object... args) {
+        log(Type.INFO, text, args);
     }
     
-    public void w(String text) {
-        log(Type.WARNING, text);
+    public void w(String text, Object... args) {
+        log(Type.WARNING, text, args);
     }
     
-    public void e(String text) {
-        log(Type.SEVERE, text);
+    public void e(String text, Object... args) {
+        log(Type.SEVERE, text, args);
     }
     
-    public void e(String text, Throwable t) {
-        log(Type.SEVERE, text, t);
+    public void e(Throwable t, String text, Object... args) {
+        log(Type.SEVERE, t, text, args);
     }
     
 }

@@ -101,32 +101,32 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onSiteFiltered(FacesContext context, String domain) {
-        LOGGER.i(String.format("Page '%s' is filtered by site '%s'", Faces.getRealRequestURI(context, true), domain));
+        LOGGER.i("Page '%s' is filtered by site '%s'", Faces.getRealRequestURI(context, true), domain);
         send404Error(context);
     }
     
     protected void onSiteDisabled(FacesContext context, String domain) {
-        LOGGER.i(String.format("Site '%s' is disabled", domain));
+        LOGGER.i("Site '%s' is disabled", domain);
         send404Error(context);
     }
     
     protected void onSiteUnknown(FacesContext context, String domain) {
-        LOGGER.i(String.format("Unknown site '%s'", domain));
+        LOGGER.i("Unknown site '%s'", domain);
         send404Error(context);
     }
     
     protected void onPageDisabled(FacesContext context) {
-        LOGGER.i(String.format("Page '%s' is disabled", Faces.getRealRequestURI(context, true)));
+        LOGGER.i("Page '%s' is disabled", Faces.getRealRequestURI(context, true));
         send404Error(context);
     }
     
     protected void onPageUnknown(FacesContext context) {
         if (PrettyConfigurationProvider.getCurrentMapping(context) == null) {
-            LOGGER.i(String.format("URL '%s' is not a pretty URL", Faces.getRealRequestURI(context, true)));
+            LOGGER.i("URL '%s' is not a pretty URL", Faces.getRealRequestURI(context, true));
             send404Error(context);
         }
         else {
-            LOGGER.i(String.format("URL '%s' is not from the database", Faces.getRealRequestURI(context, true)));
+            LOGGER.i("URL '%s' is not from the database", Faces.getRealRequestURI(context, true));
         }
     }
     

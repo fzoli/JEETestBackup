@@ -119,29 +119,31 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
             List<String> actions = mapping.getPage().getActions();
             if (lng == null || lng.getCode() == null) continue;
             String id = mapping.getLanguage().getCode() + '-' + node.getId();
-            LanguageProcessor lngProcessor = getLanguageProcessor(lngProcessors, lng);
             if (findParentView) {
                 PageMapping parentMapping = Pages.getFirstPage(true, null, node, lng.getCode(), null, false, true);
                 if (parentMapping == null) continue;
                 view = getViewPath(parentMapping.getPage());
             }
+            PageMappingCache cache = new PageMappingCache(mapping);
+            LanguageProcessor lngProcessor = getLanguageProcessor(lngProcessors, lng);
+            InboundPageFilter pageFilter = new PageMappingFilter(mapping);
             int paramCount = mapping.getPage().getParameters().size();
             for (int paramLimit = !mapping.getPage().isParameterIncremented() ? 0 : paramCount; paramLimit >= 0; paramLimit--) {
                 String link = mapping.getPermalink(new RewritePageFormatter(mapping, paramLimit));
                 if (link == null) continue; // the path is broken or the language not matches; next...
                 String mappingId =  id + '.' + paramLimit;
-                createRule(cfg, lngProcessor, mapping, mappingId + "-y", link + '/', view, actions);
-                createRule(cfg, lngProcessor, mapping, mappingId + "-x", link, view, actions);
+                createRule(cfg, cache, lngProcessor, pageFilter, mappingId + "-y", link + '/', view, actions);
+                createRule(cfg, cache, lngProcessor, pageFilter, mappingId + "-x", link, view, actions);
             }
         }
         
     }
     
-    private static void createRule(final ConfigurationBuilder cfg, final LanguageProcessor lngProcessor, final PageMapping mapping, final String id, final String link, final String view, final List<String> actions) {
+    private static void createRule(final ConfigurationBuilder cfg, final PageMappingCache cache, final LanguageProcessor lngProcessor, InboundPageFilter pageFilter, final String id, final String link, final String view, final List<String> actions) {
         Rule rule = Join.path(link).to(view);
-        cfg.addRule(rule).when(lngProcessor).perform(lngProcessor);
-        RewriteRuleCache.save(rule, new PageMappingCache(mapping));
-        LOGGER.i(String.format("Mapping[%s]: %s -> %s", id, link, view));
+        cfg.addRule(rule).when(lngProcessor.and(pageFilter)).perform(lngProcessor);
+        RewriteRuleCache.save(rule, cache);
+        LOGGER.i("Mapping[%s]: %s -> %s", id, link, view);
     }
     
     @Override
