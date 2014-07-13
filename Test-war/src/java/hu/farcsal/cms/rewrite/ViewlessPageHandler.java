@@ -4,12 +4,13 @@ import hu.farcsal.cms.bean.CachedBeans;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
 import hu.farcsal.cms.util.Pages;
-import hu.farcsal.log.Log;
 import org.ocpsoft.rewrite.context.EvaluationContext;
 import org.ocpsoft.rewrite.servlet.config.HttpOperation;
 import org.ocpsoft.rewrite.servlet.config.Redirect;
 import org.ocpsoft.rewrite.servlet.http.event.HttpInboundServletRewrite;
 import org.ocpsoft.rewrite.servlet.http.event.HttpServletRewrite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -17,7 +18,7 @@ import org.ocpsoft.rewrite.servlet.http.event.HttpServletRewrite;
  */
 public class ViewlessPageHandler extends HttpOperation {
 
-    private static final Log LOGGER = Log.getLogger(ViewlessPageHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ViewlessPageHandler.class);
 
     private final PageMapping mapping;
     
@@ -32,11 +33,11 @@ public class ViewlessPageHandler extends HttpOperation {
                 PageMapping firstPage = Pages.getFirstPage(Site.findSiteByDomain(CachedBeans.getPageBeanLocal().getSites(), hsr.getRequest().getServerName()), mapping.getPage(), mapping.getLanguage().getCode(), null, true);
                 try {
                     String link = firstPage.getPermalinkWithCtxPath("");
-                    LOGGER.i("redirecting from '%s' to '%s'", Pages.getRealRequestURI(hsr.getRequest(), false), link);
+                    LOGGER.info("redirecting from '{}' to '{}'", Pages.getRealRequestURI(hsr.getRequest(), false), link);
                     Redirect.temporary(link).performHttp(hsr, ec);
                 }
                 catch (Exception ex) {
-                    LOGGER.e(firstPage == null ? "there is no page to redirect" : "redirect error", ex);
+                    LOGGER.error(firstPage == null ? "there is no page to redirect" : "redirect error", ex);
                 }
             }
         }

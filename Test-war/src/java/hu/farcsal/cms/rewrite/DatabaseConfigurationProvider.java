@@ -9,7 +9,6 @@ import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
 import hu.farcsal.cms.rewrite.cache.PageMappingCache;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.WebHelpers;
-import hu.farcsal.log.Log;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -19,6 +18,8 @@ import org.ocpsoft.rewrite.config.ConfigurationBuilder;
 import org.ocpsoft.rewrite.config.Rule;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -63,7 +64,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         return ConfigOrder.DATABASE.getPriority();
     }
     
-    private static final Log LOGGER = Log.getLogger(DatabaseConfigurationProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfigurationProvider.class);
     
     private static final ViewlessPageHandler DUMMY_VIEWLESS_PAGE_HANDLER = new ViewlessPageHandler(null);
     
@@ -146,7 +147,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         Rule rule = Join.path(link).to(view);
         cfg.addRule(rule).when(lngProcessor.and(pageFilter)).perform(viewlessHandler.and(lngProcessor));
         RewriteRuleCache.save(rule, cache);
-        LOGGER.i("Mapping[%s]: %s -> %s", id, link, view);
+        LOGGER.info("Mapping[{}]: {} -> {}", id, link, view);
     }
     
     @Override

@@ -15,7 +15,6 @@ import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.rewrite.ConfigurationCacheProvider;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.WebHelpers;
-import hu.farcsal.log.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,6 +24,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,7 +39,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     private static final WeakHashMap<UrlMapping, PageMapping> NODES = new WeakHashMap<>();
     
-    private static final Log LOGGER = Log.getLogger(PrettyConfigurationProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrettyConfigurationProvider.class);
     
     static UrlMapping getUrlMapping(PageMapping mapping) {
         synchronized (NODES) {
@@ -257,7 +258,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
         if (!validators.isEmpty()) map.setPathValidators(validators);
         ls.add(map);
         NODES.put(map, mapping);
-        LOGGER.i("Mapping[%s]: %s -> %s", id, link, view);
+        LOGGER.info("Mapping[{}]: {} -> {}", id, link, view);
     }
     
     private static interface PageMappingFormatter<T> {

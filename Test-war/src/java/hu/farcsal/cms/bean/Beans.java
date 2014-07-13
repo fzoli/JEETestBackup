@@ -3,7 +3,8 @@ package hu.farcsal.cms.bean;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import hu.farcsal.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -11,7 +12,7 @@ import hu.farcsal.log.Log;
  */
 public class Beans {
     
-    private static final Log LOGGER = Log.getLogger(Beans.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Beans.class);
     
     public static PageBeanLocal lookupPageBeanLocal() {
         try {
@@ -19,7 +20,7 @@ public class Beans {
             return (PageBeanLocal) c.lookup("java:app/Test-ejb/PageBean!" + PageBeanLocal.class.getName());
         }
         catch (NamingException ne) {
-            LOGGER.e("exception caught", ne);
+            LOGGER.error("exception caught", ne);
             return null;
         }
     }

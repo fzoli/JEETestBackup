@@ -5,9 +5,10 @@ import hu.farcsal.cms.bean.PageBeanLocal;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
 import hu.farcsal.cms.util.Pages;
-import hu.farcsal.log.Log;
 import org.ocpsoft.rewrite.context.EvaluationContext;
 import org.ocpsoft.rewrite.servlet.http.event.HttpInboundServletRewrite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -15,7 +16,7 @@ import org.ocpsoft.rewrite.servlet.http.event.HttpInboundServletRewrite;
  */
 public class PageMappingFilter extends InboundPageFilter {
 
-    private static final Log LOGGER = Log.getLogger(PageMappingFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PageMappingFilter.class);
     
     public PageMappingFilter(PageMapping mapping) {
         super(new PageMappingHelper(mapping));
@@ -40,19 +41,19 @@ public class PageMappingFilter extends InboundPageFilter {
                 String reqURI = Pages.getRealRequestURI(rwrt.getRequest(), true);
                 switch (filterType) {
                     case PAGE_DISABLED:
-                        LOGGER.i("Page '%s' is disabled", reqURI);
+                        LOGGER.info("Page '{}' is disabled", reqURI);
                         break;
                     case PAGE_UNKNOWN:
-                        LOGGER.i("URL '%s' is not from the database", reqURI);
+                        LOGGER.info("URL '{}' is not from the database", reqURI);
                         break;
                     case SITE_DISABLED:
-                        LOGGER.i("Site '%s' is disabled", domain);
+                        LOGGER.info("Site '{}' is disabled", domain);
                         break;
                     case SITE_FILTERED:
-                        LOGGER.i("Page '%s' is filtered by site '%s'", reqURI, domain);
+                        LOGGER.info("Page '{}' is filtered by site '{}'", reqURI, domain);
                         break;
                     case SITE_UNKNOWN:
-                        LOGGER.i("Unknown site '%s'", domain);
+                        LOGGER.info("Unknown site '{}'", domain);
                         break;
                 }
                 return false;

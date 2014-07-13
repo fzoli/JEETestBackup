@@ -3,7 +3,6 @@ package hu.farcsal.cms.rewrite;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
 import hu.farcsal.cms.util.Pages;
-import hu.farcsal.log.Log;
 import hu.farcsal.util.WebConfig;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -12,6 +11,8 @@ import org.ocpsoft.rewrite.servlet.config.Forward;
 import org.ocpsoft.rewrite.servlet.config.HttpOperation;
 import org.ocpsoft.rewrite.servlet.config.Redirect;
 import org.ocpsoft.rewrite.servlet.http.event.HttpServletRewrite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -21,7 +22,7 @@ class HomePageHandler extends HttpOperation {
 
     private static final String PARAM_REDIRECTING = "hu.farcsal.cms.rewrite.HOME_PAGE_REDIRECTING";
     
-    private static final Log LOGGER = Log.getLogger(HomePageHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomePageHandler.class);
     
     private final ServletContext context;
     private final List<Site> sites;
@@ -39,15 +40,15 @@ class HomePageHandler extends HttpOperation {
     }
     
     protected void onHomepageNotFound(HttpServletRewrite hsr, EvaluationContext ec) {
-        LOGGER.w("homepage not found");
+        LOGGER.warn("homepage not found");
     }
     
     protected void onPageFileNotExists(HttpServletRewrite hsr, EvaluationContext ec) {
-        LOGGER.e("page file not exists");
+        LOGGER.error("page file not exists");
     }
     
     protected void onPermalinkUnavailable(HttpServletRewrite hsr, EvaluationContext ec) {
-        LOGGER.w("permalink unavailable");
+        LOGGER.warn("permalink unavailable");
     }
     
     private void handle(HttpServletRewrite hsr, EvaluationContext ec, PageMapping mapping) {

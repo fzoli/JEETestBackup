@@ -8,17 +8,18 @@ import hu.farcsal.cms.entity.Site;
 import hu.farcsal.cms.util.Faces;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.Pages.FilterType;
-import hu.farcsal.log.Log;
 import java.util.Locale;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author zoli
  */
 public class PrettyViewHandler extends MultiViewHandler {
 
-    private static final Log LOGGER = Log.getLogger(PrettyViewHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrettyViewHandler.class);
     
     private PageBeanLocal pageBean;
 
@@ -61,7 +62,7 @@ public class PrettyViewHandler extends MultiViewHandler {
                     context.getExternalContext().redirect(Faces.getContextPath(context) + firstPage.getPermalink(""));
                 }
                 catch (Exception ex) { // no first page or redirect error
-                    LOGGER.e("redirect failed", ex);
+                    LOGGER.error("redirect failed", ex);
                 }
             }
         }
@@ -101,32 +102,32 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onSiteFiltered(FacesContext context, String domain) {
-        LOGGER.i("Page '%s' is filtered by site '%s'", Faces.getRealRequestURI(context, true), domain);
+        LOGGER.info("Page '{}' is filtered by site '{}'", Faces.getRealRequestURI(context, true), domain);
         send404Error(context);
     }
     
     protected void onSiteDisabled(FacesContext context, String domain) {
-        LOGGER.i("Site '%s' is disabled", domain);
+        LOGGER.info("Site '{}' is disabled", domain);
         send404Error(context);
     }
     
     protected void onSiteUnknown(FacesContext context, String domain) {
-        LOGGER.i("Unknown site '%s'", domain);
+        LOGGER.info("Unknown site '{}'", domain);
         send404Error(context);
     }
     
     protected void onPageDisabled(FacesContext context) {
-        LOGGER.i("Page '%s' is disabled", Faces.getRealRequestURI(context, true));
+        LOGGER.info("Page '{}' is disabled", Faces.getRealRequestURI(context, true));
         send404Error(context);
     }
     
     protected void onPageUnknown(FacesContext context) {
         if (PrettyConfigurationProvider.getCurrentMapping(context) == null) {
-            LOGGER.i("URL '%s' is not a pretty URL", Faces.getRealRequestURI(context, true));
+            LOGGER.info("URL '{}' is not a pretty URL", Faces.getRealRequestURI(context, true));
             send404Error(context);
         }
         else {
-            LOGGER.i("URL '%s' is not from the database", Faces.getRealRequestURI(context, true));
+            LOGGER.info("URL '{}' is not from the database", Faces.getRealRequestURI(context, true));
         }
     }
     
