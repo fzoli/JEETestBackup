@@ -102,7 +102,7 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onSiteFiltered(FacesContext context, String domain) {
-        LOGGER.info("Page '{}' is filtered by site '{}'", Faces.getRealRequestURI(context, true), domain);
+        if (LOGGER.isInfoEnabled()) LOGGER.info("Page '{}' is filtered by site '{}'", Faces.getRealRequestURI(context, true), domain);
         send404Error(context);
     }
     
@@ -117,17 +117,17 @@ public class PrettyViewHandler extends MultiViewHandler {
     }
     
     protected void onPageDisabled(FacesContext context) {
-        LOGGER.info("Page '{}' is disabled", Faces.getRealRequestURI(context, true));
+        if (LOGGER.isInfoEnabled()) LOGGER.info("Page '{}' is disabled", Faces.getRealRequestURI(context, true));
         send404Error(context);
     }
     
     protected void onPageUnknown(FacesContext context) {
         if (PrettyConfigurationProvider.getCurrentMapping(context) == null) {
-            LOGGER.info("URL '{}' is not a pretty URL", Faces.getRealRequestURI(context, true));
+            if (LOGGER.isInfoEnabled()) LOGGER.info("URL '{}' is not a pretty URL", Faces.getRealRequestURI(context, true));
             send404Error(context);
         }
         else {
-            LOGGER.info("URL '{}' is not from the database", Faces.getRealRequestURI(context, true));
+            if (LOGGER.isInfoEnabled()) LOGGER.info("URL '{}' is not from the database", Faces.getRealRequestURI(context, true));
         }
     }
     

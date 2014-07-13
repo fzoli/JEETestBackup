@@ -38,23 +38,25 @@ public class PageMappingFilter extends InboundPageFilter {
             Site site = Site.findSiteByDomain(pageBean.getSites(), domain);
             Pages.FilterType filterType = Pages.getFilterType(site, mapping, pageBean.getPageFilters());
             if (filterType != null) {
-                String reqURI = Pages.getRealRequestURI(rwrt.getRequest(), true);
-                switch (filterType) {
-                    case PAGE_DISABLED:
-                        LOGGER.info("Page '{}' is disabled", reqURI);
-                        break;
-                    case PAGE_UNKNOWN:
-                        LOGGER.info("URL '{}' is not from the database", reqURI);
-                        break;
-                    case SITE_DISABLED:
-                        LOGGER.info("Site '{}' is disabled", domain);
-                        break;
-                    case SITE_FILTERED:
-                        LOGGER.info("Page '{}' is filtered by site '{}'", reqURI, domain);
-                        break;
-                    case SITE_UNKNOWN:
-                        LOGGER.info("Unknown site '{}'", domain);
-                        break;
+                if (LOGGER.isInfoEnabled()) {
+                    String reqURI = Pages.getRealRequestURI(rwrt.getRequest(), true);
+                    switch (filterType) {
+                        case PAGE_DISABLED:
+                            LOGGER.info("Page '{}' is disabled", reqURI);
+                            break;
+                        case PAGE_UNKNOWN:
+                            LOGGER.info("URL '{}' is not from the database", reqURI);
+                            break;
+                        case SITE_DISABLED:
+                            LOGGER.info("Site '{}' is disabled", domain);
+                            break;
+                        case SITE_FILTERED:
+                            LOGGER.info("Page '{}' is filtered by site '{}'", reqURI, domain);
+                            break;
+                        case SITE_UNKNOWN:
+                            LOGGER.info("Unknown site '{}'", domain);
+                            break;
+                    }
                 }
                 return false;
             }

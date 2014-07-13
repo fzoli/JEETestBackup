@@ -33,7 +33,7 @@ public class ViewlessPageHandler extends HttpOperation {
                 PageMapping firstPage = Pages.getFirstPage(Site.findSiteByDomain(CachedBeans.getPageBeanLocal().getSites(), hsr.getRequest().getServerName()), mapping.getPage(), mapping.getLanguage().getCode(), null, true);
                 try {
                     String link = firstPage.getPermalinkWithCtxPath("");
-                    LOGGER.info("redirecting from '{}' to '{}'", Pages.getRealRequestURI(hsr.getRequest(), false), link);
+                    if (LOGGER.isInfoEnabled()) LOGGER.info("redirecting from '{}' to '{}'", Pages.getRealRequestURI(hsr.getRequest(), false), link);
                     Redirect.temporary(link).performHttp(hsr, ec);
                 }
                 catch (Exception ex) {
