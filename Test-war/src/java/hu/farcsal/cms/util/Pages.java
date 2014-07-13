@@ -6,6 +6,7 @@ import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.PageFilter;
 import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.entity.Site;
+import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
 import hu.farcsal.util.UrlParameters;
 import java.io.File;
 import java.util.List;
@@ -107,6 +108,12 @@ public class Pages {
     public static boolean isViewFileExists(ServletContext ctx, Page page) {
         String viewPath = WebHelpers.getPageHelper(ctx).stripFacesDir(page.getRealViewPath(false));
         return viewPath != null && new File(ctx.getRealPath(viewPath)).isFile();
+    }
+    
+    public static String stripAppContext(String url) {
+        PrettyPageHelper helper = WebHelpers.getPageHelper(null);
+        if (helper == null) return url;
+        return helper.stripAppCtxFromUrl(url);
     }
     
     public static UrlParameters getLanguageParameter() {

@@ -66,7 +66,10 @@ public class PageBean implements PageBeanLocal {
 
     @Override
     public Page getPageTree() {
-        return new Page(getPages(false)) {
+        if (QueryCache.pageTree != null) {
+            return QueryCache.pageTree;
+        }
+        return QueryCache.pageTree = new Page(getPages(false)) {
 
             @Override
             public String getInfo() {
@@ -78,25 +81,28 @@ public class PageBean implements PageBeanLocal {
     
     @Override
     public List<Language> getLanguages() {
+        if (QueryCache.languages != null) return QueryCache.languages;
         CriteriaBuilder builder = manager.getCriteriaBuilder();
         CriteriaQuery<Language> query = builder.createQuery(Language.class);
         Root<Language> root = query.from(Language.class);
         query.orderBy(builder.asc(root.get(Language_.code)));
-        return manager.createQuery(query).getResultList();
+        return QueryCache.languages = manager.createQuery(query).getResultList();
     }
     
     @Override
     public List<PageFilter> getPageFilters() {
+        if (QueryCache.pageFilters != null) return QueryCache.pageFilters;
         CriteriaBuilder builder = manager.getCriteriaBuilder();
         CriteriaQuery<PageFilter> query = builder.createQuery(PageFilter.class);
         Root<PageFilter> root = query.from(PageFilter.class);
         query.orderBy(builder.asc(root.get(PageFilter_.page)), builder.asc(root.get(PageFilter_.site)));
-        return manager.createQuery(query).getResultList();
+        return QueryCache.pageFilters = manager.createQuery(query).getResultList();
     }
     
     @Override
     public List<Site> getSites() {
-        return getNodes(Site.class, true);
+        if (QueryCache.sites != null) return QueryCache.sites;
+        return QueryCache.sites = getNodes(Site.class, true);
     }
     
     private List<Page> getPages(boolean listAll) {
@@ -115,6 +121,10 @@ public class PageBean implements PageBeanLocal {
     @Override
     public void clearPagesFromCache() {
         clearFromCache(Page.class);
+        QueryCache.languages = null;
+        QueryCache.pageFilters = null;
+        QueryCache.pageTree = null;
+        QueryCache.sites = null;
     }
     
     private void clearFromCache(Class<?> clazz) {

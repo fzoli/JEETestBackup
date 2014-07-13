@@ -7,7 +7,6 @@ package hu.farcsal.cms.rewrite;
 enum ConfigOrder {
     
     ZIP_OUTPUT(-100000),
-    VIEWLESS_PAGE,
     DATABASE,
     HOME_PAGE;
     

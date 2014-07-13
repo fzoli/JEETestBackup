@@ -65,6 +65,8 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     
     private static final Log LOGGER = Log.getLogger(DatabaseConfigurationProvider.class);
     
+    private static final ViewlessPageHandler DUMMY_VIEWLESS_PAGE_HANDLER = new ViewlessPageHandler(null);
+    
     private static PrettyPageHelper pageHelper;
     private static PageBeanLocal pageBean;
     
@@ -109,7 +111,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         if (node.getId() == null) return;
         
         String view = getViewPath(node);
-        boolean findParentView = view == null;
+        boolean viewless = view == null;
         
         List<PageMapping> mappings = node.getMappings();
         if (mappings == null || mappings.isEmpty()) return;
@@ -119,7 +121,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
             List<String> actions = mapping.getPage().getActions();
             if (lng == null || lng.getCode() == null) continue;
             String id = mapping.getLanguage().getCode() + '-' + node.getId();
-            if (findParentView) {
+            if (viewless) {
                 PageMapping parentMapping = Pages.getFirstPage(true, null, node, lng.getCode(), null, false, true);
                 if (parentMapping == null) continue;
                 view = getViewPath(parentMapping.getPage());
@@ -127,21 +129,22 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
             PageMappingCache cache = new PageMappingCache(mapping);
             LanguageProcessor lngProcessor = getLanguageProcessor(lngProcessors, lng);
             InboundPageFilter pageFilter = new PageMappingFilter(mapping);
+            ViewlessPageHandler viewlessHandler = viewless ? new ViewlessPageHandler(mapping) : DUMMY_VIEWLESS_PAGE_HANDLER;
             int paramCount = mapping.getPage().getParameters().size();
             for (int paramLimit = !mapping.getPage().isParameterIncremented() ? 0 : paramCount; paramLimit >= 0; paramLimit--) {
                 String link = mapping.getPermalink(new RewritePageFormatter(mapping, paramLimit));
                 if (link == null) continue; // the path is broken or the language not matches; next...
                 String mappingId =  id + '.' + paramLimit;
-                createRule(cfg, cache, lngProcessor, pageFilter, mappingId + "-y", link + '/', view, actions);
-                createRule(cfg, cache, lngProcessor, pageFilter, mappingId + "-x", link, view, actions);
+                createRule(cfg, cache, lngProcessor, pageFilter, viewlessHandler, mappingId + "-y", link + '/', view, actions);
+                createRule(cfg, cache, lngProcessor, pageFilter, viewlessHandler, mappingId + "-x", link, view, actions);
             }
         }
         
     }
     
-    private static void createRule(final ConfigurationBuilder cfg, final PageMappingCache cache, final LanguageProcessor lngProcessor, InboundPageFilter pageFilter, final String id, final String link, final String view, final List<String> actions) {
+    private static void createRule(final ConfigurationBuilder cfg, final PageMappingCache cache, final LanguageProcessor lngProcessor, InboundPageFilter pageFilter, ViewlessPageHandler viewlessHandler, final String id, final String link, final String view, final List<String> actions) {
         Rule rule = Join.path(link).to(view);
-        cfg.addRule(rule).when(lngProcessor.and(pageFilter)).perform(lngProcessor);
+        cfg.addRule(rule).when(lngProcessor.and(pageFilter)).perform(viewlessHandler.and(lngProcessor));
         RewriteRuleCache.save(rule, cache);
         LOGGER.i("Mapping[%s]: %s -> %s", id, link, view);
     }

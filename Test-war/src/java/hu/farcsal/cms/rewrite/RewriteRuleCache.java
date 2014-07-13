@@ -1,5 +1,6 @@
 package hu.farcsal.cms.rewrite;
 
+import hu.farcsal.cms.util.Pages;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -59,6 +60,7 @@ public abstract class RewriteRuleCache {
     }
     
     private static <T extends RewriteRuleCache> T find(Class<T> rtype, String value, MatcherType mtype) {
+        if (MatcherType.URL == mtype) value = Pages.stripAppContext(value);
         T cache = null;
         synchronized (RULES) {
             Iterator<Map.Entry<Rule, RewriteRuleCache>> it = RULES.entrySet().iterator();
