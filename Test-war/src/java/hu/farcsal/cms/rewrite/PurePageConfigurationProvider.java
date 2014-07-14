@@ -36,20 +36,28 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
         private final Pattern PATTERN;
         
         public PurePagePatternCondition(PrettyPageHelper helper) {
-            //  [1           ] [2        ] [3 [4     ]  [5 ]       [6   ] ]
-            // ^(http://[^/]+)*(/Test-war) (  (/faces)?/(.*)\.xhtml(\?.*)*)$
-            PATTERN = Pattern.compile(String.format("^(http://[^/]+)*(%s)((%s)?/(.*)\\.xhtml(\\?.*)*)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
+            //  [1           ] [2        ] [3 [4     ]   [5 [6        ] [7   ] ] ]
+            // ^(http://[^/]+)*(/Test-war) (  (/faces)?/?(  (.*\.xhtml) (\?.*)*)?)$
+            PATTERN = Pattern.compile(String.format("^(http://[^/]+)*(%s)((%s)?/?((.*\\.xhtml)(\\?.*)*)?)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
         }
 
         @Override
         public boolean evaluateHttp(HttpServletRewrite hsr, EvaluationContext ec) {
             Matcher m = PATTERN.matcher(Pages.getRealRequestURI(hsr.getRequest(), false));
             if (m.matches()) {
-                String dir = m.group(5);
-                for (String s : WHITE_LIST) {
-                    if (dir.startsWith(s)) return false;
+                String req = m.group(3);
+                if (req.isEmpty() || req.equals("/")) {
+                    LOGGER.info("Homepage '{}' enabled", req);
+                    return false;
                 }
-                if (LOGGER.isInfoEnabled()) LOGGER.info("Page '{}' filtered", m.group(3));
+                String dir = m.group(6);
+                if (dir != null) {
+                    for (String s : WHITE_LIST) {
+                        LOGGER.info("Page '{}' enabled by whitelist", req);
+                        if (dir.startsWith(s)) return false;
+                    }
+                }
+                LOGGER.info("Page '{}' filtered", req);
                 return true;
             }
             return false;
