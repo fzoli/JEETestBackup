@@ -36,9 +36,9 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
         private final Pattern PATTERN;
         
         public PurePagePatternCondition(PrettyPageHelper helper) {
-            //  [1           ] [2        ] [3 [4     ]   [5 [6        ] [7   ] ] ]
-            // ^(http://[^/]+)*(/Test-war) (  (/faces)?/?(  (.*\.xhtml) (\?.*)*)?)$
-            PATTERN = Pattern.compile(String.format("^(http://[^/]+)*(%s)((%s)?/?((.*\\.xhtml)(\\?.*)*)?)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
+            //  [1             ] [2        ] [3 [4     ]   [5 [6        ]  ] ]
+            // ^(https?://[^/]+)?(/Test-war) (  (/faces)?/?(  (.+\.xhtml).*)?)$
+            PATTERN = Pattern.compile(String.format("^(https?://[^/]+)?(%s)((%s)?/?((.+\\.xhtml).*)?)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
         }
 
         @Override
@@ -47,14 +47,16 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
             if (m.matches()) {
                 String req = m.group(3);
                 if (req.isEmpty() || req.equals("/")) {
-                    LOGGER.info("Homepage '{}' enabled", req);
+                    LOGGER.debug("Homepage '{}' enabled", req);
                     return false;
                 }
                 String dir = m.group(6);
                 if (dir != null) {
                     for (String s : WHITE_LIST) {
-                        LOGGER.info("Page '{}' enabled by whitelist", req);
-                        if (dir.startsWith(s)) return false;
+                        if (dir.startsWith(s)) {
+                            LOGGER.info("Page '{}' enabled by whitelist", req);
+                            return false;
+                        }
                     }
                 }
                 LOGGER.info("Page '{}' filtered", req);
