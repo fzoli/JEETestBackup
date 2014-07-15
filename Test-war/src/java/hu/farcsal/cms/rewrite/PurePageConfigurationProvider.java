@@ -27,6 +27,12 @@ import org.slf4j.LoggerFactory;
 @RewriteConfiguration
 public class PurePageConfigurationProvider extends HttpConfigurationProvider {
     
+    // filtering by regex pattern
+    private static final String[] BLACK_LIST = {
+        "resources"
+    };
+    
+    // accepting by String.startsWith
     private static final String[] WHITE_LIST = {
         
     };
@@ -39,15 +45,24 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
         private final List<String> ERROR_PAGES;
         
         public PurePagePatternCondition(PrettyPageHelper helper, List<String> errorPages) {
-            //  [1             ] [2        ] [3 [4     ]   [5 [6        ]  ] ]
-            // ^(https?://[^/]+)?(/Test-war) (  (/faces)?/?(  (.+\.xhtml).*)?)$
-            PATTERN = Pattern.compile(String.format("^(https?://[^/]+)?(%s)((%s)?/?((.+\\.xhtml).*)?)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
+            //  [1             ] [2        ] [3 [4     ]   [5 [6                  ]  ] ]
+            // ^(https?://[^/]+)?(/Test-war) (  (/faces)?/?(  (.+\.xhtml|resources).*)?)$
+            PATTERN = Pattern.compile(String.format("^(https?://[^/]+)?(%s)((%s)?/?((.+\\.xhtml%s).*)?)$", helper.getAppCtxPath(), helper.getFacesDir(), blackPattern()), Pattern.CASE_INSENSITIVE);
             ERROR_PAGES = errorPages;
         }
 
+        private String blackPattern() {
+            String s = "";
+            for (String f : BLACK_LIST) {
+                s += "|" + f;
+            }
+            return s;
+        }
+        
         @Override
         public boolean evaluateHttp(HttpServletRewrite hsr, EvaluationContext ec) {
-            Matcher m = PATTERN.matcher(Pages.getRealRequestURI(hsr.getRequest(), false));
+            String url = Pages.getRealRequestURI(hsr.getRequest(), false);
+            Matcher m = PATTERN.matcher(url);
             if (m.matches()) {
                 String req = m.group(3);
                 if (req.isEmpty() || req.equals("/")) {

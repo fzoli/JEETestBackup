@@ -32,3 +32,11 @@ továbbfejlesztés:
   (csak az adott oldalhoz tartozó nyelvek megjelenítése)
 - a shops tábla address és name oszlopa legyen nyelvfüggő
   (a Shop származzon le a Site-ból és tartozzon hozzá a ShopMapping)
+
+reminder tags:
+// GZip + Tidy HTML like omnifaces' servlet filter
+// memory mount (linux) for cache
+// full page cache
+// link external directory (f.e. images)
+// log architect
+// user permissions and groups
