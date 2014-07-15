@@ -30,6 +30,16 @@ public class Strings {
         return sb.toString();
     }
     
+    public static String ltrim(String val, String... rems) {
+        for (String rem : rems) {
+            if (!val.startsWith(rem)) {
+                return val;
+            }
+            val = val.substring(rem.length());
+        }
+        return val;
+    }
+    
     public static String toPrettyString(String string) {
         return Normalizer.normalize(string == null ? "" : string.toLowerCase(), Normalizer.Form.NFD)
             .replaceAll("\\p{InCombiningDiacriticalMarks}+", "") // normalize all characters and get rid of all diacritical marks (so that e.g. é, ö, à becomes e, o, a)
@@ -39,6 +49,8 @@ public class Strings {
     }
     
     public static void main(String[] args) {
+        System.out.println(ltrim("alma/barack/malac", "alma", "/"));
+        System.out.println(ltrim("alma/barack/malac", "alma", "malac"));
         System.out.println(toPrettyString("/öt szép szűzlány #1 őrült {ír/ót} nyúz!"));
     }
     

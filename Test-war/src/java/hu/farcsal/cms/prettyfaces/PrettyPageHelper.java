@@ -3,6 +3,7 @@ package hu.farcsal.cms.prettyfaces;
 import hu.farcsal.util.Servlets;
 import hu.farcsal.cms.entity.Page;
 import hu.farcsal.cms.entity.spec.Helpers;
+import hu.farcsal.util.Strings;
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
@@ -38,8 +39,7 @@ public class PrettyPageHelper implements Helpers.PageHelper {
     @Override
     public String stripAppCtxFromUrl(String url) {
         if (url == null) return null;
-        if (url.startsWith(getAppCtxPath())) return url.substring(getAppCtxPath().length());
-        return url;
+        return Strings.ltrim(url, getAppCtxPath());
     }
 
     @Override
@@ -58,9 +58,7 @@ public class PrettyPageHelper implements Helpers.PageHelper {
 
     public String stripFacesDir(String path) {
         if (path == null) return null;
-        if (path.startsWith(getFacesDir())) path = path.substring(getFacesDir().length());
-        if (path.startsWith("/")) path = path.substring(1);
-        return path;
+        return Strings.ltrim(path, getFacesDir(), "/");
     }
 
 }

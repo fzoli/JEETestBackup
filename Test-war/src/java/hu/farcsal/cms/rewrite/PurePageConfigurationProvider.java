@@ -3,6 +3,8 @@ package hu.farcsal.cms.rewrite;
 import hu.farcsal.cms.prettyfaces.PrettyPageHelper;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.WebHelpers;
+import hu.farcsal.util.Servlets;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
@@ -19,14 +21,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * 
  * @author zoli
  */
 @RewriteConfiguration
 public class PurePageConfigurationProvider extends HttpConfigurationProvider {
     
     private static final String[] WHITE_LIST = {
-        "errorpages"
+        
     };
     
     private static final Logger LOGGER = LoggerFactory.getLogger(PurePageConfigurationProvider.class);
@@ -34,11 +36,13 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
     private static class PurePagePatternCondition extends HttpCondition {
 
         private final Pattern PATTERN;
+        private final List<String> ERROR_PAGES;
         
-        public PurePagePatternCondition(PrettyPageHelper helper) {
+        public PurePagePatternCondition(PrettyPageHelper helper, List<String> errorPages) {
             //  [1             ] [2        ] [3 [4     ]   [5 [6        ]  ] ]
             // ^(https?://[^/]+)?(/Test-war) (  (/faces)?/?(  (.+\.xhtml).*)?)$
             PATTERN = Pattern.compile(String.format("^(https?://[^/]+)?(%s)((%s)?/?((.+\\.xhtml).*)?)$", helper.getAppCtxPath(), helper.getFacesDir()), Pattern.CASE_INSENSITIVE);
+            ERROR_PAGES = errorPages;
         }
 
         @Override
@@ -59,6 +63,10 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
                         }
                     }
                 }
+                if (ERROR_PAGES.contains(req)) {
+                    LOGGER.debug("Errorpage '{}' enabled", req);
+                    return false;
+                }
                 LOGGER.info("Page '{}' filtered", req);
                 return true;
             }
@@ -74,9 +82,10 @@ public class PurePageConfigurationProvider extends HttpConfigurationProvider {
     
     @Override
     public Configuration getConfiguration(ServletContext t) {
+        List<String> errorPages = Servlets.getErrorPages(t);
         PrettyPageHelper helper = WebHelpers.getPageHelper(t);
         return ConfigurationBuilder.begin().addRule()
-                .when(Direction.isInbound().and(new PurePagePatternCondition(helper)))
+                .when(Direction.isInbound().and(new PurePagePatternCondition(helper, errorPages)))
                 .perform(Redirect.temporary(helper.getAppCtxPath() + "/"));
     }
     

@@ -15,6 +15,7 @@ import hu.farcsal.cms.entity.PageMapping;
 import hu.farcsal.cms.rewrite.ConfigurationCacheProvider;
 import hu.farcsal.cms.util.Pages;
 import hu.farcsal.cms.util.WebHelpers;
+import hu.farcsal.util.Strings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -133,9 +134,7 @@ public class PrettyConfigurationProvider implements ConfigurationProvider {
     
     static String stripPageRoot(String path) {
         if (path == null) return null;
-        if (path.startsWith(pageRoot)) path = path.substring(pageRoot.length());
-        if (path.startsWith("/")) path = path.substring(1);
-        return path;
+        return Strings.ltrim(path, pageRoot, "/");
     }
     
     private static boolean isPathJSF(String path) {

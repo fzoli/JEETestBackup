@@ -8,6 +8,12 @@ sebezhetőség:
 - a nem pretty url-ek se legyenek elérhetőek + a generált kimenetben a nem pretty url-ek cserélődjenek le pretty url-re
 
 fejlesztés:
+- teljes oldal cache
+  minden munkamenethez tartozik egy cache manager (fix név + sesskey)
+  a cache élettartama 1 perc
+  a cache oldalanként resetelhető illetve teljesen üríthető
+  az összes manager törölhető egyszerre
+  fontos a szálkezeltség (ha eldől, hogy cachelés lesz, legyen is az, és csak a cache folyamatok lezárulása után lehessen törölni)
 - page parameter validator to source code
 - ha nincs alapértelmezett oldal, mert mondjuk 1 oldal sincs a rendszerben,
   jó lenne egy alapértelmezett oldal, ami ezt jelzi és mutat linket a CMS oldalra

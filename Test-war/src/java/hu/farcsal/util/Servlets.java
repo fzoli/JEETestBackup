@@ -1,10 +1,17 @@
 package hu.farcsal.util;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -35,6 +42,33 @@ public class Servlets {
             }
         }
         return mapping;
+    }
+    
+    public static List<String> getErrorPages(ServletContext sc) {
+        List<String> l = new ArrayList<>();
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(sc.getRealPath("/WEB-INF/web.xml"));
+            doc.getDocumentElement().normalize();
+            NodeList nodes = doc.getElementsByTagName("error-page");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                    Node n = nodes.item(i);
+                    if (!n.hasChildNodes()) continue;
+                    NodeList children = n.getChildNodes();
+                    for (int j = 0; j < children.getLength(); j++) {
+                        n = children.item(j);
+                        if ("location".equals(n.getNodeName())) {
+                            l.add(n.getTextContent());
+                            break;
+                        }
+                    }
+            }
+        }
+        catch (Exception ex) {
+            ;
+        }
+        return l;
     }
     
 }
