@@ -1,7 +1,7 @@
 bug:
+- page parameters lista indexei nem frissülnek
 - a PrettyFaces újratöltése után nem frissül jól a konfiguráció
 - a PrettyHomeServlet a nem JSF oldalakat is tiltja
-- page parameters lista indexei nem frissülnek
 
 sebezhetőség:
 - az eredeti jsf oldalak ne legyenek elérhetőek
@@ -34,9 +34,12 @@ továbbfejlesztés:
   (a Shop származzon le a Site-ból és tartozzon hozzá a ShopMapping)
 
 reminder tags:
+// missing (prettyfaces) features from rewrite
+// page forwarding rule from database (f.e. login required site)
 // GZip + Tidy HTML like omnifaces' servlet filter
-// memory mount (linux) for cache
 // full page cache
-// link external directory (f.e. images)
+// users, user permissions and groups (UserBean)
 // log architect
-// user permissions and groups
+// link external directory (f.e. images)
+// memory mount (linux) for cache (fstab)
+   tmpfs           /mnt/ramdisk  tmpfs  nodev,nosuid,noexec,nodiratime,size=3072M   0       0
