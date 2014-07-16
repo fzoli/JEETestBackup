@@ -251,7 +251,6 @@ public class Page extends Node<Page, PageMapping> {
     
     public String getViewPath(boolean withDir) {
         String facesdir = getFacesDir();
-        if (facesdir != null) facesdir = facesdir + (facesdir.endsWith("/") ? "" : "/");
         String root = withDir ? facesdir : null;
         if (viewPath == null) return null;
         String view = viewPath.trim();
@@ -274,9 +273,15 @@ public class Page extends Node<Page, PageMapping> {
         }
     }
     
+    private static String facesDir;
     private String getFacesDir() {
+        if (facesDir != null) {
+            return facesDir;
+        }
         try {
-            return Helpers.getPageHelper().getFacesDir();
+            String dir = Helpers.getPageHelper().getFacesDir();
+            if (dir != null) dir = dir + (dir.endsWith("/") ? "" : "/");
+            return facesDir = dir;
         }
         catch (Exception ex) {
             return null;

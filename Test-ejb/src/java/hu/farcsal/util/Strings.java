@@ -31,7 +31,9 @@ public class Strings {
     }
     
     public static String ltrim(String val, String... rems) {
+        if (val == null) return null;
         for (String rem : rems) {
+            if (rem == null) break;
             if (!val.startsWith(rem)) {
                 return val;
             }
