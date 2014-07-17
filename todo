@@ -14,6 +14,12 @@ fejlesztés:
   a cache oldalanként resetelhető illetve teljesen üríthető
   az összes manager törölhető egyszerre
   fontos a szálkezeltség (ha eldől, hogy cachelés lesz, legyen is az, és csak a cache folyamatok lezárulása után lehessen törölni)
+  tárolás: csak validurl cachelhető, a teljes url a kulcs; legyen globális és session cache, ezen belül három szintes cache
+           - kicsi, de gyors (RAM)
+           - közepes méretű, közepes teljesítményű (linuxon tmpfs illetve SSD swap)
+           - nagy, de lassú (háttértár)
+           Ha bármelyik tiltva van, a soron következő veszi át a helyét. Ha mind tiltva van, nincs cache.
+           (Az EHCache támogat kétféle TTL-t is, ami ehhez pont jól jön.)
 - page parameter validator to source code
 - ha nincs alapértelmezett oldal, mert mondjuk 1 oldal sincs a rendszerben,
   jó lenne egy alapértelmezett oldal, ami ezt jelzi és mutat linket a CMS oldalra
