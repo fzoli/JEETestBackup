@@ -20,6 +20,12 @@ fejlesztés:
            - nagy, de lassú (háttértár)
            Ha bármelyik tiltva van, a soron következő veszi át a helyét. Ha mind tiltva van, nincs cache.
            (Az EHCache támogat kétféle TTL-t is, ami ehhez pont jól jön.)
+  A POST illetve paraméterezett GET kérések nem cachelődnek.
+  A session cache GZip tömörítésű, ha a hozzá tartozó böngésző támogatja azt; a globális cache tömörítetlen.
+  A session megszűnése a session cache törlését eredményezi.
+  Illeszkedés: viewId és real request URL alapján
+  Sorrend: előbb session, aztán global.
+- servlet filter sorrend: gzip, cache, tidy
 - page parameter validator to source code
 - ha nincs alapértelmezett oldal, mert mondjuk 1 oldal sincs a rendszerben,
   jó lenne egy alapértelmezett oldal, ami ezt jelzi és mutat linket a CMS oldalra
