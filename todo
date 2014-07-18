@@ -44,6 +44,8 @@ továbbfejlesztés:
   (csak az adott oldalhoz tartozó nyelvek megjelenítése)
 - a shops tábla address és name oszlopa legyen nyelvfüggő
   (a Shop származzon le a Site-ból és tartozzon hozzá a ShopMapping)
+- debug tag, ami csak fejlesztőknek jelenik meg; paraméterben átadható bármely objektum (toString() használva) vagy formázható string, első paraméter egy nem opcionális cimke
+  a debug tegek oldalanként gyűjtődnek össze és a végén íródnak ki servlet filterrel
 
 reminder tags:
 // missing (prettyfaces) features from rewrite
