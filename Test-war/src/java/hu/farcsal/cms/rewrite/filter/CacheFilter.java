@@ -1,6 +1,7 @@
 package hu.farcsal.cms.rewrite.filter;
 
 import hu.farcsal.cms.util.Pages;
+import hu.farcsal.util.WebConfig;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -23,6 +24,10 @@ public class CacheFilter extends AbstractHttpFilter {
     private static final MimetypesFileTypeMap MIME_TYPES = new MimetypesFileTypeMap();
     private static final String MIME_OCTET_STREAM = "application/octet-stream", MIME_XML = "application/xml";
     
+    private static final String PARAM_DISABLED = "hu.farcsal.cms.rewrite.DISABLE_CACHE";
+    
+    private static Boolean disabled;
+    
     /**
      * Constructor
      */
@@ -31,7 +36,12 @@ public class CacheFilter extends AbstractHttpFilter {
 
     @Override
     protected boolean isEnabled(HttpServletRequest request, HttpSession session) {
-        return request.isRequestedSessionIdFromCookie() && !BotDetector.isBot(request);
+        return !isDisabled(request) && request.isRequestedSessionIdFromCookie() && !BotDetector.isBot(request);
+    }
+    
+    private boolean isDisabled(HttpServletRequest request) {
+        if (disabled != null) return disabled;
+        return disabled = WebConfig.isTrue(request.getServletContext(), PARAM_DISABLED);
     }
     
     /**
