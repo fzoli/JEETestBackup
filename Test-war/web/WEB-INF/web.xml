@@ -17,11 +17,11 @@
     <!-- Filters (do not change the order) -->
     <!-- GZip filter -->
     <filter>
-        <filter-name>gzipResponseFilter</filter-name>
+        <filter-name>GzipResponseFilter</filter-name>
         <filter-class>org.omnifaces.filter.GzipResponseFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>gzipResponseFilter</filter-name>
+        <filter-name>GzipResponseFilter</filter-name>
         <url-pattern>/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>ERROR</dispatcher>
@@ -45,11 +45,20 @@
     </context-param>
     <!-- Cache filter -->
     <filter>
-        <filter-name>cacheFilter</filter-name>
+        <filter-name>CacheFilter</filter-name>
         <filter-class>hu.farcsal.cms.rewrite.filter.CacheFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>cacheFilter</filter-name>
+        <filter-name>CacheFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!-- URLSession filter -->
+    <filter>
+	<filter-name>URLSessionFilter</filter-name>
+	<filter-class>hu.farcsal.cms.rewrite.filter.URLSessionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>URLSessionFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <!-- JSF -->

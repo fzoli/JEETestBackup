@@ -6,21 +6,15 @@ import java.net.*;
 import java.util.*;
 import javax.activation.MimetypesFileTypeMap;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.*;
 
 /**
  * A filter that caches pages after they are generated.
  */
-public class CacheFilter implements Filter {
-    
-    /** the filter configuration */
-    private FilterConfig filterConfig = null;
+public class CacheFilter extends AbstractHttpFilter {
     
     /** the cached data */
     private HashMap datacache;
@@ -34,26 +28,25 @@ public class CacheFilter implements Filter {
      */
     public CacheFilter() {
     }
+
+    @Override
+    protected boolean isEnabled(HttpServletRequest request, HttpSession session) {
+        return request.isRequestedSessionIdFromCookie() && !BotDetector.isBot(request);
+    }
     
     /**
      * Perform the actual caching.  If a given key is available in the
      * cache, return it immediately.  If not, cache the result using a 
      * CacheResponseWrapper
-     * @param request
-     * @param response
+     * @param req
+     * @param res
+     * @param session
      * @param chain
      * @throws java.io.IOException
      * @throws javax.servlet.ServletException
      */
     @Override
-    public void doFilter(ServletRequest request, 
-                         ServletResponse response,
-                         FilterChain chain)
-        throws IOException, ServletException
-    {
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse res = (HttpServletResponse) response;
-       
+    protected void doFilterIfEnabled(HttpServletRequest req, HttpServletResponse res, HttpSession session, FilterChain chain) throws ServletException, IOException {
         String url = Pages.getRealRequestURI(req, true);
         
 //        if (url.contains("javax.faces")) {
@@ -73,7 +66,7 @@ public class CacheFilter implements Filter {
             // cache
             if (data == null) {
                 CacheResponseWrapper crw = new CacheResponseWrapper(res);
-                chain.doFilter(request, crw);
+                chain.doFilter(req, crw);
                 data = crw.getBytes();
                 if (data != null) {
                     datacache.put(key, data);
@@ -100,7 +93,7 @@ public class CacheFilter implements Filter {
             }
         } else {
             // generate the data normally if it was not cacheable
-            chain.doFilter(request, response);
+            chain.doFilter(req, res);
         }
     }
     
@@ -118,7 +111,6 @@ public class CacheFilter implements Filter {
      */
     @Override
     public void init(FilterConfig filterConfig) {
-        this.filterConfig = filterConfig;
         datacache = new HashMap();
         mimecache = new HashMap();
     }
@@ -132,7 +124,6 @@ public class CacheFilter implements Filter {
         
         datacache = null;
         mimecache = null;
-        filterConfig = null;
     }
     
     private static String getMimeType(String url, byte[] data) {
