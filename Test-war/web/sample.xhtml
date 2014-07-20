@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/template.xhtml">
@@ -9,6 +10,9 @@
 <ui:define name="content">
     <h:outputText value="#{homedict['hello']}" />!
     <br />
-    This is the new content.
+    Generated on: 
+    <h:outputText value="#{session.lastAccessedTime}">
+        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" type="date" />
+    </h:outputText>
 </ui:define>
 </ui:composition>
