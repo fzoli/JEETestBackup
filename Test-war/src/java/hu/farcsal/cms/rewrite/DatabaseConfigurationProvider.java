@@ -15,6 +15,7 @@ import javax.servlet.ServletContext;
 import org.ocpsoft.rewrite.annotation.RewriteConfiguration;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
+import org.ocpsoft.rewrite.config.OperationBuilder;
 import org.ocpsoft.rewrite.config.Rule;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
@@ -22,7 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * TODO:
+ * - page action
+ * - parameter validator
+ * - parameter bean variable
+ * - page view path generated
  * @author zoli
  */
 @RewriteConfiguration
@@ -119,7 +124,6 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
         
         for (PageMapping mapping : mappings) {
             Language lng = mapping.getLanguage();
-            List<String> actions = mapping.getPage().getActions();
             if (lng == null || lng.getCode() == null) continue;
             String id = mapping.getLanguage().getCode() + '-' + node.getId();
             if (viewless) {
@@ -131,6 +135,7 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
             LanguageProcessor lngProcessor = getLanguageProcessor(lngProcessors, lng);
             InboundPageFilter pageFilter = new PageMappingFilter(mapping);
             ViewlessPageHandler viewlessHandler = viewless ? new ViewlessPageHandler(mapping) : DUMMY_VIEWLESS_PAGE_HANDLER;
+            List<String> actions = mapping.getPage().getActions();
             int paramCount = mapping.getPage().getParameters().size();
             for (int paramLimit = !mapping.getPage().isParameterIncremented() ? 0 : paramCount; paramLimit >= 0; paramLimit--) {
                 String link = mapping.getPermalink(new RewritePageFormatter(mapping, paramLimit));
@@ -145,7 +150,20 @@ public class DatabaseConfigurationProvider extends HttpConfigurationProvider {
     
     private static void createRule(final ConfigurationBuilder cfg, final PageMappingCache cache, final LanguageProcessor lngProcessor, InboundPageFilter pageFilter, ViewlessPageHandler viewlessHandler, final String id, final String link, final String view, final List<String> actions) {
         Rule rule = Join.path(link).to(view);
-        cfg.addRule(rule).when(lngProcessor.and(pageFilter)).perform(viewlessHandler.and(lngProcessor));
+        OperationBuilder operation = viewlessHandler.and(lngProcessor);
+//        if (actions != null) {
+//            for (final String action : actions) {
+//                if (action == null || action.isEmpty()) continue;
+//                // java.lang.ClassNotFoundException: org.ocpsoft.common.spi.ServiceLocator
+//                // org.ocpsoft.rewrite.exception.RewriteException: No registered org.ocpsoft.rewrite.el.spi.ExpressionLanguageProvider could handle the Expression
+//                operation = operation.and(
+//                    PhaseOperation.enqueue(
+//                        Invoke.binding(El.retrievalMethod(action))
+//                    ).after(PhaseId.RESTORE_VIEW)
+//                );
+//            }
+//        }
+        cfg.addRule(rule).when(lngProcessor.and(pageFilter)).perform(operation);
         RewriteRuleCache.save(rule, cache);
         LOGGER.info("Mapping[{}]: {} -> {}", id, link, view);
     }
